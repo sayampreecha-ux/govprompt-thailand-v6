@@ -1,78 +1,239 @@
 <!doctype html>
 <html lang="th">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#103b70">
-<title>GovPrompt Thailand v6.0 Stable</title>
-<style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GovPrompt Thailand v6.0 Stable เครื่องมือ AI สำหรับงานราชการไทย">
+  <meta name="theme-color" content="#103b70">
+  <title>GovPrompt Thailand v6.0 Stable</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
 :root{--navy:#103b70;--blue:#176fd1;--sky:#1aa7e8;--ink:#17263d;--muted:#64748b;--line:#dce6f1;--soft:#f5f8fc;--white:#fff;--gold:#f6bd43;--shadow:0 20px 60px rgba(16,59,112,.13)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Tahoma,"Noto Sans Thai",sans-serif;color:var(--ink);line-height:1.65;background:#fff}body.lock{overflow:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-.topbar{height:72px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 max(18px,calc((100vw - 1140px)/2));background:rgba(255,255,255,.96);border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}.brandmark{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(140deg,var(--navy),var(--blue),var(--sky));color:#fff;font-size:23px;font-weight:800}.brand strong,.brand small{display:block}.brand small{font-size:12px;color:var(--muted)}nav{display:flex;gap:22px}nav a{text-decoration:none;font-weight:700;font-size:14px}.menu-btn{display:none;border:0;background:none;font-size:25px;color:var(--navy)}
-.hero{max-width:1180px;margin:auto;padding:64px 24px 50px;display:grid;grid-template-columns:1.25fr .75fr;gap:50px;align-items:center;background:radial-gradient(circle at 10% 10%,#eaf5ff,transparent 38%)}.version,.section-head span,.community>div>span{font-size:13px;color:var(--blue);font-weight:800;letter-spacing:.08em}.hero h1{font-size:clamp(46px,6vw,72px);line-height:1.06;letter-spacing:-.035em;margin:14px 0}.hero h1 span{color:var(--blue)}.hero-copy>p{font-size:19px;color:#455975;max-width:720px}.hero-search{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;border:1px solid #bfd1e5;border-radius:17px;padding:8px 8px 8px 15px;background:#fff;box-shadow:0 12px 32px rgba(16,59,112,.08);margin-top:26px}.hero-search input{border:0;outline:0;min-width:0;padding:9px}.hero-search button{border:0;border-radius:11px;background:var(--navy);color:#fff;font-weight:800;padding:11px 18px}.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.quick button,.category-bar button{border:1px solid var(--line);border-radius:999px;background:#fff;padding:7px 12px;color:#4a5b72;font-size:13px}.quick button:hover,.category-bar button.active{background:#eaf4ff;color:var(--blue);border-color:#bdd8f7}.actions{display:flex;gap:12px;margin-top:25px}.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:13px;padding:12px 19px;font-weight:800;text-decoration:none}.btn.primary{background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff}.btn.secondary{background:#fff;border-color:var(--line);color:var(--navy)}.btn.dark{background:var(--navy);color:#fff}.btn.full{width:100%}.btn.facebook{background:#1877f2;color:#fff}
-.hero-panel{padding:24px;border-radius:26px;background:linear-gradient(155deg,var(--navy),#17508e);color:#fff;box-shadow:var(--shadow)}.hero-panel h2{margin-top:0}.step{display:flex;align-items:center;gap:13px;padding:13px;border:1px solid rgba(255,255,255,.14);border-radius:15px;background:rgba(255,255,255,.06);margin-bottom:9px}.step b{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:#fff;color:var(--navy)}.step strong,.step small{display:block}.step small{color:#d0dfef}.warning{font-size:13px;padding:13px;background:rgba(246,189,67,.14);border-left:4px solid var(--gold);border-radius:11px;color:#fff2bf}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Noto Sans Thai",system-ui,sans-serif;color:var(--ink);line-height:1.65;background:#fff}body.lock{overflow:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+.topbar{height:74px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,calc((100vw - 1140px)/2));background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}.brandmark{width:45px;height:45px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(140deg,var(--navy),var(--blue),var(--sky));color:#fff;font-size:24px;font-weight:800}.brand strong,.brand small{display:block}.brand small{font-size:12px;color:var(--muted)}nav{display:flex;gap:22px}nav a{text-decoration:none;font-weight:700;font-size:14px}.menu-btn{display:none;border:0;background:none;font-size:25px;color:var(--navy)}
+.hero{max-width:1180px;margin:auto;padding:68px 24px 52px;display:grid;grid-template-columns:1.25fr .75fr;gap:52px;align-items:center;background:radial-gradient(circle at 10% 10%,#eaf5ff,transparent 38%)}.version,.section-head span,.community>div>span{font-size:13px;color:var(--blue);font-weight:800;letter-spacing:.08em}.hero h1{font-size:clamp(48px,6vw,74px);line-height:1.06;letter-spacing:-.035em;margin:14px 0}.hero h1 span{color:var(--blue)}.hero-copy>p{font-size:20px;color:#455975;max-width:720px}.hero-search{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;border:1px solid #bfd1e5;border-radius:17px;padding:8px 8px 8px 15px;background:#fff;box-shadow:0 12px 32px rgba(16,59,112,.08);margin-top:26px}.hero-search input{border:0;outline:0;min-width:0;padding:9px}.hero-search button{border:0;border-radius:11px;background:var(--navy);color:#fff;font-weight:800;padding:11px 18px}.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.quick button,.category-bar button{border:1px solid var(--line);border-radius:999px;background:#fff;padding:7px 12px;color:#4a5b72;font-size:13px}.quick button:hover,.category-bar button.active{background:#eaf4ff;color:var(--blue);border-color:#bdd8f7}.actions{display:flex;gap:12px;margin-top:25px}.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:13px;padding:12px 19px;font-weight:800;text-decoration:none}.btn.primary{background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff}.btn.secondary{background:#fff;border-color:var(--line);color:var(--navy)}.btn.dark{background:var(--navy);color:#fff}.btn.full{width:100%}.btn.facebook{background:#1877f2;color:#fff}
+.hero-panel{padding:25px;border-radius:27px;background:linear-gradient(155deg,var(--navy),#17508e);color:#fff;box-shadow:var(--shadow)}.hero-panel h2{margin-top:0}.step{display:flex;align-items:center;gap:13px;padding:13px;border:1px solid rgba(255,255,255,.14);border-radius:15px;background:rgba(255,255,255,.06);margin-bottom:9px}.step b{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:#fff;color:var(--navy)}.step strong,.step small{display:block}.step small{color:#d0dfef}.warning{font-size:13px;padding:13px;background:rgba(246,189,67,.14);border-left:4px solid var(--gold);border-radius:11px;color:#fff2bf}
 .category-bar{max-width:1132px;margin:auto;padding:0 24px 8px;display:flex;gap:8px;overflow-x:auto}.category-bar button{white-space:nowrap;font-weight:700}
-.section{max-width:1180px;margin:auto;padding:62px 24px}.section.alt{max-width:none;background:var(--soft)}.section.alt>*{max-width:1132px;margin-left:auto;margin-right:auto}.section-head{display:flex;justify-content:space-between;align-items:end;gap:44px;margin-bottom:27px}.section-head.center{display:block;text-align:center}.section-head h2{font-size:clamp(30px,4vw,46px);line-height:1.2;margin:7px 0}.section-head p{max-width:520px;color:var(--muted)}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:18px}.toolbar input{width:min(520px,100%);padding:12px 14px;border:1px solid var(--line);border-radius:13px}.toolbar span{font-size:14px;color:var(--muted);font-weight:700}
-.tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.tool-card{min-height:250px;padding:18px;border:1px solid var(--line);border-radius:19px;background:#fff;display:flex;flex-direction:column;transition:.2s}.tool-card:hover{transform:translateY(-4px);box-shadow:0 15px 35px rgba(16,59,112,.1)}.tool-top{display:flex;justify-content:space-between;align-items:center}.tool-icon{font-size:30px}.tool-code{font-size:11px;font-weight:800;color:var(--blue);background:#eaf4ff;padding:5px 8px;border-radius:999px}.tool-card h3{font-size:18px;line-height:1.4;margin:12px 0 7px}.tool-card p{font-size:13px;color:var(--muted);flex:1}.tool-card button{border:0;border-radius:11px;padding:10px;background:var(--navy);color:#fff;font-weight:800}.empty{text-align:center;padding:45px;background:var(--soft);border:1px dashed #b9c9dc;border-radius:18px}
-.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.how-grid article,.plans article{padding:25px;border:1px solid var(--line);border-radius:21px;background:#fff}.how-grid b{color:var(--blue)}.how-grid h3{font-size:22px;margin:10px 0 5px}.how-grid p{color:var(--muted);margin:0}.plans{max-width:900px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}.plans label{font-size:12px;font-weight:800;color:var(--blue)}.plans h3{font-size:24px}.plans .featured{background:linear-gradient(155deg,var(--navy),#17508e);color:#fff;box-shadow:var(--shadow)}.plans .featured label{color:#9bddff}.plans ul{padding-left:21px}.community{margin-bottom:60px;border-radius:26px;background:linear-gradient(120deg,#edf7ff,#fff);display:flex;align-items:center;justify-content:space-between;gap:35px}.community p{color:var(--muted);max-width:730px}footer{background:#071f40;color:#d8e5f2;padding:35px max(22px,calc((100vw - 1132px)/2));display:flex;justify-content:space-between;gap:30px}
-.modal{position:fixed;inset:0;z-index:100;background:rgba(5,20,42,.72);padding:24px;overflow:auto}.modal-card{max-width:1240px;margin:auto;background:var(--soft);border-radius:27px;overflow:hidden}.modal-card>header{display:flex;justify-content:space-between;gap:20px;padding:24px 27px;background:#fff;border-bottom:1px solid var(--line)}.modal-card header h2{margin:5px 0}.modal-card header p{margin:0;color:var(--muted)}#closeModal{width:42px;height:42px;border:0;border-radius:13px;background:#edf3f8;color:var(--navy);font-size:26px}.modal-body{display:grid;grid-template-columns:.85fr 1.15fr;gap:18px;padding:18px}#promptForm,.result{background:#fff;border:1px solid var(--line);border-radius:20px;padding:21px}#promptForm label{display:block;font-weight:700;margin-bottom:14px}#promptForm input,#promptForm select,#promptForm textarea{width:100%;margin-top:6px;padding:11px 12px;border:1px solid #c7d6e5;border-radius:11px}#promptForm textarea{min-height:105px;resize:vertical}.confirm{display:flex!important;gap:9px;font-weight:500!important}.confirm input{width:auto!important;margin-top:4px!important}.result-head{display:flex;justify-content:space-between;align-items:center}.result-head button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 9px}.result-head button:disabled{opacity:.4}.result pre{min-height:500px;max-height:65vh;overflow:auto;white-space:pre-wrap;background:#0d2545;color:#e8f1fc;padding:17px;border-radius:14px;line-height:1.8}.empty-result{display:grid;place-items:center;color:#9eb2ca}.toast{position:fixed;right:20px;bottom:20px;z-index:150;background:#102e55;color:#fff;padding:11px 15px;border-radius:11px;opacity:0;transform:translateY(20px);transition:.2s}.toast.show{opacity:1;transform:none}
+.section{max-width:1180px;margin:auto;padding:65px 24px}.section.alt{max-width:none;background:var(--soft)}.section.alt>*{max-width:1132px;margin-left:auto;margin-right:auto}.section-head{display:flex;justify-content:space-between;align-items:end;gap:44px;margin-bottom:27px}.section-head.center{display:block;text-align:center}.section-head h2{font-size:clamp(31px,4vw,47px);line-height:1.2;margin:7px 0}.section-head p{max-width:520px;color:var(--muted)}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:18px}.toolbar input{width:min(520px,100%);padding:12px 14px;border:1px solid var(--line);border-radius:13px}.toolbar span{font-size:14px;color:var(--muted);font-weight:700}
+.tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.tool-card{min-height:255px;padding:18px;border:1px solid var(--line);border-radius:19px;background:#fff;display:flex;flex-direction:column;transition:.2s}.tool-card:hover{transform:translateY(-4px);box-shadow:0 15px 35px rgba(16,59,112,.1)}.tool-top{display:flex;justify-content:space-between;align-items:center}.tool-icon{font-size:30px}.tool-code{font-size:11px;font-weight:800;color:var(--blue);background:#eaf4ff;padding:5px 8px;border-radius:999px}.tool-card h3{font-size:18px;line-height:1.4;margin:12px 0 7px}.tool-card p{font-size:13px;color:var(--muted);flex:1}.tool-card button{border:0;border-radius:11px;padding:10px;background:var(--navy);color:#fff;font-weight:800}.empty{text-align:center;padding:45px;background:var(--soft);border:1px dashed #b9c9dc;border-radius:18px}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.how-grid article,.plans article{padding:25px;border:1px solid var(--line);border-radius:21px;background:#fff}.how-grid b{color:var(--blue)}.how-grid h3{font-size:22px;margin:10px 0 5px}.how-grid p{color:var(--muted);margin:0}.plans{max-width:900px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}.plans label{font-size:12px;font-weight:800;color:var(--blue)}.plans h3{font-size:24px}.plans .featured{background:linear-gradient(155deg,var(--navy),#17508e);color:#fff;box-shadow:var(--shadow)}.plans .featured label{color:#9bddff}.plans ul{padding-left:21px}.community{margin-bottom:65px;border-radius:26px;background:linear-gradient(120deg,#edf7ff,#fff);display:flex;align-items:center;justify-content:space-between;gap:35px}.community p{color:var(--muted);max-width:730px}footer{background:#071f40;color:#d8e5f2;padding:35px max(22px,calc((100vw - 1132px)/2));display:flex;justify-content:space-between;gap:30px}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(5,20,42,.72);backdrop-filter:blur(6px);padding:24px;overflow:auto}.modal-card{max-width:1240px;margin:auto;background:var(--soft);border-radius:27px;overflow:hidden}.modal-card>header{display:flex;justify-content:space-between;gap:20px;padding:24px 27px;background:#fff;border-bottom:1px solid var(--line)}.modal-card header h2{margin:5px 0}.modal-card header p{margin:0;color:var(--muted)}#closeModal{width:42px;height:42px;border:0;border-radius:13px;background:#edf3f8;color:var(--navy);font-size:26px}.modal-body{display:grid;grid-template-columns:.85fr 1.15fr;gap:18px;padding:18px}#promptForm,.result{background:#fff;border:1px solid var(--line);border-radius:20px;padding:21px}#promptForm label{display:block;font-weight:700;margin-bottom:14px}#promptForm input,#promptForm select,#promptForm textarea{width:100%;margin-top:6px;padding:11px 12px;border:1px solid #c7d6e5;border-radius:11px}#promptForm textarea{min-height:105px;resize:vertical}.confirm{display:flex!important;gap:9px;font-weight:500!important}.confirm input{width:auto!important;margin-top:4px!important}.result-head{display:flex;justify-content:space-between;align-items:center}.result-head button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 9px}.result-head button:disabled{opacity:.4}.result pre{min-height:500px;max-height:65vh;overflow:auto;white-space:pre-wrap;background:#0d2545;color:#e8f1fc;padding:17px;border-radius:14px;line-height:1.8}.empty-result{display:grid;place-items:center;color:#9eb2ca}.toast{position:fixed;right:20px;bottom:20px;z-index:150;background:#102e55;color:#fff;padding:11px 15px;border-radius:11px;opacity:0;transform:translateY(20px);transition:.2s}.toast.show{opacity:1;transform:none}
 @media(max-width:980px){.hero,.modal-body{grid-template-columns:1fr}.tool-grid{grid-template-columns:repeat(2,1fr)}.how-grid{grid-template-columns:1fr}.result pre{min-height:350px}}
-@media(max-width:720px){.topbar{height:68px;padding:0 17px}.menu-btn{display:block}nav{display:none;position:absolute;top:68px;left:12px;right:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--shadow);flex-direction:column}nav.open{display:flex}nav a{padding:9px}.hero{padding:40px 17px}.hero h1{font-size:42px}.hero-copy>p{font-size:17px}.hero-search{grid-template-columns:auto 1fr}.hero-search button{grid-column:1/-1}.actions,.toolbar,.section-head,.community,footer{display:block}.actions .btn{width:100%;margin-bottom:8px}.tool-grid,.plans{grid-template-columns:1fr}.section{padding:50px 17px}.toolbar span{display:block;margin-top:9px}.community{margin-left:16px;margin-right:16px}.community .btn{width:100%;margin-top:12px}.modal{padding:0}.modal-card{min-height:100vh;border-radius:0}.modal-body{padding:11px}.result-head{display:block}.result-head div{margin-top:8px}.result pre{max-height:none}}
+@media(max-width:720px){.topbar{height:68px;padding:0 17px}.menu-btn{display:block}nav{display:none;position:absolute;top:68px;left:12px;right:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--shadow);flex-direction:column}nav.open{display:flex}nav a{padding:9px}.hero{padding:40px 17px}.hero h1{font-size:43px}.hero-copy>p{font-size:17px}.hero-search{grid-template-columns:auto 1fr}.hero-search button{grid-column:1/-1}.actions,.toolbar,.section-head,.community,footer{display:block}.actions .btn{width:100%;margin-bottom:8px}.tool-grid,.plans{grid-template-columns:1fr}.section{padding:50px 17px}.toolbar span{display:block;margin-top:9px}.community{margin-left:16px;margin-right:16px}.community .btn{width:100%;margin-top:12px}.modal{padding:0}.modal-card{min-height:100vh;border-radius:0}.modal-body{padding:11px}.result-head{display:block}.result-head div{margin-top:8px}.result pre{max-height:none}}
+
 </style>
 </head>
 <body>
 <header class="topbar">
-<a class="brand" href="#top"><span class="brandmark">G</span><span><strong>GovPrompt Thailand</strong><small>Government AI Copilot</small></span></a>
-<button id="menuBtn" class="menu-btn">☰</button>
-<nav id="nav"><a href="#tools">เครื่องมือ</a><a href="#how">วิธีใช้</a><a href="#plans">Starter + Professional</a><a href="#community">ชุมชน</a></nav>
+  <a class="brand" href="#top">
+    <span class="brandmark">G</span>
+    <span><strong>GovPrompt Thailand</strong><small>Government AI Copilot</small></span>
+  </a>
+  <button id="menuBtn" class="menu-btn">☰</button>
+  <nav id="nav">
+    <a href="#tools">เครื่องมือ</a>
+    <a href="#how">วิธีใช้</a>
+    <a href="#plans">Starter + Professional</a>
+    <a href="#community">ชุมชน</a>
+  </nav>
 </header>
+
 <main id="top">
 <section class="hero">
-<div class="hero-copy">
-<div class="version">v6.0 Stable · เว็บไซต์เดียว</div>
-<h1>วันนี้คุณต้องการ<br><span>ทำงานอะไร?</span></h1>
-<p>เลือกงาน กรอกข้อเท็จจริง แล้วรับ Prompt พร้อมใช้ โดยไม่ต้องเขียน Prompt เอง</p>
-<div class="hero-search"><span>🔎</span><input id="heroSearch" type="search" placeholder="ค้นหา เช่น หนังสือราชการ กฎหมาย TOR โครงการ ข่าว"><button id="heroSearchBtn">ค้นหา</button></div>
-<div class="quick"><button data-q="หนังสือ">หนังสือราชการ</button><button data-q="กฎหมาย">กฎหมาย</button><button data-q="TOR">TOR</button><button data-q="โครงการ">โครงการ</button><button data-q="ข่าว">ประชาสัมพันธ์</button></div>
-<div class="actions"><a class="btn primary" href="#tools">เริ่มทดลองใช้ 20 เครื่องมือ</a><a class="btn secondary" href="#plans">ดู Professional</a></div>
-</div>
-<aside class="hero-panel">
-<h2>ง่ายที่สุดใน 3 ขั้นตอน</h2>
-<div class="step"><b>1</b><span><strong>เลือกงาน</strong><small>ค้นหาหรือเลือกหมวด</small></span></div>
-<div class="step"><b>2</b><span><strong>กรอกข้อมูลจริง</strong><small>ตอบเฉพาะที่จำเป็น</small></span></div>
-<div class="step"><b>3</b><span><strong>คัดลอกไปใช้</strong><small>ตรวจทานก่อนใช้จริง</small></span></div>
-<p class="warning">AI เป็นผู้ช่วยร่าง ผู้ใช้ต้องตรวจสอบข้อเท็จจริง กฎหมาย อำนาจหน้าที่ และความถูกต้องก่อนนำไปใช้จริง</p>
-</aside>
+  <div class="hero-copy">
+    <div class="version">v6.0 Stable · เว็บไซต์เดียว</div>
+    <h1>วันนี้คุณต้องการ<br><span>ทำงานอะไร?</span></h1>
+    <p>เลือกงาน กรอกข้อเท็จจริง แล้วรับ Prompt พร้อมใช้ โดยไม่ต้องเขียน Prompt เอง</p>
+    <div class="hero-search">
+      <span>🔎</span>
+      <input id="heroSearch" type="search" placeholder="ค้นหา เช่น หนังสือราชการ กฎหมาย TOR โครงการ ข่าว">
+      <button id="heroSearchBtn">ค้นหา</button>
+    </div>
+    <div class="quick">
+      <button data-q="หนังสือ">หนังสือราชการ</button>
+      <button data-q="กฎหมาย">กฎหมาย</button>
+      <button data-q="TOR">TOR</button>
+      <button data-q="โครงการ">โครงการ</button>
+      <button data-q="ข่าว">ประชาสัมพันธ์</button>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="#tools">เริ่มทดลองใช้ 20 เครื่องมือ</a>
+      <a class="btn secondary" href="#plans">ดู Professional</a>
+    </div>
+  </div>
+  <aside class="hero-panel">
+    <h2>ง่ายที่สุดใน 3 ขั้นตอน</h2>
+    <div class="step"><b>1</b><span><strong>เลือกงาน</strong><small>ค้นหาหรือเลือกหมวด</small></span></div>
+    <div class="step"><b>2</b><span><strong>กรอกข้อมูลจริง</strong><small>ตอบเฉพาะที่จำเป็น</small></span></div>
+    <div class="step"><b>3</b><span><strong>คัดลอกไปใช้</strong><small>ตรวจทานก่อนใช้จริง</small></span></div>
+    <p class="warning">AI เป็นผู้ช่วยร่าง ผู้ใช้ต้องตรวจสอบข้อเท็จจริง กฎหมาย อำนาจหน้าที่ และความถูกต้องก่อนนำไปใช้จริง</p>
+  </aside>
 </section>
+
 <section class="category-bar">
-<button class="active" data-cat="ทั้งหมด">ทั้งหมด</button><button data-cat="หนังสือราชการ">📄 หนังสือราชการ</button><button data-cat="กฎหมาย">⚖️ กฎหมาย</button><button data-cat="พัสดุ">📦 พัสดุ</button><button data-cat="โครงการ">📊 โครงการ</button><button data-cat="ประชาสัมพันธ์">📣 ประชาสัมพันธ์</button><button data-cat="ผู้บริหาร">👔 ผู้บริหาร</button>
+  <button class="active" data-cat="ทั้งหมด">ทั้งหมด</button>
+  <button data-cat="หนังสือราชการ">📄 หนังสือราชการ</button>
+  <button data-cat="กฎหมาย">⚖️ กฎหมาย</button>
+  <button data-cat="พัสดุ">📦 พัสดุ</button>
+  <button data-cat="โครงการ">📊 โครงการ</button>
+  <button data-cat="ประชาสัมพันธ์">📣 ประชาสัมพันธ์</button>
+  <button data-cat="ผู้บริหาร">👔 ผู้บริหาร</button>
 </section>
+
 <section id="tools" class="section">
-<div class="section-head"><div><span>STARTER</span><h2>ทดลองใช้ 20 เครื่องมือ</h2></div><p>เปิดเว็บแล้วเลือกงานได้ทันที ไม่ต้องเรียน AI ก่อน</p></div>
-<div class="toolbar"><input id="toolSearch" type="search" placeholder="ค้นหาเครื่องมือ"><span id="count">20 เครื่องมือ</span></div>
-<div id="toolGrid" class="tool-grid"></div><div id="empty" class="empty hidden">ยังไม่พบเครื่องมือที่ตรงกับคำค้น</div>
+  <div class="section-head">
+    <div><span>STARTER</span><h2>ทดลองใช้ 20 เครื่องมือ</h2></div>
+    <p>เปิดเว็บแล้วเลือกงานได้ทันที ไม่ต้องเรียน AI ก่อน</p>
+  </div>
+  <div class="toolbar">
+    <input id="toolSearch" type="search" placeholder="ค้นหาเครื่องมือ">
+    <span id="count">20 เครื่องมือ</span>
+  </div>
+  <div id="toolGrid" class="tool-grid"></div>
+  <div id="empty" class="empty hidden">ยังไม่พบเครื่องมือที่ตรงกับคำค้น</div>
 </section>
+
 <section id="how" class="section alt">
-<div class="section-head center"><div><span>วิธีใช้</span><h2>เริ่มงานได้ภายใน 30 วินาที</h2></div></div>
-<div class="how-grid"><article><b>01</b><h3>เลือกงาน</h3><p>เลือกเครื่องมือที่ตรงกับงานราชการที่กำลังทำ</p></article><article><b>02</b><h3>กรอกข้อเท็จจริง</h3><p>ระบบถามข้อมูลสำคัญ และไม่สร้างชื่อ วันที่ เลขหนังสือ หรือวงเงินแทนคุณ</p></article><article><b>03</b><h3>สร้าง Prompt</h3><p>คัดลอกไปใช้กับ ChatGPT หรือ AI ที่คุณเลือก แล้วตรวจทานก่อนใช้จริง</p></article></div>
+  <div class="section-head center"><div><span>วิธีใช้</span><h2>เริ่มงานได้ภายใน 30 วินาที</h2></div></div>
+  <div class="how-grid">
+    <article><b>01</b><h3>เลือกงาน</h3><p>เลือกเครื่องมือที่ตรงกับงานราชการที่กำลังทำ</p></article>
+    <article><b>02</b><h3>กรอกข้อเท็จจริง</h3><p>ระบบถามข้อมูลสำคัญ และไม่สร้างชื่อ วันที่ เลขหนังสือ หรือวงเงินแทนคุณ</p></article>
+    <article><b>03</b><h3>สร้าง Prompt</h3><p>คัดลอกไปใช้กับ ChatGPT หรือ AI ที่คุณเลือก แล้วตรวจทานก่อนใช้จริง</p></article>
+  </div>
 </section>
+
 <section id="plans" class="section">
-<div class="section-head center"><div><span>เว็บไซต์เดียว</span><h2>Starter + Professional</h2></div></div>
-<div class="plans"><article><label>STARTER</label><h3>ทดลองใช้ 20 เครื่องมือ</h3><ul><li>20 เครื่องมือยอดนิยม</li><li>สร้าง Prompt ได้ทันที</li><li>ไม่ต้องสมัครสมาชิก</li></ul><a class="btn primary full" href="#tools">เริ่มทดลองใช้</a></article><article class="featured"><label>PROFESSIONAL</label><h3>เครื่องมือทั้งหมด GP001–GP222</h3><ul><li>คลังเครื่องมือครบทุกกลุ่มงาน</li><li>Workflow งานราชการ</li><li>อัปเดตต่อเนื่อง</li></ul><button class="btn dark full" id="proBtn">กำลังพัฒนาอย่างต่อเนื่อง</button></article></div>
+  <div class="section-head center"><div><span>เว็บไซต์เดียว</span><h2>Starter + Professional</h2></div></div>
+  <div class="plans">
+    <article>
+      <label>STARTER</label>
+      <h3>ทดลองใช้ 20 เครื่องมือ</h3>
+      <ul><li>20 เครื่องมือยอดนิยม</li><li>สร้าง Prompt ได้ทันที</li><li>ไม่ต้องสมัครสมาชิก</li></ul>
+      <a class="btn primary full" href="#tools">เริ่มทดลองใช้</a>
+    </article>
+    <article class="featured">
+      <label>PROFESSIONAL</label>
+      <h3>เครื่องมือทั้งหมด GP001–GP222</h3>
+      <ul><li>คลังเครื่องมือครบทุกกลุ่มงาน</li><li>Workflow งานราชการ</li><li>อัปเดตต่อเนื่อง</li></ul>
+      <button class="btn dark full" id="proBtn">กำลังพัฒนาอย่างต่อเนื่อง</button>
+    </article>
+  </div>
 </section>
-<section id="community" class="section community"><div><span>COMMUNITY</span><h2>GovPrompt Thailand - ชุมชน AI งานราชการ</h2><p>ร่วมทดลองใช้และส่งข้อเสนอแนะเพื่อพัฒนาเครื่องมือให้ตรงกับงานจริง</p></div><a class="btn facebook" target="_blank" rel="noopener" href="https://www.facebook.com/GovPromptThailandAI">ไปที่ Facebook ↗</a></section>
+
+<section id="community" class="section community">
+  <div><span>COMMUNITY</span><h2>GovPrompt Thailand - ชุมชน AI งานราชการ</h2><p>ร่วมทดลองใช้และส่งข้อเสนอแนะเพื่อพัฒนาเครื่องมือให้ตรงกับงานจริง</p></div>
+  <a class="btn facebook" target="_blank" rel="noopener" href="https://www.facebook.com/GovPromptThailandAI">ไปที่ Facebook ↗</a>
+</section>
 </main>
-<footer><strong>GovPrompt Thailand v6.0 Stable</strong><p>ระบบช่วยร่างและวิเคราะห์ ผู้ใช้ต้องตรวจสอบก่อนนำไปใช้จริง</p></footer>
-<div id="modal" class="modal hidden"><div class="modal-card"><header><div><small id="toolCode"></small><h2 id="toolName"></h2><p id="toolDesc"></p></div><button id="closeModal">×</button></header><div class="modal-body"><form id="promptForm"><div id="fields"></div><label>รูปแบบผลลัพธ์<select id="tone"><option>ภาษาราชการ กระชับ ชัดเจน</option><option>สรุปสำหรับผู้บริหาร</option><option>ภาษาง่ายสำหรับประชาชน</option></select></label><label class="confirm"><input id="confirm" type="checkbox" required> ยืนยันว่าข้อมูลเป็นข้อเท็จจริงและจะตรวจทานก่อนใช้จริง</label><button class="btn primary full" type="submit">สร้าง Prompt</button></form><section class="result"><div class="result-head"><strong>Prompt พร้อมใช้งาน</strong><div><button id="copyBtn" disabled>📋 คัดลอก</button><button id="downloadBtn" disabled>⬇️ ดาวน์โหลด</button></div></div><pre id="output" class="empty-result">Prompt จะแสดงที่นี่</pre></section></div></div></div>
+
+<footer>
+  <strong>GovPrompt Thailand v6.0 Stable</strong>
+  <p>ระบบช่วยร่างและวิเคราะห์ ผู้ใช้ต้องตรวจสอบก่อนนำไปใช้จริง</p>
+</footer>
+
+<div id="modal" class="modal hidden">
+  <div class="modal-card">
+    <header>
+      <div><small id="toolCode"></small><h2 id="toolName"></h2><p id="toolDesc"></p></div>
+      <button id="closeModal">×</button>
+    </header>
+    <div class="modal-body">
+      <form id="promptForm">
+        <div id="fields"></div>
+        <label>รูปแบบผลลัพธ์
+          <select id="tone">
+            <option>ภาษาราชการ กระชับ ชัดเจน</option>
+            <option>สรุปสำหรับผู้บริหาร</option>
+            <option>ภาษาง่ายสำหรับประชาชน</option>
+          </select>
+        </label>
+        <label class="confirm"><input id="confirm" type="checkbox" required> ยืนยันว่าข้อมูลเป็นข้อเท็จจริงและจะตรวจทานก่อนใช้จริง</label>
+        <button class="btn primary full" type="submit">สร้าง Prompt</button>
+      </form>
+      <section class="result">
+        <div class="result-head">
+          <strong>Prompt พร้อมใช้งาน</strong>
+          <div><button id="copyBtn" disabled>📋 คัดลอก</button><button id="downloadBtn" disabled>⬇️ ดาวน์โหลด</button></div>
+        </div>
+        <pre id="output" class="empty-result">Prompt จะแสดงที่นี่</pre>
+      </section>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 <script>
-const tools=[{"id": "GP001", "icon": "📄", "category": "หนังสือราชการ", "name": "ร่างหนังสือราชการ", "desc": "ร่างหนังสือภายนอก หนังสือภายใน หรือบันทึกข้อความ", "fields": ["หน่วยงาน", "ประเภทหนังสือ", "เรื่อง", "ผู้รับ", "ข้อเท็จจริง", "วัตถุประสงค์", "เอกสารอ้างอิง"]}, {"id": "GP002", "icon": "📝", "category": "หนังสือราชการ", "name": "บันทึกข้อความเสนอผู้บริหาร", "desc": "จัดทำเรื่องเดิม ข้อเท็จจริง ข้อพิจารณา และข้อเสนอ", "fields": ["ส่วนราชการ", "เรื่อง", "ข้อเท็จจริง", "ข้อพิจารณา", "ข้อเสนอ"]}, {"id": "GP003", "icon": "📨", "category": "หนังสือราชการ", "name": "หนังสือเชิญประชุม", "desc": "ร่างหนังสือเชิญพร้อมวัน เวลา สถานที่ และวาระ", "fields": ["หน่วยงาน", "ชื่อประชุม", "ผู้รับ", "วันเวลา", "สถานที่", "วาระ", "เอกสารแนบ"]}, {"id": "GP004", "icon": "📋", "category": "หนังสือราชการ", "name": "สรุปรายงานการประชุม", "desc": "สรุปสาระ มติ ผู้รับผิดชอบ และกำหนดเวลา", "fields": ["ชื่อประชุม", "วันเวลา", "ผู้เข้าร่วม", "บันทึกประชุม", "รูปแบบผลลัพธ์"]}, {"id": "GP005", "icon": "⚖️", "category": "กฎหมาย", "name": "วิเคราะห์ข้อกฎหมาย อปท.", "desc": "วิเคราะห์ข้อเท็จจริง ฐานอำนาจ ความเสี่ยง และข้อเสนอ", "fields": ["หน่วยงาน", "เรื่อง", "ข้อเท็จจริง", "ข้อหารือ", "เอกสารหรือกฎหมายที่มี"]}, {"id": "GP006", "icon": "🏛️", "category": "กฎหมาย", "name": "วิเคราะห์อำนาจหน้าที่", "desc": "ตรวจสอบว่าเรื่องอยู่ในอำนาจหน้าที่และมีเงื่อนไขอย่างไร", "fields": ["หน่วยงาน", "กิจกรรม", "ข้อเท็จจริง", "กลุ่มเป้าหมาย", "ข้อกังวล"]}, {"id": "GP007", "icon": "📜", "category": "กฎหมาย", "name": "ร่างหนังสือหารือราชการ", "desc": "จัดทำหนังสือหารืออย่างเป็นระบบและไม่ชี้นำคำตอบ", "fields": ["ผู้หารือ", "ผู้รับหารือ", "เรื่อง", "ข้อเท็จจริง", "ข้อกฎหมาย", "ประเด็นหารือ"]}, {"id": "GP008", "icon": "🛡️", "category": "กฎหมาย", "name": "ตรวจความเสี่ยงทางกฎหมาย", "desc": "ชี้จุดเสี่ยง ข้อมูลที่ขาด และเงื่อนไขก่อนดำเนินการ", "fields": ["เรื่อง", "ข้อเท็จจริง", "แนวทางดำเนินการ", "เอกสาร", "ประเด็นเสี่ยง"]}, {"id": "GP009", "icon": "📦", "category": "พัสดุ", "name": "ตรวจร่าง TOR", "desc": "ตรวจล็อกสเปก การแข่งขัน คุณสมบัติ ตรวจรับ และค่าปรับ", "fields": ["รายการพัสดุ", "ความต้องการใช้งาน", "ข้อความ TOR", "วงเงิน", "จุดกังวล"]}, {"id": "GP010", "icon": "🔍", "category": "พัสดุ", "name": "ตรวจการล็อกสเปก", "desc": "วิเคราะห์ถ้อยคำที่อาจจำกัดการแข่งขันและเสนอข้อความแก้", "fields": ["รายการพัสดุ", "สเปก", "ความจำเป็นใช้งาน", "ข้อมูลตลาด"]}, {"id": "GP011", "icon": "✅", "category": "พัสดุ", "name": "ตรวจรับพัสดุและงานจ้าง", "desc": "เปรียบเทียบ TOR สัญญา แบบ BOQ และผลงานจริง", "fields": ["ชื่องาน", "ข้อกำหนด", "ผลงานจริง", "หลักฐาน", "ข้อบกพร่อง"]}, {"id": "GP012", "icon": "🧾", "category": "พัสดุ", "name": "ร่างขอบเขตงานและคุณลักษณะ", "desc": "จัดทำ TOR จากความต้องการใช้งานโดยไม่ผูกยี่ห้อ", "fields": ["ชื่อพัสดุ", "วัตถุประสงค์", "สภาพใช้งาน", "คุณสมบัติจำเป็น", "รับประกัน"]}, {"id": "GP013", "icon": "📊", "category": "โครงการ", "name": "ตรวจสอบโครงการก่อนอนุมัติ", "desc": "วิเคราะห์ความจำเป็น อำนาจหน้าที่ งบ ความคุ้มค่า และความเสี่ยง", "fields": ["หน่วยงาน", "ชื่อโครงการ", "ปัญหา", "กลุ่มเป้าหมาย", "กิจกรรม", "งบประมาณ", "ผลลัพธ์"]}, {"id": "GP014", "icon": "🧭", "category": "โครงการ", "name": "จัดทำโครงร่างโครงการ", "desc": "เชื่อมโยงปัญหา วัตถุประสงค์ กิจกรรม ผลผลิต และตัวชี้วัด", "fields": ["หน่วยงาน", "ชื่อโครงการ", "ปัญหา", "กลุ่มเป้าหมาย", "ระยะเวลา", "งบประมาณ"]}, {"id": "GP015", "icon": "🎯", "category": "โครงการ", "name": "ออกแบบตัวชี้วัดโครงการ", "desc": "กำหนดผลผลิต ผลลัพธ์ ค่าเป้าหมาย และวิธีเก็บข้อมูล", "fields": ["ชื่อโครงการ", "วัตถุประสงค์", "กิจกรรม", "กลุ่มเป้าหมาย", "ข้อมูลที่มี"]}, {"id": "GP016", "icon": "📣", "category": "ประชาสัมพันธ์", "name": "เขียนข่าวประชาสัมพันธ์", "desc": "เขียนข่าวภาครัฐที่ถูกต้อง เป็นกลาง และอ่านง่าย", "fields": ["หน่วยงาน", "กิจกรรม", "วันเวลา", "สถานที่", "ผู้เกี่ยวข้อง", "ข้อเท็จจริง", "ผลลัพธ์"]}, {"id": "GP017", "icon": "📱", "category": "ประชาสัมพันธ์", "name": "ร่างโพสต์ Facebook", "desc": "สร้างโพสต์สั้น อ่านง่าย พร้อมข้อความเชิญชวน", "fields": ["หัวเรื่อง", "ข้อเท็จจริง", "กลุ่มเป้าหมาย", "น้ำเสียง", "ลิงก์"]}, {"id": "GP018", "icon": "🖼️", "category": "ประชาสัมพันธ์", "name": "วางโครง One Page", "desc": "จัดพาดหัว ประเด็นสำคัญ ขั้นตอน และช่องทางติดต่อ", "fields": ["หัวเรื่อง", "กลุ่มเป้าหมาย", "สาระสำคัญ", "ขั้นตอน", "ช่องทางติดต่อ", "ภาพลักษณ์"]}, {"id": "GP019", "icon": "👔", "category": "ผู้บริหาร", "name": "สรุปผู้บริหารหนึ่งหน้า", "desc": "สรุปเรื่องสำคัญ ทางเลือก ความเสี่ยง และข้อเสนอ", "fields": ["เรื่อง", "ข้อเท็จจริง", "ประเด็นตัดสินใจ", "ข้อจำกัด", "ระดับความละเอียด"]}, {"id": "GP020", "icon": "🎤", "category": "ผู้บริหาร", "name": "ร่างคำกล่าวเปิด–ปิดงาน", "desc": "ร่างคำกล่าวให้เหมาะกับบทบาทผู้กล่าวและวัตถุประสงค์", "fields": ["ผู้กล่าว", "ชื่องาน", "ผู้เข้าร่วม", "ความสำคัญ", "นโยบาย", "ประเภทคำกล่าว"]}];
-(()=>{const grid=document.getElementById('toolGrid'),search=document.getElementById('toolSearch'),count=document.getElementById('count'),empty=document.getElementById('empty'),modal=document.getElementById('modal'),fields=document.getElementById('fields'),form=document.getElementById('promptForm'),output=document.getElementById('output');let category='ทั้งหมด',active=null,prompt='';const norm=v=>String(v||'').toLowerCase().trim();
-function render(){const q=norm(search.value),list=tools.filter(t=>(category==='ทั้งหมด'||t.category===category)&&(!q||norm([t.id,t.name,t.desc,t.category].join(' ')).includes(q)));grid.innerHTML=list.map(t=>`<article class="tool-card"><div class="tool-top"><span class="tool-icon">${t.icon}</span><span class="tool-code">${t.id}</span></div><h3>${t.name}</h3><p>${t.desc}</p><button data-open="${t.id}">เริ่มใช้เครื่องมือนี้</button></article>`).join('');count.textContent=`${list.length} เครื่องมือ`;empty.classList.toggle('hidden',list.length>0);grid.classList.toggle('hidden',list.length===0);document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openTool(b.dataset.open))}
-function openTool(id){active=tools.find(t=>t.id===id);if(!active)return;document.getElementById('toolCode').textContent=active.id;document.getElementById('toolName').textContent=active.name;document.getElementById('toolDesc').textContent=active.desc;fields.innerHTML=active.fields.map((f,i)=>`<label>${f}<textarea name="f${i}" ${i<2?'required':''} placeholder="ระบุข้อมูลจริง หากไม่ทราบให้เว้นว่าง"></textarea></label>`).join('');form.reset();output.textContent='Prompt จะแสดงที่นี่';output.classList.add('empty-result');document.getElementById('copyBtn').disabled=true;document.getElementById('downloadBtn').disabled=true;modal.classList.remove('hidden');document.body.classList.add('lock')}
+window.GOVPROMPT_TOOLS=[{"id":"GP001","icon":"📄","category":"หนังสือราชการ","name":"ร่างหนังสือราชการ","desc":"ร่างหนังสือภายนอก หนังสือภายใน หรือบันทึกข้อความ","fields":["หน่วยงาน","ประเภทหนังสือ","เรื่อง","ผู้รับ","ข้อเท็จจริง","วัตถุประสงค์","เอกสารอ้างอิง"]},{"id":"GP002","icon":"📝","category":"หนังสือราชการ","name":"บันทึกข้อความเสนอผู้บริหาร","desc":"จัดทำเรื่องเดิม ข้อเท็จจริง ข้อพิจารณา และข้อเสนอ","fields":["ส่วนราชการ","เรื่อง","ข้อเท็จจริง","ข้อพิจารณา","ข้อเสนอ"]},{"id":"GP003","icon":"📨","category":"หนังสือราชการ","name":"หนังสือเชิญประชุม","desc":"ร่างหนังสือเชิญพร้อมวัน เวลา สถานที่ และวาระ","fields":["หน่วยงาน","เรื่องประชุม","ผู้รับ","วันเวลา","สถานที่","วาระ","เอกสารแนบ"]},{"id":"GP004","icon":"📋","category":"หนังสือราชการ","name":"สรุปรายงานการประชุม","desc":"สรุปสาระ มติ ผู้รับผิดชอบ และกำหนดเวลา","fields":["ชื่อประชุม","วันเวลา","ผู้เข้าร่วม","บันทึกประชุม","รูปแบบผลลัพธ์"]},{"id":"GP005","icon":"⚖️","category":"กฎหมาย","name":"วิเคราะห์ข้อกฎหมาย อปท.","desc":"วิเคราะห์ข้อเท็จจริง ฐานอำนาจ ความเสี่ยง และข้อเสนอ","fields":["หน่วยงาน","เรื่อง","ข้อเท็จจริง","ข้อหารือ","เอกสารหรือกฎหมายที่มี"]},{"id":"GP006","icon":"🏛️","category":"กฎหมาย","name":"วิเคราะห์อำนาจหน้าที่","desc":"ตรวจสอบว่าเรื่องอยู่ในอำนาจหน้าที่และมีเงื่อนไขอย่างไร","fields":["หน่วยงาน","กิจกรรม","ข้อเท็จจริง","กลุ่มเป้าหมาย","ข้อกังวล"]},{"id":"GP007","icon":"📜","category":"กฎหมาย","name":"ร่างหนังสือหารือราชการ","desc":"จัดทำหนังสือหารืออย่างเป็นระบบและไม่ชี้นำคำตอบ","fields":["ผู้หารือ","ผู้รับหารือ","เรื่อง","ข้อเท็จจริง","ข้อกฎหมาย","ประเด็นหารือ"]},{"id":"GP008","icon":"🛡️","category":"กฎหมาย","name":"ตรวจความเสี่ยงทางกฎหมาย","desc":"ชี้จุดเสี่ยง ข้อมูลที่ขาด และเงื่อนไขก่อนดำเนินการ","fields":["เรื่อง","ข้อเท็จจริง","แนวทางดำเนินการ","เอกสาร","ประเด็นเสี่ยง"]},{"id":"GP009","icon":"📦","category":"พัสดุ","name":"ตรวจร่าง TOR","desc":"ตรวจล็อกสเปก การแข่งขัน คุณสมบัติ ตรวจรับ และค่าปรับ","fields":["รายการพัสดุ","ความต้องการใช้งาน","ข้อความ TOR","วงเงิน","จุดกังวล"]},{"id":"GP010","icon":"🔍","category":"พัสดุ","name":"ตรวจการล็อกสเปก","desc":"วิเคราะห์ถ้อยคำที่อาจจำกัดการแข่งขันและเสนอข้อความแก้","fields":["รายการพัสดุ","สเปก","ความจำเป็นใช้งาน","ข้อมูลตลาด"]},{"id":"GP011","icon":"✅","category":"พัสดุ","name":"ตรวจรับพัสดุและงานจ้าง","desc":"เปรียบเทียบ TOR สัญญา แบบ BOQ และผลงานจริง","fields":["ชื่องาน","ข้อกำหนด","ผลงานจริง","หลักฐาน","ข้อบกพร่อง"]},{"id":"GP012","icon":"🧾","category":"พัสดุ","name":"ร่างขอบเขตงานและคุณลักษณะ","desc":"จัดทำ TOR จากความต้องการใช้งานโดยไม่ผูกยี่ห้อ","fields":["ชื่อพัสดุ","วัตถุประสงค์","สภาพใช้งาน","คุณสมบัติจำเป็น","รับประกัน"]},{"id":"GP013","icon":"📊","category":"โครงการ","name":"ตรวจสอบโครงการก่อนอนุมัติ","desc":"วิเคราะห์ความจำเป็น อำนาจหน้าที่ งบ ความคุ้มค่า และความเสี่ยง","fields":["หน่วยงาน","ชื่อโครงการ","ปัญหา","กลุ่มเป้าหมาย","กิจกรรม","งบประมาณ","ผลลัพธ์"]},{"id":"GP014","icon":"🧭","category":"โครงการ","name":"จัดทำโครงร่างโครงการ","desc":"เชื่อมโยงปัญหา วัตถุประสงค์ กิจกรรม ผลผลิต และตัวชี้วัด","fields":["หน่วยงาน","ชื่อโครงการ","ปัญหา","กลุ่มเป้าหมาย","ระยะเวลา","งบประมาณ"]},{"id":"GP015","icon":"🎯","category":"โครงการ","name":"ออกแบบตัวชี้วัดโครงการ","desc":"กำหนดผลผลิต ผลลัพธ์ ค่าเป้าหมาย และวิธีเก็บข้อมูล","fields":["ชื่อโครงการ","วัตถุประสงค์","กิจกรรม","กลุ่มเป้าหมาย","ข้อมูลที่มี"]},{"id":"GP016","icon":"📣","category":"ประชาสัมพันธ์","name":"เขียนข่าวประชาสัมพันธ์","desc":"เขียนข่าวภาครัฐที่ถูกต้อง เป็นกลาง และอ่านง่าย","fields":["หน่วยงาน","กิจกรรม","วันเวลา","สถานที่","ผู้เกี่ยวข้อง","ข้อเท็จจริง","ผลลัพธ์"]},{"id":"GP017","icon":"📱","category":"ประชาสัมพันธ์","name":"ร่างโพสต์ Facebook","desc":"สร้างโพสต์สั้น อ่านง่าย พร้อมข้อความเชิญชวน","fields":["หัวเรื่อง","ข้อเท็จจริง","กลุ่มเป้าหมาย","น้ำเสียง","ลิงก์"]},{"id":"GP018","icon":"🖼️","category":"ประชาสัมพันธ์","name":"วางโครง One Page","desc":"จัดพาดหัว ประเด็นสำคัญ ขั้นตอน และช่องทางติดต่อ","fields":["หัวเรื่อง","กลุ่มเป้าหมาย","สาระสำคัญ","ขั้นตอน","ช่องทางติดต่อ","ภาพลักษณ์"]},{"id":"GP019","icon":"👔","category":"ผู้บริหาร","name":"สรุปผู้บริหารหนึ่งหน้า","desc":"สรุปเรื่องสำคัญ ทางเลือก ความเสี่ยง และข้อเสนอ","fields":["เรื่อง","ข้อเท็จจริง","ประเด็นตัดสินใจ","ข้อจำกัด","ระดับความละเอียด"]},{"id":"GP020","icon":"🎤","category":"ผู้บริหาร","name":"ร่างคำกล่าวเปิด–ปิดงาน","desc":"ร่างคำกล่าวให้เหมาะกับบทบาทผู้กล่าวและวัตถุประสงค์","fields":["ผู้กล่าว","ชื่องาน","ผู้เข้าร่วม","ความสำคัญ","นโยบาย","ประเภทคำกล่าว"]}];
+</script>
+<script>
+(() => {
+const tools=window.GOVPROMPT_TOOLS||[];
+const grid=document.getElementById('toolGrid'),search=document.getElementById('toolSearch'),count=document.getElementById('count'),empty=document.getElementById('empty');
+const modal=document.getElementById('modal'),fields=document.getElementById('fields'),form=document.getElementById('promptForm'),output=document.getElementById('output');
+let category='ทั้งหมด',active=null,prompt='';
+
+const norm=v=>String(v||'').toLowerCase().trim();
+function render(){
+ const q=norm(search.value);
+ const list=tools.filter(t=>(category==='ทั้งหมด'||t.category===category)&&(!q||norm([t.id,t.name,t.desc,t.category].join(' ')).includes(q)));
+ grid.innerHTML=list.map(t=>`<article class="tool-card"><div class="tool-top"><span class="tool-icon">${t.icon}</span><span class="tool-code">${t.id}</span></div><h3>${t.name}</h3><p>${t.desc}</p><button data-open="${t.id}">เริ่มใช้เครื่องมือนี้</button></article>`).join('');
+ count.textContent=`${list.length} เครื่องมือ`; empty.classList.toggle('hidden',list.length>0); grid.classList.toggle('hidden',list.length===0);
+ document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openTool(b.dataset.open));
+}
+function openTool(id){
+ active=tools.find(t=>t.id===id); if(!active)return;
+ document.getElementById('toolCode').textContent=active.id; document.getElementById('toolName').textContent=active.name; document.getElementById('toolDesc').textContent=active.desc;
+ fields.innerHTML=active.fields.map((f,i)=>`<label>${f}<textarea name="f${i}" ${i<2?'required':''} placeholder="ระบุข้อมูลจริง หากไม่ทราบให้เว้นว่าง"></textarea></label>`).join('');
+ form.reset(); output.textContent='Prompt จะแสดงที่นี่'; output.classList.add('empty-result'); document.getElementById('copyBtn').disabled=true; document.getElementById('downloadBtn').disabled=true;
+ modal.classList.remove('hidden'); document.body.classList.add('lock');
+}
 function close(){modal.classList.add('hidden');document.body.classList.remove('lock')}
-form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),info=active.fields.map((f,i)=>`- ${f}: ${String(fd.get('f'+i)||'').trim()||'[ยังไม่ได้ระบุ]'}`).join('\n');prompt=`บทบาท\nคุณเป็น Government AI Copilot ผู้เชี่ยวชาญงานราชการไทย\n\nภารกิจ\n${active.name}\n\nข้อมูลจากผู้ใช้\n${info}\n\nรูปแบบผลลัพธ์\n- ใช้${document.getElementById('tone').value}\n- จัดหัวข้อและลำดับเนื้อหาให้เหมาะสม\n- แยกข้อเท็จจริง การวิเคราะห์ ความเสี่ยง และข้อเสนอแนะเมื่อเกี่ยวข้อง\n- ระบุข้อมูลที่ยังขาดก่อนนำไปใช้จริง\n\nข้อกำหนดสำคัญ\n1. ยึดข้อเท็จจริงและเอกสารที่ผู้ใช้ให้เป็นหลัก\n2. ห้ามสมมติชื่อบุคคล วันที่ เลขหนังสือ วงเงิน หรือข้อกฎหมาย\n3. หากข้อมูลไม่ครบ ให้ใช้คำว่า [ต้องตรวจสอบ/เพิ่มเติม]\n4. ห้ามอ้างกฎหมายหรือแหล่งข้อมูลที่ไม่สามารถยืนยันได้\n5. ตรวจชื่อ วันที่ ตัวเลข หน่วยงาน และข้อเสนอ ก่อนจบคำตอบ\n6. ผลลัพธ์เป็นร่าง ผู้ใช้ต้องตรวจทานก่อนนำไปใช้จริง\n\nโปรดดำเนินการทันที`;output.textContent=prompt;output.classList.remove('empty-result');document.getElementById('copyBtn').disabled=false;document.getElementById('downloadBtn').disabled=false};
-document.getElementById('copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText(prompt)}catch(e){const a=document.createElement('textarea');a.value=prompt;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}toast('คัดลอก Prompt แล้ว')};document.getElementById('downloadBtn').onclick=()=>{const b=new Blob([prompt],{type:'text/plain;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`${active.id}-${active.name}.txt`;a.click();URL.revokeObjectURL(u)};document.getElementById('closeModal').onclick=close;modal.onclick=e=>{if(e.target===modal)close()};document.onkeydown=e=>{if(e.key==='Escape')close()};search.oninput=render;document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{category=b.dataset.cat;document.querySelectorAll('[data-cat]').forEach(x=>x.classList.remove('active'));b.classList.add('active');render()});function heroFind(){search.value=document.getElementById('heroSearch').value;category='ทั้งหมด';document.querySelectorAll('[data-cat]').forEach(x=>x.classList.toggle('active',x.dataset.cat==='ทั้งหมด'));render();document.getElementById('tools').scrollIntoView({behavior:'smooth'})}document.getElementById('heroSearchBtn').onclick=heroFind;document.getElementById('heroSearch').onkeydown=e=>{if(e.key==='Enter')heroFind()};document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{document.getElementById('heroSearch').value=b.dataset.q;heroFind()});document.getElementById('menuBtn').onclick=()=>document.getElementById('nav').classList.toggle('open');document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>document.getElementById('nav').classList.remove('open'));document.getElementById('proBtn').onclick=()=>toast('Professional กำลังพัฒนาอย่างต่อเนื่อง');function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}render()})();
+form.onsubmit=e=>{
+ e.preventDefault(); const fd=new FormData(form);
+ const info=active.fields.map((f,i)=>`- ${f}: ${String(fd.get('f'+i)||'').trim()||'[ยังไม่ได้ระบุ]'}`).join('
+');
+ prompt=`บทบาท
+คุณเป็น Government AI Copilot ผู้เชี่ยวชาญงานราชการไทย
+
+ภารกิจ
+${active.name}
+
+ข้อมูลจากผู้ใช้
+${info}
+
+รูปแบบผลลัพธ์
+- ใช้${document.getElementById('tone').value}
+- จัดหัวข้อและลำดับเนื้อหาให้เหมาะสม
+- แยกข้อเท็จจริง การวิเคราะห์ ความเสี่ยง และข้อเสนอแนะเมื่อเกี่ยวข้อง
+- ระบุข้อมูลที่ยังขาดก่อนนำไปใช้จริง
+
+ข้อกำหนดสำคัญ
+1. ยึดข้อเท็จจริงและเอกสารที่ผู้ใช้ให้เป็นหลัก
+2. ห้ามสมมติชื่อบุคคล วันที่ เลขหนังสือ วงเงิน หรือข้อกฎหมาย
+3. หากข้อมูลไม่ครบ ให้ใช้คำว่า [ต้องตรวจสอบ/เพิ่มเติม]
+4. ห้ามอ้างกฎหมายหรือแหล่งข้อมูลที่ไม่สามารถยืนยันได้
+5. ตรวจชื่อ วันที่ ตัวเลข หน่วยงาน และข้อเสนอ ก่อนจบคำตอบ
+6. ผลลัพธ์เป็นร่าง ผู้ใช้ต้องตรวจทานก่อนนำไปใช้จริง
+
+โปรดดำเนินการทันที`;
+ output.textContent=prompt; output.classList.remove('empty-result'); document.getElementById('copyBtn').disabled=false; document.getElementById('downloadBtn').disabled=false;
+};
+document.getElementById('copyBtn').onclick=async()=>{await navigator.clipboard.writeText(prompt);toast('คัดลอก Prompt แล้ว')};
+document.getElementById('downloadBtn').onclick=()=>{const b=new Blob([prompt],{type:'text/plain;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`${active.id}-${active.name}.txt`;a.click();URL.revokeObjectURL(u)};
+document.getElementById('closeModal').onclick=close; modal.onclick=e=>{if(e.target===modal)close()}; document.onkeydown=e=>{if(e.key==='Escape')close()};
+search.oninput=render;
+document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{category=b.dataset.cat;document.querySelectorAll('[data-cat]').forEach(x=>x.classList.remove('active'));b.classList.add('active');render()});
+function heroFind(){search.value=document.getElementById('heroSearch').value;category='ทั้งหมด';document.querySelectorAll('[data-cat]').forEach(x=>x.classList.toggle('active',x.dataset.cat==='ทั้งหมด'));render();document.getElementById('tools').scrollIntoView({behavior:'smooth'})}
+document.getElementById('heroSearchBtn').onclick=heroFind;document.getElementById('heroSearch').onkeydown=e=>{if(e.key==='Enter')heroFind()};
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{document.getElementById('heroSearch').value=b.dataset.q;heroFind()});
+document.getElementById('menuBtn').onclick=()=>document.getElementById('nav').classList.toggle('open');
+document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>document.getElementById('nav').classList.remove('open'));
+document.getElementById('proBtn').onclick=()=>toast('Professional กำลังพัฒนาอย่างต่อเนื่อง');
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+render();
+})();
 </script>
 </body>
 </html>
