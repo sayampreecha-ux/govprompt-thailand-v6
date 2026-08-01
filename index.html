@@ -192,8 +192,7 @@ function openTool(id){
 function close(){modal.classList.add('hidden');document.body.classList.remove('lock')}
 form.onsubmit=e=>{
  e.preventDefault(); const fd=new FormData(form);
- const info=active.fields.map((f,i)=>`- ${f}: ${String(fd.get('f'+i)||'').trim()||'[ยังไม่ได้ระบุ]'}`).join('
-');
+ const info=active.fields.map((f,i)=>`- ${f}: ${String(fd.get('f'+i)||'').trim()||'[ยังไม่ได้ระบุ]'}`).join('\\n');
  prompt=`บทบาท
 คุณเป็น Government AI Copilot ผู้เชี่ยวชาญงานราชการไทย
 

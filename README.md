@@ -1,19 +1,15 @@
-# GovPrompt Thailand v6.0 Stable — One File
+# GovPrompt Thailand v6.0.1 — Search Fix
 
-รุ่นนี้ทำให้ง่ายที่สุด โดยเว็บไซต์ทั้งหมดรวมอยู่ใน `index.html` เพียงไฟล์เดียว
+แก้ข้อผิดพลาด JavaScript ที่ทำให้:
+- ปุ่มค้นหาไม่ทำงาน
+- การกรองหมวดไม่ทำงาน
+- การเปิดเครื่องมือไม่ทำงาน
 
-## วิธีลงใน GitHub Desktop
-1. เปิดโฟลเดอร์ Repository `govprompt-thailand-v6`
-2. ลบไฟล์เดิม `index.html`, `README.txt`, `tools.js`
-3. คัดลอกไฟล์จากชุดนี้ไปวาง:
-   - `index.html`
-   - `README.md`
-   - `.nojekyll`
-4. กลับ GitHub Desktop
-5. ใส่ Summary: `Release GovPrompt Thailand v6.0 Stable One File`
-6. กด **Commit to main**
-7. กด **Push origin**
-8. ไปที่ GitHub: Settings → Pages
-9. เลือก Branch `main` และ Folder `/(root)` แล้วกด Save
-10. รอ 1–5 นาที แล้วเปิด:
-    `https://sayampreecha-ux.github.io/govprompt-thailand-v6/`
+## วิธีอัปเดต
+1. แตก ZIP
+2. คัดลอก `index.html` ไปทับไฟล์เดิมในโฟลเดอร์ Repository `govprompt-thailand-v6`
+3. กลับ GitHub Desktop
+4. Summary: `Fix search and tool functions v6.0.1`
+5. Commit to main
+6. Push origin
+7. รอ GitHub Pages 1–3 นาที แล้วกด Ctrl + F5
