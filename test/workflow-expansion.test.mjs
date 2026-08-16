@@ -38,6 +38,8 @@ test('exposes deterministic states, evidence, risk gates, deliverables, and huma
   const result = api.plan(envelope('GP009', { evidence: { types: ['requirement-specification'], count: 1, provided: true } }), quality('PASS'));
   assert.equal(result.status, 'READY_FOR_REVIEW');
   assert.equal(result.currentState, 'human-review');
+  assert.deepEqual(JSON.parse(JSON.stringify(result.availableTransitions)), ['deliverable-ready', 'collecting-evidence', 'blocked']);
+  assert.deepEqual(JSON.parse(JSON.stringify(api.transitions['human-review'])), ['deliverable-ready', 'collecting-evidence', 'blocked']);
   assert.equal(result.requiresHumanReview, true);
   assert.deepEqual(JSON.parse(JSON.stringify(result.requiredEvidence)), [
     { type: 'requirement-specification', provided: true },

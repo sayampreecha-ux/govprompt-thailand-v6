@@ -3,6 +3,15 @@
 
   const QUALITY_STATUS = Object.freeze({ PASS: 'PASS', NEEDS_INFO: 'NEEDS_INFO', BLOCKED: 'BLOCKED', REVIEW_REQUIRED: 'REVIEW_REQUIRED' });
   const WORKFLOW_STATES = Object.freeze(['intake', 'collecting-evidence', 'risk-review', 'human-review', 'deliverable-ready', 'blocked', 'not-applicable']);
+  const TRANSITIONS = Object.freeze({
+    intake: Object.freeze(['collecting-evidence', 'blocked']),
+    'collecting-evidence': Object.freeze(['risk-review', 'human-review', 'blocked']),
+    'risk-review': Object.freeze(['human-review', 'blocked']),
+    'human-review': Object.freeze(['deliverable-ready', 'collecting-evidence', 'blocked']),
+    'deliverable-ready': Object.freeze([]),
+    blocked: Object.freeze([]),
+    'not-applicable': Object.freeze([])
+  });
 
   const DEFINITIONS = Object.freeze([
     Object.freeze({
@@ -97,13 +106,15 @@
     const evidenceTypes = new Set((envelope?.evidence?.types || []).map(String));
     const requiredEvidence = definition.requiredEvidence.map(type => ({ type, provided: evidenceTypes.has(type) }));
     const deliverableState = status === 'READY_FOR_REVIEW' ? 'READY_FOR_HUMAN_REVIEW' : status === 'BLOCKED' ? 'BLOCKED' : 'NOT_READY';
+    const currentState = stateFor(status);
 
     return freeze({
       workflowId: definition.id,
       selectedGpId,
       status,
-      currentState: stateFor(status),
+      currentState,
       states: [...WORKFLOW_STATES],
+      availableTransitions: [...TRANSITIONS[currentState]],
       requiredEvidence,
       missingInformation,
       riskGates: definition.riskGates.map(gate => ({ gate, triggered: riskFlags.includes(gate) })),
@@ -114,5 +125,5 @@
     });
   }
 
-  window.GOVPROMPT_WORKFLOW_EXPANSION = Object.freeze({ plan, definitions: DEFINITIONS, states: WORKFLOW_STATES });
+  window.GOVPROMPT_WORKFLOW_EXPANSION = Object.freeze({ plan, definitions: DEFINITIONS, states: WORKFLOW_STATES, transitions: TRANSITIONS });
 })();
