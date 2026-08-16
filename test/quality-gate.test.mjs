@@ -43,6 +43,19 @@ test('returns REVIEW_REQUIRED for risks, low confidence, and PDPA-sensitive fiel
   assert.equal(gate().evaluate(envelope({ userInputs: { เลขบัตรประชาชน: '[redacted]' } })).status, 'REVIEW_REQUIRED');
 });
 
+test('hardens evidence readiness with metadata-only verification states', () => {
+  const result = gate().evaluate(envelope({ evidence: { provided: true, count: 1, types: ['facts'], requiredTypes: ['facts'], records: [{ type: 'facts', status: 'needs-verification' }] } }));
+  assert.equal(result.status, 'REVIEW_REQUIRED');
+  assert.deepEqual(JSON.parse(JSON.stringify(result.checks.requiredEvidence.unverifiedTypes)), ['facts']);
+  assert.equal(result.checks.sourceReadiness.verificationReady, false);
+  assert.equal(gate().evaluate(envelope({ evidence: { provided: true, count: 1, requiredTypes: ['facts'], records: [] } })).status, 'NEEDS_INFO');
+});
+
+test('reports catalog unavailable or not applicable without a substantive decision', () => {
+  assert.equal(gate().evaluate(envelope({ catalogStatus: 'MISSING_CATALOG' })).status, 'MISSING_CATALOG');
+  assert.equal(gate().evaluate(envelope({ catalogStatus: 'NOT_APPLICABLE' })).status, 'NOT_APPLICABLE');
+});
+
 test('contains no persistence or network primitives', () => {
   assert.doesNotMatch(source, /\b(localStorage|sessionStorage|indexedDB|document\.cookie)\b/);
   assert.doesNotMatch(source, /\b(fetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon)\b/);
