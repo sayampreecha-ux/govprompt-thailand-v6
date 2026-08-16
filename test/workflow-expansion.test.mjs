@@ -33,23 +33,32 @@ test('maps the existing GP catalog to all four Batch 1 workflows', () => {
   assert.equal(api.plan(envelope('GP001'), quality('PASS')).workflowId, 'official-letter-follow-up');
 });
 
-test('exposes deterministic states, evidence, risk gates, deliverables, and human handoffs', () => {
+test('requires all workflow evidence before a ready-for-review status', () => {
   const api = workflow();
   const result = api.plan(envelope('GP009', { evidence: { types: ['requirement-specification'], count: 1, provided: true } }), quality('PASS'));
-  assert.equal(result.status, 'READY_FOR_REVIEW');
-  assert.equal(result.currentState, 'human-review');
-  assert.deepEqual(JSON.parse(JSON.stringify(result.availableTransitions)), ['deliverable-ready', 'collecting-evidence', 'blocked']);
-  assert.deepEqual(JSON.parse(JSON.stringify(api.transitions['human-review'])), ['deliverable-ready', 'collecting-evidence', 'blocked']);
+  assert.equal(result.status, 'NEEDS_INFO');
+  assert.equal(result.currentState, 'collecting-evidence');
   assert.equal(result.requiresHumanReview, true);
   assert.deepEqual(JSON.parse(JSON.stringify(result.requiredEvidence)), [
     { type: 'requirement-specification', provided: true },
     { type: 'market-information', provided: false },
     { type: 'budget-basis', provided: false }
   ]);
-  assert.equal(result.deliverable.state, 'READY_FOR_HUMAN_REVIEW');
+  assert.deepEqual(JSON.parse(JSON.stringify(result.missingInformation)), ['workflow-evidence:market-information', 'workflow-evidence:budget-basis']);
+  assert.equal(result.deliverable.state, 'NOT_READY');
   assert.deepEqual(JSON.parse(JSON.stringify(result.handoff.allowedTargets)), ['legal-analysis', 'official-letter-follow-up']);
   assert.equal(result.handoff.requiresHumanDecision, true);
   assert.equal(Object.isFrozen(result), true);
+});
+
+test('is ready for human review only after the workflow evidence set is complete', () => {
+  const api = workflow();
+  const result = api.plan(envelope('GP009', { evidence: { types: ['requirement-specification', 'market-information', 'budget-basis'], count: 3, provided: true } }), quality('PASS'));
+  assert.equal(result.status, 'READY_FOR_REVIEW');
+  assert.equal(result.currentState, 'human-review');
+  assert.deepEqual(JSON.parse(JSON.stringify(result.availableTransitions)), ['deliverable-ready', 'collecting-evidence', 'blocked']);
+  assert.deepEqual(JSON.parse(JSON.stringify(api.transitions['human-review'])), ['deliverable-ready', 'collecting-evidence', 'blocked']);
+  assert.equal(result.deliverable.state, 'READY_FOR_HUMAN_REVIEW');
 });
 
 test('propagates quality outcomes without making a substantive decision', () => {

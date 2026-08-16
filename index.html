@@ -182,6 +182,7 @@ const sharedContext=window.GOVPROMPT_CONTEXT;
 const coreEngine=window.GOVPROMPT_CORE_ENGINE;
 const qualityGate=window.GOVPROMPT_QUALITY_GATE;
 const workflowPilot=window.GOVPROMPT_WORKFLOW_PILOT;
+const workflowExpansion=window.GOVPROMPT_WORKFLOW_EXPANSION;
 let category='ทั้งหมด',active=null,prompt='';
 
 const norm=v=>String(v||'').toLowerCase().trim();
@@ -208,7 +209,7 @@ form.onsubmit=e=>{
  e.preventDefault(); const fd=new FormData(form);
  const inputValues=Object.fromEntries(active.fields.map((f,i)=>[f,String(fd.get('f'+i)||'').trim()]));
  sharedContext?.setUserInputs(inputValues); sharedContext?.setWorkflowState('generated');
- const execution=coreEngine?.prepare(sharedContext?.get()); const quality=qualityGate?.evaluate(execution); workflowPilot?.plan(execution,quality);
+ const execution=coreEngine?.prepare(sharedContext?.get()); const quality=qualityGate?.evaluate(execution); workflowPilot?.plan(execution,quality); const workflowPlan=workflowExpansion?.plan(execution,quality); window.GOVPROMPT_WORKFLOW_PLAN=workflowPlan||null;
  const info=active.fields.map((f,i)=>`- ${f}: ${String(fd.get('f'+i)||'').trim()||'[ยังไม่ได้ระบุ]'}`).join('\\n');
  prompt=`บทบาท
 คุณเป็น Government AI Copilot ผู้เชี่ยวชาญงานราชการไทย

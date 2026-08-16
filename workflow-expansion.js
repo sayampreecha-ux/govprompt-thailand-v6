@@ -63,7 +63,7 @@
     return DEFINITIONS.find(definition => definition.gpIds.includes(gpId)) || null;
   }
 
-  function statusFor(qualityStatus) {
+  function statusFor(qualityStatus, hasMissingRequiredEvidence) {
     if (qualityStatus === QUALITY_STATUS.PASS) return 'READY_FOR_REVIEW';
     if (qualityStatus === QUALITY_STATUS.NEEDS_INFO) return 'NEEDS_INFO';
     if (qualityStatus === QUALITY_STATUS.REVIEW_REQUIRED) return 'REVIEW_REQUIRED';
@@ -98,13 +98,14 @@
       });
     }
 
-    const qualityStatus = qualityResult?.status || QUALITY_STATUS.BLOCKED;
-    const status = statusFor(qualityStatus);
     const qualityChecks = qualityResult?.checks || {};
-    const missingInformation = clone(qualityChecks.missingInformation || []);
     const riskFlags = [...new Set([...(envelope?.riskFlags || []), ...(qualityChecks.riskFlags || []), ...(qualityChecks.pdpaSecurity?.concerns || [])].map(String))];
     const evidenceTypes = new Set((envelope?.evidence?.types || []).map(String));
     const requiredEvidence = definition.requiredEvidence.map(type => ({ type, provided: evidenceTypes.has(type) }));
+    const missingWorkflowEvidence = requiredEvidence.filter(evidence => !evidence.provided).map(evidence => `workflow-evidence:${evidence.type}`);
+    const missingInformation = [...new Set([...clone(qualityChecks.missingInformation || []), ...missingWorkflowEvidence])];
+    const qualityStatus = qualityResult?.status || QUALITY_STATUS.BLOCKED;
+    const status = qualityStatus === QUALITY_STATUS.PASS && missingWorkflowEvidence.length ? 'NEEDS_INFO' : statusFor(qualityStatus);
     const deliverableState = status === 'READY_FOR_REVIEW' ? 'READY_FOR_HUMAN_REVIEW' : status === 'BLOCKED' ? 'BLOCKED' : 'NOT_READY';
     const currentState = stateFor(status);
 
