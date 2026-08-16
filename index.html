@@ -169,6 +169,7 @@ window.GOVPROMPT_TOOLS=[{"id":"GP001","icon":"📄","category":"หนังส�
 </script>
 <script src="shared-context.js"></script>
 <script src="core-engine.js"></script>
+<script src="quality-gate.js"></script>
 <script src="gp-router.js"></script>
 <script>
 (() => {
@@ -177,6 +178,7 @@ const grid=document.getElementById('toolGrid'),search=document.getElementById('t
 const modal=document.getElementById('modal'),fields=document.getElementById('fields'),form=document.getElementById('promptForm'),output=document.getElementById('output');
 const sharedContext=window.GOVPROMPT_CONTEXT;
 const coreEngine=window.GOVPROMPT_CORE_ENGINE;
+const qualityGate=window.GOVPROMPT_QUALITY_GATE;
 let category='ทั้งหมด',active=null,prompt='';
 
 const norm=v=>String(v||'').toLowerCase().trim();
@@ -203,7 +205,7 @@ form.onsubmit=e=>{
  e.preventDefault(); const fd=new FormData(form);
  const inputValues=Object.fromEntries(active.fields.map((f,i)=>[f,String(fd.get('f'+i)||'').trim()]));
  sharedContext?.setUserInputs(inputValues); sharedContext?.setWorkflowState('generated');
- coreEngine?.prepare(sharedContext?.get());
+ const execution=coreEngine?.prepare(sharedContext?.get()); qualityGate?.evaluate(execution);
  const info=active.fields.map((f,i)=>`- ${f}: ${String(fd.get('f'+i)||'').trim()||'[ยังไม่ได้ระบุ]'}`).join('\\n');
  prompt=`บทบาท
 คุณเป็น Government AI Copilot ผู้เชี่ยวชาญงานราชการไทย
