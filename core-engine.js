@@ -34,7 +34,9 @@
       evidence: {
         provided: source.evidence?.provided === true,
         types: clone(source.evidence?.types || []),
-        count: Number(source.evidence?.count) || 0
+        count: Number(source.evidence?.count) || 0,
+        records: clone(source.evidence?.records || []),
+        requiredTypes: clone(source.evidence?.requiredTypes || [])
       },
       riskFlags: clone(source.riskFlags || []),
       workflowState: String(valueOr(source.workflowState, 'idle'))

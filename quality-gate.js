@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const STATUSES = Object.freeze({ PASS: 'PASS', NEEDS_INFO: 'NEEDS_INFO', BLOCKED: 'BLOCKED', REVIEW_REQUIRED: 'REVIEW_REQUIRED' });
+  const STATUSES = Object.freeze({ PASS: 'PASS', NEEDS_INFO: 'NEEDS_INFO', BLOCKED: 'BLOCKED', REVIEW_REQUIRED: 'REVIEW_REQUIRED', NOT_APPLICABLE: 'NOT_APPLICABLE', MISSING_CATALOG: 'MISSING_CATALOG' });
   const MINIMUM_CONFIDENCE = 0.3;
   const PDPA_FIELD_PATTERN = /บัตร|เลขประจำตัว|บัญชี|สุขภาพ|biometric/i;
 
@@ -27,26 +27,34 @@
     const hasSelection = Boolean(source.task?.selectedGpId);
     const evidenceRequired = riskFlags.includes('evidence-required');
     const evidenceProvided = source.evidence?.provided === true || (Number(source.evidence?.count) || 0) > 0;
+    const evidenceRecords = Array.isArray(source.evidence?.records) ? source.evidence.records : [];
+    const requiredEvidenceTypes = [...new Set((source.evidence?.requiredTypes || []).map(String))];
+    const suppliedEvidenceTypes = new Set(evidenceRecords.filter(record => ['supplied', 'needs-verification', 'verified-by-human'].includes(record?.status)).map(record => String(record.type)));
+    const unverifiedEvidenceTypes = requiredEvidenceTypes.filter(type => evidenceRecords.find(record => String(record?.type) === type)?.status !== 'verified-by-human');
+    const missingEvidenceTypes = requiredEvidenceTypes.filter(type => !suppliedEvidenceTypes.has(type));
     const pdpaFields = entries.map(([field]) => field).filter(field => PDPA_FIELD_PATTERN.test(field));
     const pdpaConcerns = pdpaFields.length ? ['personal-data-field-present'] : [];
     const missingInformation = [];
     if (!providedFields.length) missingInformation.push('user-inputs');
     if (evidenceRequired && !evidenceProvided) missingInformation.push('required-evidence');
+    missingEvidenceTypes.forEach(type => missingInformation.push(`required-evidence:${type}`));
 
     let status = STATUSES.PASS;
-    if (!hasSelection || fallback) status = STATUSES.BLOCKED;
+    if (source.catalogStatus === STATUSES.MISSING_CATALOG) status = STATUSES.MISSING_CATALOG;
+    else if (source.catalogStatus === STATUSES.NOT_APPLICABLE) status = STATUSES.NOT_APPLICABLE;
+    else if (!hasSelection || fallback) status = STATUSES.BLOCKED;
     else if (missingInformation.length) status = STATUSES.NEEDS_INFO;
-    else if (riskFlags.length || pdpaConcerns.length || confidence < MINIMUM_CONFIDENCE) status = STATUSES.REVIEW_REQUIRED;
+    else if (riskFlags.length || pdpaConcerns.length || confidence < MINIMUM_CONFIDENCE || unverifiedEvidenceTypes.length) status = STATUSES.REVIEW_REQUIRED;
 
     return freeze({
       status,
       checks: {
         completeness: { passed: providedFields.length > 0 && missingFields.length === 0, providedFields, missingFields },
-        requiredEvidence: { required: evidenceRequired, provided: evidenceProvided, passed: !evidenceRequired || evidenceProvided },
+        requiredEvidence: { required: evidenceRequired || requiredEvidenceTypes.length > 0, provided: evidenceProvided, requiredTypes: requiredEvidenceTypes, missingTypes: missingEvidenceTypes, unverifiedTypes: unverifiedEvidenceTypes, passed: (!evidenceRequired || evidenceProvided) && !missingEvidenceTypes.length },
         missingInformation,
         riskFlags,
         confidence: { value: confidence, minimum: MINIMUM_CONFIDENCE, passed: confidence >= MINIMUM_CONFIDENCE },
-        sourceReadiness: { ready: evidenceProvided || !evidenceRequired, evidenceTypes: clone(source.evidence?.types || []) },
+        sourceReadiness: { ready: (evidenceProvided || !evidenceRequired) && !missingEvidenceTypes.length, evidenceTypes: clone(source.evidence?.types || []), verificationReady: !unverifiedEvidenceTypes.length },
         pdpaSecurity: { concerns: pdpaConcerns, requiresReview: pdpaConcerns.length > 0 },
         workflowReadiness: { ready: status === STATUSES.PASS }
       }

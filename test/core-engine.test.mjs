@@ -21,7 +21,7 @@ test('prepares a standard execution envelope from shared context', () => {
     query: 'ตรวจร่าง TOR', selectedGpId: 'GP009', category: 'พัสดุ',
     userInputs: { รายการพัสดุ: 'ตัวอย่าง' },
     routing: { score: 0.42, confidence: 0.42, matchedReason: 'matched GP009', fallback: false },
-    evidence: { provided: true, types: ['เอกสารอ้างอิง'], count: 1 },
+    evidence: { provided: true, types: ['เอกสารอ้างอิง'], count: 1, records: [], requiredTypes: [] },
     riskFlags: ['review-required'], workflowState: 'generated'
   };
   const envelope = engine().prepare(context);
@@ -30,7 +30,7 @@ test('prepares a standard execution envelope from shared context', () => {
     task: { query: 'ตรวจร่าง TOR', selectedGpId: 'GP009', category: 'พัสดุ' },
     userInputs: { รายการพัสดุ: 'ตัวอย่าง' },
     routing: { score: 0.42, confidence: 0.42, matchedReason: 'matched GP009', fallback: false },
-    evidence: { provided: true, types: ['เอกสารอ้างอิง'], count: 1 },
+    evidence: { provided: true, types: ['เอกสารอ้างอิง'], count: 1, records: [], requiredTypes: [] },
     riskFlags: ['review-required'], workflowState: 'generated'
   });
 });
