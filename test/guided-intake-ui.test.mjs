@@ -14,7 +14,7 @@ function buildHarness() {
     focus() { this.focused = true; }
   }));
   const form = {
-    dataset: {},
+    dataset: {}, noValidate: false,
     addEventListener(type, fn) { listener[type] = fn; },
     querySelectorAll(selector) { return selector === '#fields textarea' ? textareas : []; }
   };
@@ -23,7 +23,8 @@ function buildHarness() {
     toolCode: { textContent: 'GP014' },
     output: { textContent: '', classList: { remove() {} } },
     copyBtn: { disabled: false },
-    downloadBtn: { disabled: false }
+    downloadBtn: { disabled: false },
+    confirm: { checked: true, focused: false, focus() { this.focused = true; } }
   };
   const contextCalls = [];
   const context = {
@@ -38,11 +39,12 @@ function buildHarness() {
   };
   vm.createContext(context);
   vm.runInContext(source, context);
-  return { listener, textareas, nodes, contextCalls };
+  return { listener, textareas, nodes, contextCalls, form };
 }
 
 test('browser guard blocks generation, disables copy/download, and highlights missing fields', () => {
   const h = buildHarness();
+  assert.equal(h.form.noValidate, true);
   h.textareas[0].value = 'อบจ.ตัวอย่าง';
   h.textareas[1].value = 'โครงการ NCD';
   const event = { prevented: false, stopped: false, preventDefault() { this.prevented = true; }, stopImmediatePropagation() { this.stopped = true; } };
@@ -64,4 +66,18 @@ test('browser guard allows existing submit handler after priority data is comple
   h.listener.submit(event);
   assert.equal(event.prevented, false);
   assert.equal(event.stopped, false);
+});
+
+test('browser guard requires human confirmation after priority data is complete', () => {
+  const h = buildHarness();
+  ['อบจ.ตัวอย่าง', 'โครงการ NCD', 'ปัญหา NCD', 'ผู้สูงอายุ 100 คน', '1 วัน', '30000'].forEach((value, index) => { h.textareas[index].value = value; });
+  h.nodes.confirm.checked = false;
+  const event = { prevented: false, stopped: false, preventDefault() { this.prevented = true; }, stopImmediatePropagation() { this.stopped = true; } };
+  h.listener.submit(event);
+  assert.equal(event.prevented, true);
+  assert.equal(event.stopped, true);
+  assert.equal(h.nodes.confirm.focused, true);
+  assert.match(h.nodes.output.textContent, /กรุณายืนยัน/);
+  assert.equal(h.nodes.copyBtn.disabled, true);
+  assert.equal(h.nodes.downloadBtn.disabled, true);
 });
