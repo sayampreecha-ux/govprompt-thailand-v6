@@ -15,23 +15,14 @@
     'ผู้บริหาร': Object.freeze(['เรื่อง', 'ข้อเท็จจริง', 'ประเด็นตัดสินใจ', 'ผู้กล่าว', 'ชื่องาน', 'ผู้เข้าร่วม', 'ความสำคัญ'])
   });
 
-  function clone(value) {
-    return JSON.parse(JSON.stringify(value));
-  }
-
+  function clone(value) { return JSON.parse(JSON.stringify(value)); }
   function freeze(value) {
     if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
     Object.values(value).forEach(freeze);
     return Object.freeze(value);
   }
-
-  function nonEmpty(value) {
-    return Boolean(String(value ?? '').trim());
-  }
-
-  function unique(values) {
-    return [...new Set(values.filter(Boolean))];
-  }
+  function nonEmpty(value) { return Boolean(String(value ?? '').trim()); }
+  function unique(values) { return [...new Set(values.filter(Boolean))]; }
 
   function intakePriorityFields(tool) {
     const fields = Array.isArray(tool?.fields) ? tool.fields.map(String) : [];
@@ -65,7 +56,6 @@
     if (!tool || !fields.length) {
       return freeze({ status: INTAKE_STATUSES.READY, ready: true, missingFields: [], questions: [], checkedFields: [] });
     }
-
     const checkedFields = intakePriorityFields(tool);
     const missingFields = checkedFields.filter(field => !nonEmpty(inputValues[field])).slice(0, MAX_INTAKE_QUESTIONS);
     const questions = missingFields.map(field => ({ field, question: questionFor(field) }));
@@ -83,6 +73,7 @@
     const form = document.getElementById('promptForm');
     if (!form || form.dataset.guidedIntakeInstalled === 'true') return false;
     form.dataset.guidedIntakeInstalled = 'true';
+    form.noValidate = true;
 
     form.addEventListener('submit', event => {
       const gpId = String(document.getElementById('toolCode')?.textContent || '').trim();
@@ -100,16 +91,30 @@
         textarea.style.boxShadow = '';
       });
 
-      if (assessment.ready) return;
+      const output = document.getElementById('output');
+      const copyButton = document.getElementById('copyBtn');
+      const downloadButton = document.getElementById('downloadBtn');
+      const confirmBox = document.getElementById('confirm');
+
+      if (assessment.ready) {
+        if (!confirmBox || confirmBox.checked) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (copyButton) copyButton.disabled = true;
+        if (downloadButton) downloadButton.disabled = true;
+        if (output) {
+          output.textContent = 'ข้อมูลสำคัญครบแล้ว\n\nกรุณายืนยันว่าข้อมูลเป็นข้อเท็จจริงและจะตรวจทานก่อนใช้จริง';
+          output.classList.remove('empty-result');
+        }
+        confirmBox.focus?.();
+        return;
+      }
 
       event.preventDefault();
       event.stopImmediatePropagation();
       window.GOVPROMPT_CONTEXT?.setUserInputs(inputValues);
       window.GOVPROMPT_CONTEXT?.setWorkflowState('collecting-input');
 
-      const output = document.getElementById('output');
-      const copyButton = document.getElementById('copyBtn');
-      const downloadButton = document.getElementById('downloadBtn');
       if (copyButton) copyButton.disabled = true;
       if (downloadButton) downloadButton.disabled = true;
 
