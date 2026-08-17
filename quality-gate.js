@@ -68,12 +68,49 @@
     });
   }
 
+  function ensureIntakePanel(form) {
+    if (!document || typeof document.createElement !== 'function') return null;
+    let panel = document.getElementById('guidedIntakePanel');
+    if (panel) return panel;
+    panel = document.createElement('section');
+    panel.id = 'guidedIntakePanel';
+    panel.setAttribute('role', 'status');
+    panel.setAttribute('aria-live', 'polite');
+    panel.hidden = true;
+    panel.style.margin = '0 0 16px';
+    panel.style.padding = '15px 16px';
+    panel.style.border = '1px solid #f0b429';
+    panel.style.borderRadius = '13px';
+    panel.style.background = '#fff8e6';
+    panel.style.color = '#5b4300';
+    panel.style.lineHeight = '1.65';
+    const fields = document.getElementById('fields');
+    if (fields && fields.parentNode === form && typeof form.insertBefore === 'function') form.insertBefore(panel, fields);
+    else if (typeof form.prepend === 'function') form.prepend(panel);
+    return panel;
+  }
+
+  function showIntakePanel(panel, title, questions = [], note = '') {
+    if (!panel) return;
+    const items = questions.map(item => `<li style="margin:5px 0">${String(item.question || item)}</li>`).join('');
+    panel.innerHTML = `<strong style="display:block;font-size:17px;margin-bottom:6px">${title}</strong>${items ? `<ol style="margin:0 0 7px;padding-left:22px">${items}</ol>` : ''}${note ? `<div style="font-size:13px">${note}</div>` : ''}`;
+    panel.hidden = false;
+  }
+
+  function hideIntakePanel(panel) {
+    if (!panel) return;
+    panel.hidden = true;
+    panel.innerHTML = '';
+  }
+
   function installGuidedIntake() {
     if (typeof document === 'undefined') return false;
     const form = document.getElementById('promptForm');
     if (!form || form.dataset.guidedIntakeInstalled === 'true') return false;
     form.dataset.guidedIntakeInstalled = 'true';
     form.noValidate = true;
+    const intakePanel = ensureIntakePanel(form);
+    form.addEventListener?.('reset', () => hideIntakePanel(intakePanel));
 
     form.addEventListener('submit', event => {
       const gpId = String(document.getElementById('toolCode')?.textContent || '').trim();
@@ -97,15 +134,20 @@
       const confirmBox = document.getElementById('confirm');
 
       if (assessment.ready) {
-        if (!confirmBox || confirmBox.checked) return;
+        if (!confirmBox || confirmBox.checked) {
+          hideIntakePanel(intakePanel);
+          return;
+        }
         event.preventDefault();
         event.stopImmediatePropagation();
         if (copyButton) copyButton.disabled = true;
         if (downloadButton) downloadButton.disabled = true;
+        showIntakePanel(intakePanel, '✅ ข้อมูลสำคัญครบแล้ว', [], 'กรุณาติ๊กยืนยันว่าข้อมูลเป็นข้อเท็จจริงและจะตรวจทานก่อนใช้จริง');
         if (output) {
           output.textContent = 'ข้อมูลสำคัญครบแล้ว\n\nกรุณายืนยันว่าข้อมูลเป็นข้อเท็จจริงและจะตรวจทานก่อนใช้จริง';
           output.classList.remove('empty-result');
         }
+        intakePanel?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
         confirmBox.focus?.();
         return;
       }
@@ -118,9 +160,11 @@
       if (copyButton) copyButton.disabled = true;
       if (downloadButton) downloadButton.disabled = true;
 
+      const note = 'กรอกเฉพาะข้อมูลที่ทราบ หากยังไม่ทราบให้พิมพ์ “ไม่ทราบ” — GP จะไม่บังคับให้เดาข้อมูล';
+      showIntakePanel(intakePanel, `💬 GP ขอข้อมูลเพิ่ม ${assessment.missingFields.length} ข้อ ก่อนสร้าง Prompt`, assessment.questions, note);
       const lines = assessment.questions.map((item, index) => `${index + 1}. ${item.question}`);
       if (output) {
-        output.textContent = `ยังขาดข้อมูลสำคัญ ${assessment.missingFields.length} ข้อ\n\n${lines.join('\n')}\n\nกรอกเฉพาะข้อมูลที่ทราบ หากยังไม่ทราบให้พิมพ์ “ไม่ทราบ” แล้ว GP จะระบุจุดที่ต้องตรวจสอบต่อให้`;
+        output.textContent = `ยังขาดข้อมูลสำคัญ ${assessment.missingFields.length} ข้อ\n\n${lines.join('\n')}\n\n${note}`;
         output.classList.remove('empty-result');
       }
 
@@ -133,6 +177,7 @@
         textarea.style.boxShadow = '0 0 0 3px rgba(217,119,6,.12)';
       });
 
+      intakePanel?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
       const firstMissingIndex = (tool.fields || []).findIndex(item => String(item) === assessment.missingFields[0]);
       textareas[firstMissingIndex]?.focus();
     }, true);
