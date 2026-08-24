@@ -45,10 +45,10 @@
   <div class="hero-copy">
     <div class="version">v6.0 Stable · เว็บไซต์เดียว</div>
     <h1>วันนี้คุณต้องการ<br><span>ทำงานอะไร?</span></h1>
-    <p>เลือกงาน กรอกข้อเท็จจริง แล้วรับ Prompt พร้อมใช้ โดยไม่ต้องเขียน Prompt เอง</p>
+    <p>เลือกงาน กรอกข้อเท็จจริง แล้วรับ Prompt พร้อมใช้ — ช่วยอ่าน สรุป ตรวจ และเปรียบเทียบเอกสารราชการได้</p>
     <div class="hero-search">
       <span>🔎</span>
-      <input id="heroSearch" type="search" placeholder="ค้นหา เช่น หนังสือราชการ กฎหมาย TOR โครงการ ข่าว">
+      <input id="heroSearch" type="search" placeholder="ค้นหา เช่น หนังสือราชการ กฎหมาย TOR โครงการ สรุปเอกสาร">
       <button id="heroSearchBtn">ค้นหา</button>
     </div>
     <div class="quick">
@@ -56,7 +56,7 @@
       <button data-q="กฎหมาย">กฎหมาย</button>
       <button data-q="TOR">TOR</button>
       <button data-q="โครงการ">โครงการ</button>
-      <button data-q="ข่าว">ประชาสัมพันธ์</button>
+      <button data-q="สรุปผู้บริหาร">สรุปเอกสาร</button>
     </div>
     <div class="actions">
       <a class="btn primary" href="#tools">เริ่มทดลองใช้ 20 เครื่องมือ</a>
@@ -213,7 +213,7 @@ form.onsubmit=e=>{
  const inputValues=Object.fromEntries(active.fields.map((f,i)=>[f,String(fd.get('f'+i)||'').trim()]));
  sharedContext?.setUserInputs(inputValues); sharedContext?.setWorkflowState('generated');
  const execution=coreEngine?.prepare(sharedContext?.get()); const quality=qualityGate?.evaluate(execution); workflowPilot?.plan(execution,quality); const workflowPlan=workflowExpansion?.plan(execution,quality); window.GOVPROMPT_WORKFLOW_PLAN=workflowPlan||null;
- const info=active.fields.map((f,i)=>`- ${f}: ${String(fd.get('f'+i)||'').trim()||'[ยังไม่ได้ระบุ]'}`).join('\\n');
+ const info=active.fields.map((f,i)=>`- ${f}: ${String(fd.get('f'+i)||'').trim()||'[ยังไม่ได้ระบุ]'}`).join('\n');
  prompt=`บทบาท
 คุณเป็น Government AI Copilot ผู้เชี่ยวชาญงานราชการไทย
 
