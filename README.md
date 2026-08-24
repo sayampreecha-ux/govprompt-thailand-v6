@@ -1,15 +1,11 @@
-# GovPrompt Thailand v6.0.1 — Search Fix
+# GovPrompt Thailand v6.0 Stable
 
-แก้ข้อผิดพลาด JavaScript ที่ทำให้:
-- ปุ่มค้นหาไม่ทำงาน
-- การกรองหมวดไม่ทำงาน
-- การเปิดเครื่องมือไม่ทำงาน
+Government AI Copilot สำหรับงานราชการไทย
 
-## วิธีอัปเดต
-1. แตก ZIP
-2. คัดลอก `index.html` ไปทับไฟล์เดิมในโฟลเดอร์ Repository `govprompt-thailand-v6`
-3. กลับ GitHub Desktop
-4. Summary: `Fix search and tool functions v6.0.1`
-5. Commit to main
-6. Push origin
-7. รอ GitHub Pages 1–3 นาที แล้วกด Ctrl + F5
+## Smart Actions
+GovPrompt มี Smart Actions 10 ภารกิจทำงานอยู่หลังเมนูเดิม เพื่อช่วยเลือกแนวทางวิเคราะห์ให้เหมาะกับงานโดยอัตโนมัติ ได้แก่ การสรุปเอกสาร ค้นข้อมูลเฉพาะจุด สกัดกฎหมาย/ระเบียบ เปรียบเทียบเอกสาร ตรวจความเสี่ยง ตรวจ TOR/BOQ วิเคราะห์สัญญา วิเคราะห์งบประมาณ สรุปรายงานประชุม และจัดทำเอกสารเสนอผู้บริหาร
+
+หลักการสำคัญ: ใช้ข้อมูลและเอกสารของผู้ใช้ก่อน, ค้นเว็บเฉพาะเมื่อจำเป็นโดยยึดแหล่งราชการ/ต้นฉบับ, ไม่แต่งข้อเท็จจริง, ตรวจ PDPA, ตรวจสอบย้อนกลับได้ และให้มนุษย์ตรวจทานก่อนใช้จริง
+
+## Test
+GitHub Actions รัน syntax checks และ Node test suite อัตโนมัติบน main และ v7 branches
