@@ -60,6 +60,24 @@ test('detects regulation extraction and requires official-source verification', 
   assert.ok(plan.missingEvidence.includes('law-or-regulation-source'));
 });
 
+test('infers TOR and budget evidence from current GP009 form inputs', () => {
+  const api = engine();
+  const types = api.inferEvidenceTypes({
+    selectedGpId: 'GP009',
+    userInputs: {
+      'ข้อความ TOR': 'กำหนดคุณลักษณะโคมไฟและเงื่อนไขตรวจรับ',
+      'วงเงิน': '500000'
+    }
+  }, 'tor-boq-review');
+  assert.ok(types.includes('tor-or-specification'));
+  assert.ok(types.includes('budget-or-boq'));
+  const plan = plain(api.planSmartAction('tor-boq-review', {
+    selectedGpId: 'GP009',
+    userInputs: { 'ข้อความ TOR': 'กำหนดสเปกและตรวจรับ', 'วงเงิน': '500000' }
+  }));
+  assert.equal(plan.missingEvidence.length, 0);
+});
+
 test('uses attached-file-first, no invented facts, PDPA and human review safeguards', () => {
   const plan = plain(engine().planSmartAction('contract-review', { evidence: { types: ['contract-document'] } }));
   assert.equal(plan.missingEvidence.length, 0);
@@ -69,10 +87,42 @@ test('uses attached-file-first, no invented facts, PDPA and human review safegua
   assert.equal(plan.requiresHumanReview, true);
 });
 
+test('builds a complete TOR smart-action prompt with official-source and quality gates', () => {
+  const api = engine();
+  const result = api.buildSmartActionPrompt({
+    query: 'ตรวจ TOR และ BOQ',
+    selectedGpId: 'GP009',
+    category: 'พัสดุ',
+    userInputs: { 'ข้อความ TOR': 'กำหนดสเปกพร้อมเงื่อนไขตรวจรับ', 'วงเงิน': '500000' }
+  }, 'BASE PROMPT');
+  assert.match(result, /BASE PROMPT/);
+  assert.match(result, /SMART ACTION — ระบบเลือกอัตโนมัติ/);
+  assert.match(result, /ตรวจ TOR และ BOQ/);
+  assert.match(result, /แหล่งราชการหรือต้นฉบับ/);
+  assert.match(result, /PDF, Word, Excel/);
+  assert.match(result, /pdpa-check/);
+  assert.match(result, /human-review/);
+  assert.match(result, /ความสอดคล้องของปริมาณ\/ราคา/);
+});
+
+test('builds meeting smart-action prompt without forcing web search', () => {
+  const api = engine();
+  const result = api.buildSmartActionPrompt({
+    query: 'สรุปรายงานการประชุมและมติ',
+    selectedGpId: 'GP004',
+    userInputs: { 'บันทึกประชุม': 'ที่ประชุมมีมติให้กองช่างดำเนินการภายใน 30 วัน' }
+  }, 'BASE');
+  assert.match(result, /สรุปรายงานการประชุมและมติ/);
+  assert.match(result, /ไม่ค้นเว็บโดยอัตโนมัติ/);
+  assert.match(result, /ผู้รับผิดชอบ/);
+  assert.match(result, /กำหนดเวลา/);
+});
+
 test('supports explicit action selection but falls back safely when nothing matches', () => {
   const api = engine();
   assert.equal(api.detectSmartAction({ smartActionId: 'budget-analysis' }).actionId, 'budget-analysis');
   assert.deepEqual(plain(api.detectSmartAction({ query: 'สวัสดี' })), {
     actionId: null, label: null, score: 0, confidence: 0, matchedReason: '', fallback: true
   });
+  assert.equal(api.buildSmartActionPrompt({ query: 'สวัสดี' }, 'BASE'), 'BASE');
 });
