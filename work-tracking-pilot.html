@@ -15,7 +15,8 @@
     .brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}.mark{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;font-weight:800}.brand small{display:block;color:var(--muted)}
     .back{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 13px;border-radius:10px;text-decoration:none;font-weight:700}
     main{max-width:1280px;margin:auto;padding:28px 20px 60px}.hero{display:flex;justify-content:space-between;gap:28px;align-items:end;margin-bottom:18px}.hero h1{margin:4px 0;font-size:clamp(28px,4vw,44px);line-height:1.15}.hero p{margin:5px 0;color:var(--muted)}
-    .pilot-note{padding:12px 15px;border:1px solid #f0cf8f;background:#fff8e8;border-radius:12px;color:#72521a;font-size:14px;margin:14px 0 22px}
+    .pilot-note{padding:12px 15px;border:1px solid #f0cf8f;background:#fff8e8;border-radius:12px;color:#72521a;font-size:14px;margin:14px 0 16px}
+    .import-panel{display:grid;grid-template-columns:1.4fr auto auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:16px}.import-copy strong{display:block}.import-copy small{display:block;color:var(--muted);margin-top:3px}.file-label{display:inline-flex;align-items:center;justify-content:center;border:1px solid #bfd1e5;border-radius:10px;padding:10px 13px;background:#eef6ff;color:var(--navy);font-weight:800;cursor:pointer}.file-label input{display:none}.link-btn{border:1px solid var(--line);border-radius:10px;padding:10px 13px;background:#fff;color:var(--navy);font-weight:800;text-decoration:none}.import-status{grid-column:1/-1;font-size:13px;color:var(--muted);min-height:20px}.import-status.ok{color:var(--green)}.import-status.warn{color:var(--yellow)}.import-status.error{color:var(--red)}
     .filters{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:16px}.filters input,.filters select{width:100%;border:1px solid #cbd8e5;border-radius:10px;padding:10px 12px;background:#fff}.filters button{border:0;background:var(--navy);color:#fff;border-radius:10px;padding:10px 15px;font-weight:700}
     .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:16px 0}.kpi{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px;box-shadow:0 7px 22px rgba(16,59,112,.05)}.kpi small{display:block;color:var(--muted);font-weight:600}.kpi strong{display:block;font-size:25px;margin-top:5px}.kpi.red strong{color:var(--red)}.kpi.yellow strong{color:var(--yellow)}.kpi.green strong{color:var(--green)}
     .grid{display:grid;grid-template-columns:1fr 1.8fr;gap:16px;margin-top:16px}.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px;box-shadow:var(--shadow)}.panel h2{font-size:20px;margin:0 0 12px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-head span{font-size:13px;color:var(--muted)}
@@ -23,8 +24,8 @@
     .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:940px;background:#fff}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #e7edf4;vertical-align:top;font-size:13px}th{position:sticky;top:0;background:#f3f7fb;color:#40536b;font-weight:800}td strong{display:block}.muted{color:var(--muted);font-size:12px}.badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}.badge.RED{background:#feeceb;color:var(--red)}.badge.YELLOW{background:#fff4dc;color:#98600c}.badge.GREEN{background:#e9f8f1;color:var(--green)}
     .progress{height:7px;background:#e8eef5;border-radius:999px;overflow:hidden;margin-top:6px}.progress span{display:block;height:100%;background:var(--blue);border-radius:999px}.empty{padding:30px;text-align:center;color:var(--muted)}
     .footer-note{margin-top:16px;color:var(--muted);font-size:12px}
-    @media(max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}}
-    @media(max-width:650px){main{padding:20px 12px 45px}.topbar{padding:10px 12px}.brand small{display:none}.hero{display:block}.hero h1{font-size:30px}.kpis{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr}.filters input{grid-column:auto}.panel{padding:13px}}
+    @media(max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.import-panel{grid-template-columns:1fr 1fr}.import-copy{grid-column:1/-1}}
+    @media(max-width:650px){main{padding:20px 12px 45px}.topbar{padding:10px 12px}.brand small{display:none}.hero{display:block}.hero h1{font-size:30px}.kpis{grid-template-columns:1fr 1fr}.filters,.import-panel{grid-template-columns:1fr}.filters input,.import-copy{grid-column:auto}.panel{padding:13px}.file-label,.link-btn{width:100%}}
   </style>
 </head>
 <body>
@@ -42,7 +43,17 @@
     <div class="muted" id="updatedLabel"></div>
   </section>
 
-  <div class="pilot-note"><strong>ข้อมูลจำลอง:</strong> หน้านี้ใช้ข้อมูลสมมุติเพื่อทดสอบ Workflow และ Dashboard เท่านั้น ยังไม่เชื่อมฐานข้อมูลจริงและไม่ใช่ข้อมูลโครงการของหน่วยงาน</div>
+  <div class="pilot-note"><strong>Pilot:</strong> ค่าเริ่มต้นเป็นข้อมูลสมมุติ หน้านี้ยังไม่เชื่อมฐานข้อมูลจริงและไม่ใช่ข้อมูลโครงการของหน่วยงาน</div>
+
+  <section class="import-panel" aria-label="นำเข้าข้อมูล CSV">
+    <div class="import-copy">
+      <strong>ทดลองกับไฟล์ CSV ของกองช่าง</strong>
+      <small>ไฟล์ถูกอ่านใน Browser เท่านั้น ยังไม่ส่งขึ้นฐานข้อมูลหรือ Server · ใช้ข้อมูลที่ผ่านการคัดกรองในช่วง Pilot</small>
+    </div>
+    <label class="file-label">เลือกไฟล์ CSV<input id="csvFile" type="file" accept=".csv,text/csv"></label>
+    <a class="link-btn" href="samples/work-tracking-construction-template.csv" download>ดาวน์โหลดไฟล์ตัวอย่าง</a>
+    <div id="importStatus" class="import-status">กำลังแสดงข้อมูลจำลอง 7 โครงการ</div>
+  </section>
 
   <section class="filters" aria-label="ตัวกรองโครงการ">
     <input id="searchInput" type="search" placeholder="ค้นหาโครงการ เลขสัญญา ผู้รับจ้าง พื้นที่ หรือผู้รับผิดชอบ">
@@ -88,18 +99,22 @@
       </div>
     </article>
   </section>
-  <p class="footer-note">หลักการ Pilot: tenant isolation · deterministic dashboard · human review · ยังไม่มี persistence / citizen report / GIS / AI auto-decision</p>
+  <p class="footer-note">หลักการ Pilot: tenant isolation · deterministic dashboard · local CSV preview · human review · ยังไม่มี persistence / citizen report / GIS / AI auto-decision</p>
 </main>
 
 <script type="module">
   import { buildOrganizationDashboard, formatBaht } from './src/work-tracking/dashboard.mjs';
+  import { importProjectsFromCsv } from './src/work-tracking/csv-import.mjs';
   import { constructionPilotProjects, PILOT_ORGANIZATION_ID } from './src/work-tracking/pilot-data.mjs';
+
+  let activeProjects = constructionPilotProjects;
 
   const searchInput = document.getElementById('searchInput');
   const riskFilter = document.getElementById('riskFilter');
   const statusFilter = document.getElementById('statusFilter');
   const priorityList = document.getElementById('priorityList');
   const projectRows = document.getElementById('projectRows');
+  const importStatus = document.getElementById('importStatus');
 
   const setText = (id, value) => { document.getElementById(id).textContent = value; };
   const make = (tag, className, text) => {
@@ -115,6 +130,11 @@
     if (Number.isNaN(date.getTime())) return value;
     return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium' }).format(date);
   };
+
+  function setImportStatus(message, kind = '') {
+    importStatus.textContent = message;
+    importStatus.className = `import-status ${kind}`.trim();
+  }
 
   function renderPriority(rows) {
     priorityList.replaceChildren();
@@ -190,7 +210,7 @@
 
   function render() {
     const dashboard = buildOrganizationDashboard(
-      constructionPilotProjects,
+      activeProjects,
       PILOT_ORGANIZATION_ID,
       {
         now: new Date(),
@@ -213,6 +233,36 @@
     renderPriority(priorityRows);
     renderRows(rows);
   }
+
+  document.getElementById('csvFile').addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      setImportStatus('ไฟล์ Pilot รอบนี้รองรับเฉพาะ .csv', 'error');
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const result = importProjectsFromCsv(text, PILOT_ORGANIZATION_ID);
+      if (!result.projects.length) {
+        const detail = result.errors.map((item) => `แถว ${item.row}: ${item.message}`).join(' · ');
+        setImportStatus(`นำเข้าไม่ได้${detail ? ` — ${detail}` : ''}`, 'error');
+        return;
+      }
+
+      activeProjects = result.projects;
+      searchInput.value = '';
+      riskFilter.value = '';
+      statusFilter.value = '';
+      render();
+
+      const errorText = result.errors.length ? ` · ข้าม ${result.errors.length} แถวที่ข้อมูลไม่ครบ` : '';
+      setImportStatus(`อ่าน ${file.name} สำเร็จ ${result.projects.length} โครงการ${errorText} — ข้อมูลยังอยู่เฉพาะใน Browser`, result.errors.length ? 'warn' : 'ok');
+    } catch (error) {
+      setImportStatus(`อ่านไฟล์ไม่สำเร็จ: ${error?.message || 'ไม่ทราบสาเหตุ'}`, 'error');
+    }
+  });
 
   searchInput.addEventListener('input', render);
   riskFilter.addEventListener('change', render);
