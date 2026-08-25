@@ -104,7 +104,7 @@ export function assessProjectRisk(projectInput, now = new Date()) {
     }
   }
 
-  const level = score >= 5
+  const level = score >= 4
     ? RISK_LEVEL.RED
     : score >= 2
       ? RISK_LEVEL.YELLOW
