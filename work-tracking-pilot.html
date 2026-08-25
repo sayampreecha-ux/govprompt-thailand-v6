@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GP Work Tracking Pilot - Dashboard ติดตามโครงการก่อสร้าง">
+  <title>GP Work Tracking Pilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--navy:#103b70;--blue:#176fd1;--ink:#17263d;--muted:#64748b;--line:#dce6f1;--soft:#f5f8fc;--white:#fff;--green:#16865c;--yellow:#b06b00;--red:#b42318;--shadow:0 16px 42px rgba(16,59,112,.11)}
+    *{box-sizing:border-box}body{margin:0;font-family:"Noto Sans Thai",system-ui,sans-serif;background:#f6f8fb;color:var(--ink);line-height:1.55}button,input,select{font:inherit}
+    .topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px max(18px,calc((100vw - 1280px)/2));background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}
+    .brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}.mark{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;font-weight:800}.brand small{display:block;color:var(--muted)}
+    .back{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 13px;border-radius:10px;text-decoration:none;font-weight:700}
+    main{max-width:1280px;margin:auto;padding:28px 20px 60px}.hero{display:flex;justify-content:space-between;gap:28px;align-items:end;margin-bottom:18px}.hero h1{margin:4px 0;font-size:clamp(28px,4vw,44px);line-height:1.15}.hero p{margin:5px 0;color:var(--muted)}
+    .pilot-note{padding:12px 15px;border:1px solid #f0cf8f;background:#fff8e8;border-radius:12px;color:#72521a;font-size:14px;margin:14px 0 22px}
+    .filters{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:16px}.filters input,.filters select{width:100%;border:1px solid #cbd8e5;border-radius:10px;padding:10px 12px;background:#fff}.filters button{border:0;background:var(--navy);color:#fff;border-radius:10px;padding:10px 15px;font-weight:700}
+    .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:16px 0}.kpi{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px;box-shadow:0 7px 22px rgba(16,59,112,.05)}.kpi small{display:block;color:var(--muted);font-weight:600}.kpi strong{display:block;font-size:25px;margin-top:5px}.kpi.red strong{color:var(--red)}.kpi.yellow strong{color:var(--yellow)}.kpi.green strong{color:var(--green)}
+    .grid{display:grid;grid-template-columns:1fr 1.8fr;gap:16px;margin-top:16px}.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px;box-shadow:var(--shadow)}.panel h2{font-size:20px;margin:0 0 12px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-head span{font-size:13px;color:var(--muted)}
+    .priority{display:grid;gap:9px}.priority-item{border:1px solid var(--line);border-left-width:5px;border-radius:12px;padding:12px}.priority-item.RED{border-left-color:var(--red)}.priority-item.YELLOW{border-left-color:#e39a20}.priority-item h3{font-size:15px;margin:0 0 5px}.priority-item p{font-size:13px;color:var(--muted);margin:3px 0}.priority-item strong{font-size:12px}.risk.RED{color:var(--red)}.risk.YELLOW{color:var(--yellow)}.risk.GREEN{color:var(--green)}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:940px;background:#fff}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #e7edf4;vertical-align:top;font-size:13px}th{position:sticky;top:0;background:#f3f7fb;color:#40536b;font-weight:800}td strong{display:block}.muted{color:var(--muted);font-size:12px}.badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}.badge.RED{background:#feeceb;color:var(--red)}.badge.YELLOW{background:#fff4dc;color:#98600c}.badge.GREEN{background:#e9f8f1;color:var(--green)}
+    .progress{height:7px;background:#e8eef5;border-radius:999px;overflow:hidden;margin-top:6px}.progress span{display:block;height:100%;background:var(--blue);border-radius:999px}.empty{padding:30px;text-align:center;color:var(--muted)}
+    .footer-note{margin-top:16px;color:var(--muted);font-size:12px}
+    @media(max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}}
+    @media(max-width:650px){main{padding:20px 12px 45px}.topbar{padding:10px 12px}.brand small{display:none}.hero{display:block}.hero h1{font-size:30px}.kpis{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr}.filters input{grid-column:auto}.panel{padding:13px}}
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="mark">G</span><span><strong>GovPrompt Thailand</strong><small>Work Tracking Pilot</small></span></a>
+  <a class="back" href="index.html">← GP หลัก</a>
+</header>
+<main>
+  <section class="hero">
+    <div>
+      <p>GP WORK & COMMAND CENTER · PILOT</p>
+      <h1>ติดตามโครงการก่อสร้างกองช่าง</h1>
+      <p>มองภาพรวม → เห็นงานเสี่ยง → เจาะสัญญาและความก้าวหน้า โดยไม่เรียก AI ทุกครั้ง</p>
+    </div>
+    <div class="muted" id="updatedLabel"></div>
+  </section>
+
+  <div class="pilot-note"><strong>ข้อมูลจำลอง:</strong> หน้านี้ใช้ข้อมูลสมมุติเพื่อทดสอบ Workflow และ Dashboard เท่านั้น ยังไม่เชื่อมฐานข้อมูลจริงและไม่ใช่ข้อมูลโครงการของหน่วยงาน</div>
+
+  <section class="filters" aria-label="ตัวกรองโครงการ">
+    <input id="searchInput" type="search" placeholder="ค้นหาโครงการ เลขสัญญา ผู้รับจ้าง พื้นที่ หรือผู้รับผิดชอบ">
+    <select id="riskFilter" aria-label="กรองความเสี่ยง">
+      <option value="">ทุกระดับความเสี่ยง</option>
+      <option value="RED">🔴 เร่งด่วน</option>
+      <option value="YELLOW">🟡 ต้องติดตาม</option>
+      <option value="GREEN">🟢 ปกติ</option>
+    </select>
+    <select id="statusFilter" aria-label="กรองสถานะงาน">
+      <option value="">ทุกสถานะงาน</option>
+      <option value="NOT_STARTED">ยังไม่เริ่ม</option>
+      <option value="IN_PROGRESS">กำลังดำเนินการ</option>
+      <option value="WAITING_REVIEW">รอตรวจ/ตรวจรับ</option>
+      <option value="COMPLETED">เสร็จสิ้น</option>
+      <option value="BLOCKED">ติดปัญหา</option>
+    </select>
+    <button id="clearFilters" type="button">ล้างตัวกรอง</button>
+  </section>
+
+  <section class="kpis" aria-label="ตัวชี้วัดภาพรวม">
+    <article class="kpi"><small>โครงการที่แสดง</small><strong id="kpiTotal">0</strong></article>
+    <article class="kpi red"><small>🔴 เร่งด่วน</small><strong id="kpiRed">0</strong></article>
+    <article class="kpi yellow"><small>🟡 ต้องติดตาม</small><strong id="kpiYellow">0</strong></article>
+    <article class="kpi green"><small>✅ เสร็จสิ้น</small><strong id="kpiCompleted">0</strong></article>
+    <article class="kpi"><small>ความก้าวหน้าเฉลี่ย</small><strong id="kpiProgress">0%</strong></article>
+    <article class="kpi"><small>วงเงินรวม</small><strong id="kpiBudget">฿0</strong></article>
+  </section>
+
+  <section class="grid">
+    <article class="panel">
+      <div class="panel-head"><h2>เรื่องที่ควรติดตามก่อน</h2><span>เรียงตามคะแนนความเสี่ยง</span></div>
+      <div id="priorityList" class="priority"></div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head"><h2>รายการโครงการ</h2><span id="rowCount"></span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>โครงการ/สัญญา</th><th>งบประมาณ</th><th>แผน / ผลจริง</th><th>กำหนดเสร็จ</th><th>สถานะ</th><th>ความเสี่ยง</th></tr></thead>
+          <tbody id="projectRows"></tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+  <p class="footer-note">หลักการ Pilot: tenant isolation · deterministic dashboard · human review · ยังไม่มี persistence / citizen report / GIS / AI auto-decision</p>
+</main>
+
+<script type="module">
+  import { buildOrganizationDashboard, formatBaht } from './src/work-tracking/dashboard.mjs';
+  import { constructionPilotProjects, PILOT_ORGANIZATION_ID } from './src/work-tracking/pilot-data.mjs';
+
+  const searchInput = document.getElementById('searchInput');
+  const riskFilter = document.getElementById('riskFilter');
+  const statusFilter = document.getElementById('statusFilter');
+  const priorityList = document.getElementById('priorityList');
+  const projectRows = document.getElementById('projectRows');
+
+  const setText = (id, value) => { document.getElementById(id).textContent = value; };
+  const make = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+
+  const formatDate = (value) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium' }).format(date);
+  };
+
+  function renderPriority(rows) {
+    priorityList.replaceChildren();
+    if (!rows.length) {
+      priorityList.append(make('div', 'empty', 'ไม่พบงานที่ต้องติดตามตามตัวกรองนี้'));
+      return;
+    }
+    rows.slice(0, 6).forEach((row) => {
+      const card = make('article', `priority-item ${row.riskLevel}`);
+      card.append(make('strong', `risk ${row.riskLevel}`, `${row.riskLevel === 'RED' ? '🔴' : '🟡'} ${row.riskLabel} · คะแนน ${row.riskScore}`));
+      card.append(make('h3', '', row.name || row.id));
+      const meta = [row.contractNo, row.location].filter(Boolean).join(' · ');
+      if (meta) card.append(make('p', '', meta));
+      card.append(make('p', '', row.riskReasons.join(' / ')));
+      priorityList.append(card);
+    });
+  }
+
+  function renderRows(rows) {
+    projectRows.replaceChildren();
+    if (!rows.length) {
+      const tr = document.createElement('tr');
+      const td = make('td', 'empty', 'ไม่พบโครงการตามตัวกรอง');
+      td.colSpan = 6;
+      tr.append(td);
+      projectRows.append(tr);
+      return;
+    }
+
+    rows.forEach((row) => {
+      const tr = document.createElement('tr');
+
+      const project = document.createElement('td');
+      project.append(make('strong', '', row.name || row.id));
+      project.append(make('div', 'muted', [row.id, row.contractNo].filter(Boolean).join(' · ')));
+      project.append(make('div', 'muted', [row.contractor, row.location].filter(Boolean).join(' · ')));
+      tr.append(project);
+
+      const budget = document.createElement('td');
+      budget.append(make('strong', '', row.budgetText));
+      budget.append(make('div', 'muted', `เบิก/จ่าย ${row.spentText} (${row.budgetUtilization}%)`));
+      tr.append(budget);
+
+      const progress = document.createElement('td');
+      progress.append(make('strong', '', `${row.plannedProgress}% / ${row.actualProgress}%`));
+      progress.append(make('div', 'muted', `ผลต่าง ${row.progressVariance > 0 ? '+' : ''}${row.progressVariance} จุด`));
+      const bar = make('div', 'progress');
+      const fill = document.createElement('span');
+      fill.style.width = `${Math.max(0, Math.min(100, row.actualProgress))}%`;
+      bar.append(fill);
+      progress.append(bar);
+      tr.append(progress);
+
+      const due = document.createElement('td');
+      due.append(make('strong', '', formatDate(row.dueDate)));
+      const days = row.daysRemaining === null ? '-' : row.daysRemaining < 0 ? `เกิน ${Math.abs(row.daysRemaining)} วัน` : `เหลือ ${row.daysRemaining} วัน`;
+      due.append(make('div', 'muted', days));
+      tr.append(due);
+
+      const status = document.createElement('td');
+      status.append(make('strong', '', row.statusLabel));
+      if (row.problem) status.append(make('div', 'muted', row.problem));
+      tr.append(status);
+
+      const risk = document.createElement('td');
+      risk.append(make('span', `badge ${row.riskLevel}`, `${row.riskLevel === 'RED' ? '🔴' : row.riskLevel === 'YELLOW' ? '🟡' : '🟢'} ${row.riskLabel}`));
+      risk.append(make('div', 'muted', row.riskReasons[0] || ''));
+      tr.append(risk);
+
+      projectRows.append(tr);
+    });
+  }
+
+  function render() {
+    const dashboard = buildOrganizationDashboard(
+      constructionPilotProjects,
+      PILOT_ORGANIZATION_ID,
+      {
+        now: new Date(),
+        filters: {
+          query: searchInput.value,
+          riskLevel: riskFilter.value,
+          status: statusFilter.value,
+        },
+      },
+    );
+
+    const { summary, rows, priorityRows } = dashboard;
+    setText('kpiTotal', summary.counts.total);
+    setText('kpiRed', summary.counts.red);
+    setText('kpiYellow', summary.counts.yellow);
+    setText('kpiCompleted', summary.counts.completed);
+    setText('kpiProgress', `${summary.averageProgress}%`);
+    setText('kpiBudget', formatBaht(summary.finance.totalBudget));
+    setText('rowCount', `${rows.length} รายการ`);
+    renderPriority(priorityRows);
+    renderRows(rows);
+  }
+
+  searchInput.addEventListener('input', render);
+  riskFilter.addEventListener('change', render);
+  statusFilter.addEventListener('change', render);
+  document.getElementById('clearFilters').addEventListener('click', () => {
+    searchInput.value = '';
+    riskFilter.value = '';
+    statusFilter.value = '';
+    render();
+  });
+
+  setText('updatedLabel', `ประเมิน ณ ${new Intl.DateTimeFormat('th-TH', { dateStyle: 'long' }).format(new Date())}`);
+  render();
+</script>
+</body>
+</html>
