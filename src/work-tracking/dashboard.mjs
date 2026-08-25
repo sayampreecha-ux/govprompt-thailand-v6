@@ -50,6 +50,9 @@ export function filterProjects(projects = [], filters = {}, now = new Date()) {
       project.name,
       project.department,
       project.owner,
+      project.location,
+      project.contractNo,
+      project.contractor,
       project.problem,
     ].join(' ').toLowerCase();
 
@@ -66,9 +69,13 @@ export function buildDashboardRows(projects = [], now = new Date()) {
     const risk = assessProjectRisk(project, now);
     return {
       id: project.id,
+      projectType: project.projectType,
       name: project.name,
       department: project.department,
       owner: project.owner,
+      location: project.location,
+      contractNo: project.contractNo,
+      contractor: project.contractor,
       budget: project.budget,
       spent: project.spent,
       budgetText: formatBaht(project.budget),
@@ -84,6 +91,7 @@ export function buildDashboardRows(projects = [], now = new Date()) {
       riskScore: risk.score || 0,
       riskReasons: risk.reasons || [],
       daysRemaining: risk.metrics?.daysRemaining ?? null,
+      budgetUtilization: risk.metrics?.budgetUtilization ?? 0,
       problem: project.problem,
     };
   });
