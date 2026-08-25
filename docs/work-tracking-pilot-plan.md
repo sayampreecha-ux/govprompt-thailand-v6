@@ -1,6 +1,6 @@
 # GP Work Tracking Pilot
 
-สถานะ: Sprint 1 กำลังพัฒนา — Core + Dashboard Prototype + CSV Import Core ผ่าน CI
+สถานะ: Sprint 1 เสร็จระดับ Prototype — Core + Dashboard + CSV Preview ผ่าน CI
 
 ## เป้าหมาย
 สร้างแกนติดตามงานสำหรับการทดลองใช้ภายในองค์กรก่อน โดยไม่รอ Tavily และไม่กระทบเมนู AI ทั่วไปเดิม
@@ -19,17 +19,19 @@
 - [x] Risk scoring เขียว/เหลือง/แดง โดยใช้ progress variance, deadline, blocked status และ stale update
 - [x] Organization scoping: ถ้าไม่มี `organizationId` จะไม่คืนข้อมูล เพื่อป้องกันการเห็นข้อมูลข้ามองค์กรโดยพลาด
 - [x] Dashboard view model + search/filter ตามสถานะและความเสี่ยง
-- [x] หน้า `work-tracking-pilot.html` แบบ responsive โดยใช้ข้อมูลจำลอง ไม่เชื่อมฐานข้อมูลจริง
+- [x] หน้า `work-tracking-pilot.html` แบบ responsive โดยไม่เพิ่มเมนูบนหน้า GP หลัก
 - [x] Priority queue สำหรับงานที่ควรติดตามก่อน
-- [x] CSV import core ทำงานในฝั่ง client และบังคับ `organizationId` จากระบบ ไม่เชื่อค่าจากไฟล์ผู้ใช้
-- [x] Unit tests ครอบคลุม risk, tenant isolation, dashboard summary/filter และ CSV import
+- [x] CSV import core ทำงานฝั่ง client และบังคับ `organizationId` จากระบบ ไม่เชื่อค่าจากไฟล์ผู้ใช้
+- [x] CSV Preview เชื่อมเข้าหน้า Pilot: เลือกไฟล์ → อ่านใน Browser → สร้าง Dashboard โดยยังไม่ส่งข้อมูลขึ้น Server
+- [x] ไฟล์ CSV ตัวอย่างสำหรับให้เจ้าหน้าที่จัดรูปแบบข้อมูล
+- [x] Unit/static tests ครอบคลุม risk, tenant isolation, dashboard/filter, CSV import และขอบเขตหน้า Pilot
 - [x] GitHub Actions ผ่านบน branch pilot
 
-## งานถัดไป
-1. ต่อ CSV import เข้าหน้า Pilot ให้เจ้าหน้าที่เลือกไฟล์และ Preview ก่อนยืนยัน
-2. เพิ่ม validation/data quality เช่น วันที่ผิดรูปแบบ ตัวเลขผิดปกติ และข้อมูลซ้ำ
-3. สร้าง schema สำหรับ Project / Task / Audit Event / User Role
-4. เลือก backend/database สำหรับ persistence จริงตาม Issue #20
+## งานถัดไป — Sprint 2
+1. เพิ่ม Data Quality Gate ก่อนรับข้อมูล: วันที่ผิดรูปแบบ ตัวเลขผิดปกติ ร้อยละเกินช่วง ข้อมูลซ้ำ และรายการที่ขาดข้อมูลสำคัญ
+2. ทำ Import Preview แบบแสดงแถวผ่าน/ไม่ผ่านก่อนยืนยัน
+3. สร้าง schema สำหรับ Organization / User / Role / Project / Task / Audit Event
+4. ประเมินและเลือก backend/database สำหรับ persistence จริงตาม Issue #20
 5. เพิ่ม Login + Role และบังคับ tenant isolation ที่ backend/database
 6. ทดลองข้อมูลจริงแบบจำกัดในกองช่าง ก่อนขยาย รพ.สต. / Solar / ถนน
 
