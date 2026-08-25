@@ -30,8 +30,12 @@ export function normalizeProject(input = {}) {
     id: String(input.id || '').trim(),
     organizationId: String(input.organizationId || '').trim(),
     department: String(input.department || '').trim(),
+    projectType: String(input.projectType || '').trim(),
     name: String(input.name || '').trim(),
     owner: String(input.owner || '').trim(),
+    location: String(input.location || '').trim(),
+    contractNo: String(input.contractNo || '').trim(),
+    contractor: String(input.contractor || '').trim(),
     budget: Math.max(0, Number(input.budget) || 0),
     spent: Math.max(0, Number(input.spent) || 0),
     plannedProgress: clampPercent(input.plannedProgress),
@@ -48,14 +52,23 @@ export function normalizeProject(input = {}) {
 
 export function assessProjectRisk(projectInput, now = new Date()) {
   const project = normalizeProject(projectInput);
+  const variance = project.actualProgress - project.plannedProgress;
+  const daysRemaining = project.dueDate ? daysBetween(now, project.dueDate) : null;
+  const budgetUtilization = project.budget > 0
+    ? Math.round((project.spent / project.budget) * 1000) / 10
+    : 0;
+
   if (project.status === WORK_STATUS.COMPLETED) {
-    return { level: RISK_LEVEL.GREEN, reasons: ['งานเสร็จสิ้นแล้ว'] };
+    return {
+      level: RISK_LEVEL.GREEN,
+      score: 0,
+      reasons: ['งานเสร็จสิ้นแล้ว'],
+      metrics: { variance, daysRemaining, budgetUtilization },
+    };
   }
 
   const reasons = [];
   let score = 0;
-  const variance = project.actualProgress - project.plannedProgress;
-  const daysRemaining = project.dueDate ? daysBetween(now, project.dueDate) : null;
 
   if (project.status === WORK_STATUS.BLOCKED) {
     score += 4;
@@ -104,9 +117,7 @@ export function assessProjectRisk(projectInput, now = new Date()) {
     metrics: {
       variance,
       daysRemaining,
-      budgetUtilization: project.budget > 0
-        ? Math.round((project.spent / project.budget) * 1000) / 10
-        : 0,
+      budgetUtilization,
     },
   };
 }
