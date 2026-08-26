@@ -8,7 +8,7 @@
   <title>GP Work Tracking · นำเข้า CSV จริง</title>
   <style>
     :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--line:#dce6f1;--muted:#64748b;--red:#b42318;--yellow:#98600c;--green:#16865c}
-    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1160px)/2));display:flex;justify-content:space-between;align-items:center;gap:14px}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1160px;margin:auto;padding:28px 16px 60px}h1{font-size:clamp(28px,4vw,44px);margin:0 0 7px}.lead,.muted{color:var(--muted)}.lead{margin-top:0}.status,.notice,.gate{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;margin:14px 0}.status.ok,.gate.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error,.gate.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.notice{border-color:#f0cf8f;background:#fff8e8}.gate.warn{border-left:5px solid #e39a20}.upload{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.field{display:block;font-weight:700}.field input,.field select{display:block;width:100%;margin-top:6px;border:1px solid #c8d5e3;border-radius:10px;padding:10px 11px;background:#fff;font:inherit}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}.card small{display:block;color:var(--muted)}.card strong{font-size:26px}.card.error strong{color:var(--red)}.card.warning strong{color:var(--yellow)}.card.valid strong{color:var(--green)}.table{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}table{width:100%;border-collapse:collapse;min-width:840px}th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e8eef5;font-size:13px;vertical-align:top}th{background:#eef4fa}.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}.VALID{background:#e9f8f1;color:var(--green)}.WARNING{background:#fff4dc;color:var(--yellow)}.ERROR{background:#feeceb;color:var(--red)}ul{margin:5px 0;padding-left:18px}.empty{text-align:center;padding:34px;color:var(--muted)}.confirm{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;margin-top:14px;display:grid;gap:9px}.check{display:flex;gap:9px;align-items:flex-start}.check input{margin-top:4px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy);text-decoration:none}.btn:disabled{opacity:.45;cursor:not-allowed}.hidden{display:none!important}.foot{font-size:12px;color:var(--muted);margin-top:14px}@media(max-width:700px){.cards,.upload{grid-template-columns:1fr 1fr}.top{align-items:flex-start;flex-direction:column}}@media(max-width:520px){.cards,.upload{grid-template-columns:1fr}}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1160px)/2));display:flex;justify-content:space-between;align-items:center;gap:14px}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1160px;margin:auto;padding:28px 16px 60px}h1{font-size:clamp(28px,4vw,44px);margin:0 0 7px}.lead,.muted{color:var(--muted)}.lead{margin-top:0}.status,.notice,.gate{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;margin:14px 0}.status.ok,.gate.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error,.gate.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.notice{border-color:#f0cf8f;background:#fff8e8}.notice.error{border-color:#f3c5bf;background:#fff0ee;color:var(--red)}.gate.warn{border-left:5px solid #e39a20}.upload{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.field{display:block;font-weight:700}.field input,.field select{display:block;width:100%;margin-top:6px;border:1px solid #c8d5e3;border-radius:10px;padding:10px 11px;background:#fff;font:inherit}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}.card small{display:block;color:var(--muted)}.card strong{font-size:26px}.card.error strong{color:var(--red)}.card.warning strong{color:var(--yellow)}.card.valid strong{color:var(--green)}.table{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}table{width:100%;border-collapse:collapse;min-width:840px}th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e8eef5;font-size:13px;vertical-align:top}th{background:#eef4fa}.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}.VALID{background:#e9f8f1;color:var(--green)}.WARNING{background:#fff4dc;color:var(--yellow)}.ERROR{background:#feeceb;color:var(--red)}ul{margin:5px 0;padding-left:18px}.empty{text-align:center;padding:34px;color:var(--muted)}.confirm{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;margin-top:14px;display:grid;gap:9px}.check{display:flex;gap:9px;align-items:flex-start}.check input{margin-top:4px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy);text-decoration:none}.btn:disabled{opacity:.45;cursor:not-allowed}.hidden{display:none!important}.foot{font-size:12px;color:var(--muted);margin-top:14px}@media(max-width:700px){.cards,.upload{grid-template-columns:1fr 1fr}.top{align-items:flex-start;flex-direction:column}}@media(max-width:520px){.cards,.upload{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -34,6 +34,7 @@
     </section>
 
     <div id="gate" class="gate">ยังไม่ได้เลือกไฟล์</div>
+    <div id="departmentNotice" class="notice error hidden"><strong>กอง/หน่วยไม่ตรง:</strong> <span id="departmentNoticeText"></span> กรุณาเลือกกองปลายทางให้ตรงกับ CSV หรือแก้ไฟล์ก่อนนำเข้า</div>
     <div id="ownerNotice" class="notice hidden"><strong>ผู้รับผิดชอบจาก CSV:</strong> <span id="ownerNoticeText"></span> ระบบจะไม่เดาชื่อคนเพื่อผูกบัญชีอัตโนมัติ หลังนำเข้าให้ใช้หน้า “มอบหมายงาน” เพื่อเลือกสมาชิกจาก Directory ที่ถูกต้อง</div>
     <div class="table">
       <table>
@@ -48,7 +49,7 @@
       <div class="actions"><button id="commitBtn" class="btn" type="button" disabled>ยืนยันบันทึกจริง</button><a class="btn secondary" href="work-tracking-import-preview.html">เปิดหน้า Preview local-only</a><a class="btn secondary" href="work-assign-live-pilot.html">ไปหน้ามอบหมายงาน</a></div>
       <div id="commitStatus" class="status">ยังไม่มีการบันทึก</div>
     </section>
-    <p class="foot">ข้อจำกัด Pilot: ไม่เกิน 500 โครงการต่อ batch · ERROR ห้าม commit · WARNING/ชื่อผู้รับผิดชอบที่ยังไม่ผูกบัญชีต้องยืนยันรับทราบ · Server ตรวจ role, tenant, department, duplicate code, ตัวเลข, วันที่ และสถานะอีกครั้งก่อนเขียนฐาน</p>
+    <p class="foot">ข้อจำกัด Pilot: ไม่เกิน 500 โครงการต่อ batch · ERROR/กองไม่ตรงห้าม commit · WARNING/ชื่อผู้รับผิดชอบที่ยังไม่ผูกบัญชีต้องยืนยันรับทราบ · Server ตรวจ role, tenant, department, duplicate code, ตัวเลข, วันที่ และสถานะอีกครั้งก่อนเขียนฐาน</p>
   </section>
 </main>
 
@@ -56,7 +57,11 @@
   import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
   import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
   import { buildProjectImportPreview } from './src/work-tracking/import-preview.mjs';
-  import { buildCommitProjectImportRpc, countUnresolvedImportOwners } from './src/work-tracking/import-rpc-adapter.mjs';
+  import {
+    buildCommitProjectImportRpc,
+    countUnresolvedImportOwners,
+    findImportDepartmentMismatches,
+  } from './src/work-tracking/import-rpc-adapter.mjs';
 
   const $ = (id) => document.getElementById(id);
   const MAX_ROWS = 500;
@@ -69,12 +74,14 @@
   const requestId = () => globalThis.crypto?.randomUUID?.() || `req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const setText = (id, value) => { $(id).textContent = String(value); };
   const setStatus = (id, message, kind = '') => { const node=$(id); node.textContent=message; node.className=`status ${kind}`.trim(); };
+  const selectedDepartmentName = () => $('departmentSelect').selectedOptions?.[0]?.textContent?.trim() || '';
   const unresolvedOwnerCount = () => countUnresolvedImportOwners(preview || {});
+  const departmentMismatches = () => findImportDepartmentMismatches(preview || {}, selectedDepartmentName());
   const needsAcknowledgement = () => Boolean(preview?.requiresWarningConfirmation || unresolvedOwnerCount() > 0);
 
   function commitAllowed() {
     if (committed || !preview || !preview.canCommit || preview.summary.totalRows > MAX_ROWS) return false;
-    if (!$('departmentSelect').value || !$('confirmCommit').checked) return false;
+    if (!$('departmentSelect').value || departmentMismatches().length > 0 || !$('confirmCommit').checked) return false;
     if (needsAcknowledgement() && !$('confirmWarnings').checked) return false;
     return true;
   }
@@ -85,6 +92,7 @@
     preview = nextPreview;
     committed = false;
     const ownerCount=unresolvedOwnerCount();
+    const mismatches=departmentMismatches();
     setText('total', preview.summary.totalRows);
     setText('valid', preview.summary.valid);
     setText('warnings', preview.summary.warnings);
@@ -93,7 +101,13 @@
     $('confirmWarnings').checked = false;
     $('warningConfirmRow').classList.toggle('hidden', !needsAcknowledgement());
     $('ownerNotice').classList.toggle('hidden', ownerCount===0);
+    $('departmentNotice').classList.toggle('hidden', mismatches.length===0);
     if(ownerCount>0) $('ownerNoticeText').textContent=`พบ ${ownerCount} โครงการที่มีชื่อผู้รับผิดชอบเป็นข้อความ แต่ยังไม่มี user_id`;
+    if(mismatches.length>0) {
+      const sample=mismatches.slice(0,3).map((item)=>`แถว ${item.row}: ${item.sourceDepartment}`).join(' · ');
+      const more=mismatches.length>3?` · และอีก ${mismatches.length-3} แถว`:'';
+      $('departmentNoticeText').textContent=`เลือก “${selectedDepartmentName()}” แต่พบ ${sample}${more}`;
+    }
     $('warningConfirmText').textContent=ownerCount>0
       ? `ฉันรับทราบ WARNING และรับทราบว่าผู้รับผิดชอบจาก CSV จำนวน ${ownerCount} โครงการยังไม่ถูกผูกบัญชีอัตโนมัติ`
       : 'ฉันตรวจข้อสังเกต WARNING แล้ว และยืนยันให้นำเข้าตามข้อมูลนี้';
@@ -104,6 +118,9 @@
     } else if (preview.summary.errors > 0) {
       $('gate').className='gate error';
       $('gate').textContent=`⛔ ยังนำเข้าไม่ได้: พบ ${preview.summary.errors} แถวที่ต้องแก้ก่อน`;
+    } else if (mismatches.length > 0) {
+      $('gate').className='gate error';
+      $('gate').textContent=`⛔ ยังนำเข้าไม่ได้: พบ ${mismatches.length} แถวที่ระบุกองไม่ตรงกับ “${selectedDepartmentName()}”`;
     } else if (preview.summary.warnings > 0 || ownerCount>0) {
       $('gate').className='gate warn';
       $('gate').textContent=`⚠️ พร้อมนำเข้าแบบต้องรับทราบ: WARNING ${preview.summary.warnings} แถว · ผู้รับผิดชอบยังไม่ผูกบัญชี ${ownerCount} โครงการ`;
@@ -183,6 +200,7 @@
         preview,
         organizationId:actor.organizationId,
         departmentId:$('departmentSelect').value,
+        departmentName:selectedDepartmentName(),
         filename:selectedFile?.name || 'import.csv',
         confirmWarnings:$('confirmWarnings').checked,
         requestId:requestId(),
@@ -205,7 +223,7 @@
   $('commitBtn').addEventListener('click',commitImport);
   $('confirmCommit').addEventListener('change',syncCommitButton);
   $('confirmWarnings').addEventListener('change',syncCommitButton);
-  $('departmentSelect').addEventListener('change',syncCommitButton);
+  $('departmentSelect').addEventListener('change',()=>{if(preview)renderPreview(preview);else syncCommitButton();});
 
   loadActorAndDepartments().catch((error)=>setStatus('authStatus',`เชื่อมระบบไม่สำเร็จ: ${error.message}`,'error'));
 </script>
