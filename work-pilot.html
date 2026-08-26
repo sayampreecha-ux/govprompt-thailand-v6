@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>GovPrompt Work Tracking Pilot</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--yellow:#9a6700}*{box-sizing:border-box}body{margin:0}.top{padding:14px max(16px,calc((100vw - 1120px)/2));background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}.top a{color:var(--navy);text-decoration:none;font-weight:800}.wrap{max-width:1120px;margin:auto;padding:28px 16px 70px}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p,.muted{color:var(--muted)}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.field{display:block;margin:10px 0;font-weight:700}.field input,.field select,.field textarea{width:100%;padding:10px 11px;border:1px solid #c8d5e3;border-radius:9px;margin-top:5px;background:#fff}.field textarea{min-height:84px;resize:vertical}.btn{border:0;border-radius:10px;padding:10px 13px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy)}.status{padding:11px 12px;border-radius:10px;background:#f1f5f9;color:#465970;margin-top:10px}.status.ok{background:#e9f8f1;color:var(--green)}.status.error{background:#feeceb;color:var(--red)}.hidden{display:none!important}.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:14px}.kpi{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px}.kpi small{display:block;color:var(--muted)}.kpi strong{font-size:24px;display:block;margin-top:4px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:12px}table{border-collapse:collapse;width:100%;min-width:820px}th,td{padding:10px;border-bottom:1px solid #e8eef5;text-align:left;font-size:13px;vertical-align:top}th{background:#f4f7fb}.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800}.GREEN{background:#e9f8f1;color:var(--green)}.YELLOW{background:#fff4dc;color:var(--yellow)}.RED{background:#feeceb;color:var(--red)}.timeline{display:grid;gap:8px}.event{border-left:4px solid var(--blue);padding:8px 10px;background:#f8fbff;border-radius:8px}.row-actions{display:flex;gap:6px;flex-wrap:wrap}@media(max-width:800px){.grid,.grid3{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Work Tracking Pilot</strong><a href="index.html">← GP หลัก</a></header>
+<main class="wrap">
+<section class="hero"><div class="muted">INTERNAL PILOT · AUTH + RLS + RPC</div><h1>Work Tracking Pilot</h1><p>หน้า Pilot ซ่อนจากเมนูหลัก ใช้ฐาน Supabase จริง และไม่ใช้ Service Role ใน Browser</p></section>
+
+<section id="authCard" class="card">
+  <div class="grid">
+    <div>
+      <h2>เข้าสู่ระบบ</h2>
+      <label class="field">อีเมล<input id="loginEmail" type="email" autocomplete="email" value="sayampreecha@gmail.com"></label>
+      <label class="field">รหัสผ่าน<input id="loginPassword" type="password" autocomplete="current-password"></label>
+      <button id="loginBtn" class="btn">เข้าสู่ระบบ</button>
+    </div>
+    <div>
+      <h2>สร้างบัญชี Pilot</h2>
+      <label class="field">อีเมล<input id="signupEmail" type="email" autocomplete="email" value="sayampreecha@gmail.com"></label>
+      <label class="field">รหัสผ่านใหม่<input id="signupPassword" type="password" minlength="8" autocomplete="new-password"></label>
+      <button id="signupBtn" class="btn">สร้างบัญชี</button>
+      <p class="muted">ถ้าระบบกำหนดให้ยืนยันอีเมล ให้กดยืนยันใน Gmail แล้วกลับมา Login</p>
+    </div>
+  </div>
+  <div id="authStatus" class="status">ยังไม่ได้เข้าสู่ระบบ</div>
+</section>
+
+<section id="app" class="hidden">
+  <section class="card">
+    <div class="row-actions"><button id="reloadBtn" class="btn">โหลดข้อมูลใหม่</button><button id="logoutBtn" class="btn secondary">ออกจากระบบ</button></div>
+    <div id="whoami" class="status"></div>
+  </section>
+
+  <section class="kpis">
+    <article class="kpi"><small>โครงการทั้งหมด</small><strong id="kTotal">0</strong></article>
+    <article class="kpi"><small>🔴 เร่งด่วน</small><strong id="kRed">0</strong></article>
+    <article class="kpi"><small>🟡 ติดตาม</small><strong id="kYellow">0</strong></article>
+    <article class="kpi"><small>เสร็จสิ้น</small><strong id="kDone">0</strong></article>
+    <article class="kpi"><small>วงเงินรวม</small><strong id="kBudget">฿0</strong></article>
+  </section>
+
+  <section class="card">
+    <h2>เพิ่มโครงการ</h2>
+    <div class="grid3">
+      <label class="field">กอง/หน่วย<select id="department"></select></label>
+      <label class="field">รหัสโครงการ<input id="projectCode" placeholder="ENG-2569-001"></label>
+      <label class="field">ชื่อโครงการ<input id="projectName"></label>
+      <label class="field">ประเภท<input id="projectType" value="CONSTRUCTION"></label>
+      <label class="field">วงเงิน<input id="budget" type="number" min="0" value="0"></label>
+      <label class="field">แผนความก้าวหน้า %<input id="planned" type="number" min="0" max="100" value="0"></label>
+      <label class="field">วันเริ่ม<input id="startDate" type="date"></label>
+      <label class="field">กำหนดเสร็จ<input id="dueDate" type="date"></label>
+      <label class="field">เลขสัญญา<input id="contractNo"></label>
+    </div>
+    <button id="createBtn" class="btn">บันทึกโครงการผ่าน RPC</button>
+    <div id="createStatus" class="status">รอข้อมูล</div>
+  </section>
+
+  <section class="card">
+    <h2>โครงการในฐานข้อมูล</h2>
+    <div class="table-wrap"><table><thead><tr><th>โครงการ</th><th>งบ</th><th>แผน/จริง</th><th>กำหนด</th><th>สถานะ</th><th>ความเสี่ยง</th><th>อัปเดต</th></tr></thead><tbody id="projectRows"></tbody></table></div>
+  </section>
+
+  <section class="card">
+    <h2>Audit Timeline</h2>
+    <div id="audit" class="timeline"></div>
+  </section>
+</section>
+</main>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const supabase=createClient('https://bswokqqhfuvmsomzulyl.supabase.co','sb_publishable_ZRVlOTC0jJIaFxPJrqYpUA_ZgrTnHOZ',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=id=>document.getElementById(id);let actor=null;let projectCache=new Map();
+const setStatus=(id,msg,kind='')=>{const n=$(id);n.textContent=msg;n.className=`status ${kind}`.trim()};
+const escDate=v=>v?new Intl.DateTimeFormat('th-TH',{dateStyle:'medium'}).format(new Date(v)):'-';
+const baht=v=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:0}).format(Number(v||0));
+function risk(p){if(p.status==='COMPLETED')return{level:'GREEN',reason:'เสร็จสิ้น'};let s=0,r=[];const variance=Number(p.actual_progress)-Number(p.planned_progress);if(p.status==='BLOCKED'){s+=4;r.push('ติดปัญหา')}if(variance<=-20){s+=4;r.push(`ต่ำกว่าแผน ${Math.abs(variance)} จุด`)}else if(variance<=-10){s+=2;r.push(`ต่ำกว่าแผน ${Math.abs(variance)} จุด`)}if(p.due_date){const d=Math.ceil((new Date(p.due_date)-new Date())/86400000);if(d<0){s+=5;r.push(`เกินกำหนด ${Math.abs(d)} วัน`)}else if(d<=14&&Number(p.actual_progress)<80){s+=3;r.push(`เหลือ ${d} วัน`)}}return{level:s>=4?'RED':s>=2?'YELLOW':'GREEN',reason:r.join(' · ')||'ปกติ'};}
+async function context(){const {data:{session}}=await supabase.auth.getSession();if(!session?.user?.id)return null;let {data:m,error}=await supabase.from('organization_memberships').select('organization_id,department_id,role,active').eq('user_id',session.user.id).eq('active',true);if(error)throw error;if(!m?.length){const {data:claim,error:ce}=await supabase.rpc('claim_work_pilot_invite');if(ce)throw ce;if(claim?.ok){({data:m,error}=await supabase.from('organization_memberships').select('organization_id,department_id,role,active').eq('user_id',session.user.id).eq('active',true));if(error)throw error;}}if(!m?.length)return{session,membership:null};return{session,membership:m[0]};}
+async function boot(){try{const c=await context();if(!c?.session){$('app').classList.add('hidden');$('authCard').classList.remove('hidden');setStatus('authStatus','ยังไม่ได้เข้าสู่ระบบ');return}if(!c.membership){$('app').classList.add('hidden');$('authCard').classList.remove('hidden');setStatus('authStatus','เข้าสู่ระบบแล้ว แต่ยังไม่มีสิทธิองค์กร/คำเชิญไม่ตรงกับอีเมล','error');return}actor={userId:c.session.user.id,organizationId:c.membership.organization_id,departmentId:c.membership.department_id,role:c.membership.role};$('authCard').classList.add('hidden');$('app').classList.remove('hidden');setStatus('whoami',`พร้อมใช้งาน · ${actor.role} · องค์กร ${actor.organizationId}`,'ok');await Promise.all([loadDepartments(),loadProjects(),loadAudit()]);}catch(e){setStatus('authStatus',`เชื่อมระบบไม่สำเร็จ: ${e.message||'unknown error'}`,'error')}}
+async function loadDepartments(){const {data,error}=await supabase.from('departments').select('id,name').eq('organization_id',actor.organizationId).eq('active',true).order('name');if(error)throw error;const s=$('department');s.replaceChildren();for(const d of data||[]){const o=document.createElement('option');o.value=d.id;o.textContent=d.name;s.appendChild(o)}if(actor.departmentId)s.value=actor.departmentId;}
+async function loadProjects(){let q=supabase.from('projects').select('id,organization_id,department_id,project_code,name,contract_no,budget_amount,planned_progress,actual_progress,due_date,status,problem_summary,updated_at').eq('organization_id',actor.organizationId).order('due_date',{ascending:true,nullsFirst:false});if(['DIRECTOR','OFFICER'].includes(actor.role)&&actor.departmentId)q=q.eq('department_id',actor.departmentId);const {data,error}=await q;if(error)throw error;projectCache=new Map((data||[]).map(p=>[p.id,p]));renderProjects(data||[]);}
+function renderProjects(rows){let red=0,yellow=0,done=0,budget=0;const body=$('projectRows');body.replaceChildren();for(const p of rows){const rk=risk(p);if(rk.level==='RED')red++;if(rk.level==='YELLOW')yellow++;if(p.status==='COMPLETED')done++;budget+=Number(p.budget_amount||0);const tr=document.createElement('tr');const cells=[`${p.name}\n${p.project_code||''}${p.contract_no?' · '+p.contract_no:''}`,baht(p.budget_amount),`${p.planned_progress}% / ${p.actual_progress}%`,escDate(p.due_date),p.status,rk.level];for(let i=0;i<6;i++){const td=document.createElement('td');if(i===5){const b=document.createElement('span');b.className=`badge ${rk.level}`;b.textContent=rk.level;td.appendChild(b);const small=document.createElement('div');small.className='muted';small.textContent=rk.reason;td.appendChild(small)}else td.textContent=cells[i];tr.appendChild(td)}const action=document.createElement('td');const pct=document.createElement('input');pct.type='number';pct.min='0';pct.max='100';pct.value=p.actual_progress;pct.style.width='72px';const status=document.createElement('select');for(const v of ['NOT_STARTED','IN_PROGRESS','WAITING_REVIEW','COMPLETED','BLOCKED']){const o=document.createElement('option');o.value=v;o.textContent=v;if(v===p.status)o.selected=true;status.appendChild(o)}const btn=document.createElement('button');btn.className='btn';btn.textContent='บันทึก';btn.onclick=()=>updateProject(p.id,pct.value,status.value);action.append(pct,status,btn);tr.appendChild(action);body.appendChild(tr)}$('kTotal').textContent=rows.length;$('kRed').textContent=red;$('kYellow').textContent=yellow;$('kDone').textContent=done;$('kBudget').textContent=baht(budget);}
+async function updateProject(id,pct,status){const p=projectCache.get(id);if(!p)return;const {error}=await supabase.rpc('update_project_progress',{p_project_id:id,p_actual_progress:Number(pct),p_status:status,p_problem_summary:p.problem_summary,p_expected_updated_at:p.updated_at,p_request_id:crypto.randomUUID()});if(error){alert(`อัปเดตไม่สำเร็จ: ${error.message}`);return}await Promise.all([loadProjects(),loadAudit()]);}
+async function loadAudit(){let q=supabase.from('audit_events').select('action,entity_type,entity_id,occurred_at,metadata_json').eq('organization_id',actor.organizationId).order('occurred_at',{ascending:false}).limit(30);if(actor.role==='DIRECTOR'&&actor.departmentId)q=q.eq('department_id',actor.departmentId);const {data,error}=await q;if(error){$('audit').textContent='สิทธินี้ไม่สามารถอ่าน Audit ได้';return}const box=$('audit');box.replaceChildren();if(!(data||[]).length){box.textContent='ยังไม่มี Audit Event';return}for(const e of data){const d=document.createElement('div');d.className='event';const title=document.createElement('strong');title.textContent=e.action;const meta=document.createElement('div');meta.className='muted';meta.textContent=`${escDate(e.occurred_at)} · ${e.entity_type} · ${e.entity_id}`;d.append(title,meta);box.appendChild(d)}}
+$('loginBtn').onclick=async()=>{setStatus('authStatus','กำลังเข้าสู่ระบบ...');const {error}=await supabase.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)return setStatus('authStatus','เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจรหัสผ่าน/ยืนยันอีเมล','error');await boot()};
+$('signupBtn').onclick=async()=>{const email=$('signupEmail').value.trim(),password=$('signupPassword').value;if(password.length<8)return setStatus('authStatus','รหัสผ่านอย่างน้อย 8 ตัวอักษร','error');setStatus('authStatus','กำลังสร้างบัญชี...');const {data,error}=await supabase.auth.signUp({email,password});if(error)return setStatus('authStatus',`สร้างบัญชีไม่สำเร็จ: ${error.message}`,'error');if(data.session){setStatus('authStatus','สร้างบัญชีแล้ว กำลัง Claim สิทธิ...','ok');await boot()}else setStatus('authStatus','สร้างบัญชีแล้ว กรุณาตรวจ Gmail เพื่อยืนยันอีเมล แล้วกลับมา Login','ok')};
+$('logoutBtn').onclick=async()=>{await supabase.auth.signOut();actor=null;await boot()};$('reloadBtn').onclick=()=>boot();
+$('createBtn').onclick=async()=>{if(!actor)return;const department=$('department').value;if(!department)return setStatus('createStatus','ไม่พบกอง/หน่วย','error');const code=$('projectCode').value.trim(),name=$('projectName').value.trim();if(!code||!name)return setStatus('createStatus','กรอกรหัสและชื่อโครงการ','error');setStatus('createStatus','กำลังบันทึก...');const {error}=await supabase.rpc('create_project',{p_organization_id:actor.organizationId,p_department_id:department,p_project_code:code,p_name:name,p_project_type:$('projectType').value.trim()||null,p_owner_user_id:null,p_location_text:null,p_contract_no:$('contractNo').value.trim()||null,p_contractor_name:null,p_budget_amount:Number($('budget').value||0),p_planned_progress:Number($('planned').value||0),p_start_date:$('startDate').value||null,p_due_date:$('dueDate').value||null,p_request_id:crypto.randomUUID()});if(error)return setStatus('createStatus',`บันทึกไม่สำเร็จ: ${error.message}`,'error');setStatus('createStatus','บันทึกโครงการสำเร็จ','ok');$('projectCode').value='';$('projectName').value='';await Promise.all([loadProjects(),loadAudit()])};
+supabase.auth.onAuthStateChange(()=>setTimeout(()=>boot(),0));boot();
+</script>
+</body>
+</html>
