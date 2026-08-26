@@ -23,11 +23,13 @@ test('live import previews locally then commits only through audited import RPC'
   assert.doesNotMatch(html, /\.from\(['"]audit_events['"]\)\.(insert|update|delete|upsert)/);
 });
 
-test('live import does not persist raw CSV or use unsafe HTML rendering', () => {
+test('live import keeps raw CSV and source filename browser-local and uses safe DOM rendering', () => {
   assert.doesNotMatch(html, /localStorage|sessionStorage|indexedDB/i);
   assert.doesNotMatch(html, /innerHTML/);
   assert.doesNotMatch(html, /p_csv|csvText\s*:/);
-  assert.match(html, /ไฟล์ CSV ดิบไม่ถูกอัปโหลดหรือเก็บถาวร/);
+  assert.match(html, /ไฟล์ CSV ดิบและชื่อไฟล์ต้นฉบับอยู่ใน Browser เท่านั้น/);
+  assert.match(html, /filename:'work-tracking-import\.csv'/);
+  assert.doesNotMatch(html, /filename:selectedFile\.name/);
 });
 
 test('live import enforces pilot batch and file-size limits before commit', () => {
