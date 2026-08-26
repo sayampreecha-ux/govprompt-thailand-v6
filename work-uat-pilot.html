@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GP Work Tracking internal pilot UAT">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GP Work Tracking · Internal UAT</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--amber:#9a6700}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1040px)/2));display:flex;justify-content:space-between;gap:14px}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1040px;margin:auto;padding:34px 16px 70px}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p,.muted{color:var(--muted)}.status{margin:14px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}.status.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}.card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px}.card h3{margin:0 0 5px}.expected{font-size:13px;font-weight:800;margin:9px 0}.expected.allow{color:var(--green)}.expected.deny{color:var(--amber)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.actions a{font-size:13px;text-decoration:none;color:#fff;background:var(--blue);border-radius:9px;padding:8px 10px;font-weight:800}.field{display:block;font-weight:700;margin-top:10px}.field select,.field textarea{width:100%;margin-top:6px;padding:10px;border:1px solid #c8d5e3;border-radius:10px;font:inherit}.field textarea{min-height:76px;resize:vertical}.btn{border:0;border-radius:10px;padding:10px 13px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer;margin-top:10px}.btn:disabled{opacity:.55}.saved{font-size:13px;margin-top:8px;color:var(--muted)}.summary{margin-top:22px;background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px}.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.fact{border:1px solid var(--line);border-radius:12px;padding:12px}.fact small{display:block;color:var(--muted)}.fact strong{font-size:24px}.table{width:100%;border-collapse:collapse;margin-top:14px}.table th,.table td{text-align:left;border-bottom:1px solid var(--line);padding:9px;font-size:14px}.pill{display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:800}.pill.pass{background:#e8f7ef;color:var(--green)}.pill.fail{background:#ffebe9;color:var(--red)}.pill.blocked{background:#fff5d6;color:var(--amber)}.hidden{display:none!important}@media(max-width:760px){.grid,.facts{grid-template-columns:1fr}.top{flex-direction:column}.table{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Internal Pilot UAT</strong><nav><a href="work-login-pilot.html">Workspace</a> · <a href="work-dashboard-live-pilot.html">Dashboard</a> · <a href="../">GP หลัก</a></nav></header>
+<main class="wrap">
+  <section class="hero"><div class="muted">REAL ACCOUNT · REAL RLS · NO EMAIL DISCLOSURE</div><h1>แบบทดสอบการใช้งานจริง</h1><p>ให้ผู้ทดสอบแต่ละบทบาทเปิดหน้าที่เกี่ยวข้อง ทดลองตามสิทธิที่คาดหวัง แล้วบันทึก PASS / FAIL / BLOCKED ระบบเก็บเฉพาะ user id, role, ผลทดสอบ และหมายเหตุ ไม่เก็บอีเมลใน UAT result</p></section>
+  <div id="authStatus" class="status">กำลังตรวจสิทธิ...</div>
+  <section id="uatGrid" class="grid hidden"></section>
+  <section id="summary" class="summary hidden">
+    <h2>ภาพรวม Pilot</h2>
+    <div class="facts">
+      <div class="fact"><small>ผู้ทดสอบที่ส่งผลแล้ว</small><strong id="testerCount">0</strong></div>
+      <div class="fact"><small>ผลทดสอบทั้งหมด</small><strong id="submissionCount">0</strong></div>
+      <div class="fact"><small>บทบาทที่มีสมาชิก</small><strong id="roleCount">0</strong></div>
+    </div>
+    <table class="table"><thead><tr><th>Role</th><th>สมาชิก</th><th>PASS</th><th>FAIL</th><th>BLOCKED</th></tr></thead><tbody id="summaryBody"></tbody></table>
+  </section>
+</main>
+<script type="module">
+  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+
+  const $=(id)=>document.getElementById(id);
+  const ROLES=['ORG_ADMIN','EXECUTIVE','DIRECTOR','OFFICER','AUDITOR'];
+  const TESTS=[
+    {key:'AUTH_LOGIN',title:'เข้าสู่ระบบด้วย Magic Link',desc:'เปิดลิงก์จากอีเมลและกลับเข้า Workspace ได้',path:'work-login-pilot.html',allow:ROLES},
+    {key:'DASHBOARD_READ',title:'Dashboard ฐานข้อมูลจริง',desc:'เห็นเฉพาะข้อมูลที่ Role นี้ควรเห็น',path:'work-dashboard-live-pilot.html',allow:ROLES},
+    {key:'COMMAND_CENTER',title:'Command Center',desc:'ตรวจคิวเรื่องเร่งด่วนและการจัดลำดับ deterministic',path:'work-command-center-pilot.html',allow:ROLES},
+    {key:'PROJECT_OPERATIONS',title:'สร้าง/อัปเดตโครงการ',desc:'ทดสอบว่าทำได้เฉพาะ Role และขอบเขตที่ได้รับสิทธิ',path:'work-operations-live-pilot.html',allow:['ORG_ADMIN','DIRECTOR','OFFICER']},
+    {key:'TASK_OPERATIONS',title:'งานย่อย / Milestone',desc:'สร้างหรืออัปเดต Task ตามสิทธิและการมอบหมาย',path:'work-tasks-live-pilot.html',allow:['ORG_ADMIN','DIRECTOR','OFFICER']},
+    {key:'ASSIGNMENT',title:'มอบหมาย Project / Task',desc:'ควรทำได้เฉพาะ ORG_ADMIN หรือ DIRECTOR ในขอบเขตที่ถูกต้อง',path:'work-assign-live-pilot.html',allow:['ORG_ADMIN','DIRECTOR']},
+    {key:'CSV_IMPORT',title:'นำเข้า CSV จริง',desc:'Commit เข้า DB ควรทำได้เฉพาะ ORG_ADMIN หรือ DIRECTOR',path:'work-import-live-pilot.html',allow:['ORG_ADMIN','DIRECTOR']},
+    {key:'EXPORT_SNAPSHOT',title:'ส่งออก Snapshot',desc:'ควรทำได้เฉพาะ ORG_ADMIN หรือ AUDITOR',path:'work-export-live-pilot.html',allow:['ORG_ADMIN','AUDITOR']},
+    {key:'ROLE_BOUNDARY',title:'ทดสอบสิทธิที่ต้องถูกปฏิเสธ',desc:'ลองเปิด/ทำ action ที่ Role นี้ไม่มีสิทธิ แล้วตรวจว่าระบบปฏิเสธโดยไม่เปิดข้อมูลหรือเขียนข้อมูล',path:'work-login-pilot.html',allow:[]},
+  ];
+
+  let actor=null;
+  let saved=new Map();
+  const setStatus=(message,kind='')=>{const node=$('authStatus');node.textContent=message;node.className=`status ${kind}`.trim();};
+  const isAllowed=(test)=>test.allow.includes(actor.role);
+  const expectedText=(test)=>test.key==='ROLE_BOUNDARY'?'ต้องถูกปฏิเสธตาม Role/RLS':(isAllowed(test)?'คาดหวัง: ใช้งานได้':'คาดหวัง: ระบบต้องปฏิเสธ action ที่ไม่มีสิทธิ');
+
+  function makeResultSelect(testKey){
+    const select=document.createElement('select');select.dataset.testKey=testKey;
+    for(const value of ['','PASS','FAIL','BLOCKED']){
+      const option=document.createElement('option');option.value=value;option.textContent=value||'เลือกผลทดสอบ';select.appendChild(option);
+    }
+    return select;
+  }
+
+  function renderTests(){
+    const grid=$('uatGrid');grid.replaceChildren();
+    for(const test of TESTS){
+      const card=document.createElement('article');card.className='card';
+      const title=document.createElement('h3');title.textContent=test.title;
+      const desc=document.createElement('div');desc.className='muted';desc.textContent=test.desc;
+      const expected=document.createElement('div');expected.className=`expected ${isAllowed(test)?'allow':'deny'}`;expected.textContent=expectedText(test);
+      const actions=document.createElement('div');actions.className='actions';const link=document.createElement('a');link.href=test.path;link.target='_blank';link.rel='noopener';link.textContent='เปิดหน้าทดสอบ';actions.appendChild(link);
+      const resultLabel=document.createElement('label');resultLabel.className='field';resultLabel.append('ผลการทดสอบ');const select=makeResultSelect(test.key);resultLabel.appendChild(select);
+      const noteLabel=document.createElement('label');noteLabel.className='field';noteLabel.append('หมายเหตุ (ไม่ใส่ข้อมูลส่วนบุคคล)');const textarea=document.createElement('textarea');textarea.maxLength=1000;textarea.dataset.noteKey=test.key;noteLabel.appendChild(textarea);
+      const button=document.createElement('button');button.className='btn';button.type='button';button.textContent='บันทึกผล';button.dataset.saveKey=test.key;
+      const state=document.createElement('div');state.className='saved';state.dataset.stateKey=test.key;state.textContent='ยังไม่ได้บันทึก';
+      const previous=saved.get(test.key);if(previous){select.value=previous.result||'';textarea.value=previous.notes||'';state.textContent=`บันทึกล่าสุด: ${previous.result}`;}
+      button.addEventListener('click',()=>saveResult(test.key,select,textarea,button,state));
+      card.append(title,desc,expected,actions,resultLabel,noteLabel,button,state);grid.appendChild(card);
+    }
+  }
+
+  async function loadMine(){
+    const {data,error}=await supabase.rpc('get_my_work_pilot_uat',{p_organization_id:actor.organizationId});
+    if(error)throw error;
+    saved=new Map((data||[]).map((row)=>[row.test_key,row]));
+  }
+
+  async function saveResult(testKey,select,textarea,button,state){
+    const result=select.value;if(!result){state.textContent='กรุณาเลือกผลทดสอบ';return;}
+    button.disabled=true;state.textContent='กำลังบันทึก...';
+    try{
+      const {data,error}=await supabase.rpc('submit_work_pilot_uat',{
+        p_organization_id:actor.organizationId,
+        p_test_key:testKey,
+        p_result:result,
+        p_notes:textarea.value.trim()||null,
+      });
+      if(error)throw error;
+      state.textContent=`✅ บันทึก ${data.result||result} แล้ว`;
+      saved.set(testKey,{result:data.result||result,notes:data.notes||textarea.value.trim()});
+      if(['ORG_ADMIN','EXECUTIVE'].includes(actor.role))await loadSummary();
+    }catch(error){state.textContent=`บันทึกไม่สำเร็จ: ${error.message||'UNKNOWN_ERROR'}`;}
+    finally{button.disabled=false;}
+  }
+
+  async function loadSummary(){
+    const {data,error}=await supabase.rpc('get_work_pilot_uat_summary',{p_organization_id:actor.organizationId});
+    if(error)throw error;
+    $('summary').classList.remove('hidden');$('testerCount').textContent=String(data?.uniqueTesters||0);$('submissionCount').textContent=String(data?.submissions||0);
+    const members=new Map((data?.memberCounts||[]).map((x)=>[x.role,Number(x.count||0)]));$('roleCount').textContent=String([...members.values()].filter((count)=>count>0).length);
+    const counts=new Map();for(const item of data?.resultCounts||[]){counts.set(`${item.role}:${item.result}`,Number(item.count||0));}
+    const body=$('summaryBody');body.replaceChildren();
+    for(const role of ROLES){
+      const tr=document.createElement('tr');const values=[role,members.get(role)||0,counts.get(`${role}:PASS`)||0,counts.get(`${role}:FAIL`)||0,counts.get(`${role}:BLOCKED`)||0];
+      values.forEach((value,index)=>{const td=document.createElement('td');if(index===0){const strong=document.createElement('strong');strong.textContent=String(value);td.appendChild(strong);}else td.textContent=String(value);tr.appendChild(td);});body.appendChild(tr);
+    }
+  }
+
+  async function init(){
+    const {session,memberships}=await getPilotSessionContext();if(!session){location.href='work-login-pilot.html';return;}
+    const resolved=resolveWorkSession({session,memberships});if(!resolved.ok){setStatus('บัญชีนี้ยังไม่มี Membership สำหรับ Work Tracking','error');return;}
+    actor=resolved.actor;setStatus(`พร้อมทดสอบ · Role: ${actor.role}${actor.departmentId?` · Department scope: ${actor.departmentId}`:''}`,'ok');
+    await loadMine();renderTests();$('uatGrid').classList.remove('hidden');
+    if(['ORG_ADMIN','EXECUTIVE'].includes(actor.role))await loadSummary();
+  }
+
+  init().catch((error)=>setStatus(`เชื่อมระบบ UAT ไม่สำเร็จ: ${error.message||'UNKNOWN_ERROR'}`,'error'));
+</script>
+</body>
+</html>
