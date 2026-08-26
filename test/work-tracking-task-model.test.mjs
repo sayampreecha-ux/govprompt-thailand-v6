@@ -46,6 +46,7 @@ test('task summary creates an executive priority queue', () => {
 
   assert.equal(summary.counts.total, 3);
   assert.equal(summary.counts.completed, 1);
-  assert.equal(summary.counts.urgent, 2);
+  assert.equal(summary.counts.urgent, 1);
+  assert.equal(summary.counts.attention, 1);
   assert.equal(summary.priority.length, 2);
 });
