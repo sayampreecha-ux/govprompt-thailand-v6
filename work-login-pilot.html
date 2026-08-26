@@ -8,7 +8,7 @@
   <title>GP Work Tracking · เข้าสู่ระบบ Pilot</title>
   <style>
     :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c}
-    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 900px)/2));display:flex;justify-content:space-between}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:900px;margin:auto;padding:42px 16px 70px}.hero{text-align:center;max-width:690px;margin:auto}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p{color:var(--muted)}.card{max-width:620px;margin:28px auto 0;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.field{display:block;margin:12px 0;font-weight:700}.field input{width:100%;padding:12px;border:1px solid #c8d5e3;border-radius:10px;margin-top:6px;font:inherit}.btn{width:100%;border:0;border-radius:11px;padding:12px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy);margin-top:8px}.status{margin-top:13px;padding:11px;border-radius:10px;background:#f1f5f9;color:#465970}.status.error{background:#feeceb;color:var(--red)}.status.ok{background:#e9f8f1;color:var(--green)}.context{margin-top:20px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}.go{display:inline-flex;text-decoration:none;border-radius:10px;padding:9px 12px;background:var(--blue);color:#fff;font-weight:800;margin-right:6px;margin-top:7px}.privacy{background:#eef6ff;border:1px solid #cfe3fa;border-radius:11px;padding:11px 12px;margin:12px 0;color:#35536f}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 900px)/2));display:flex;justify-content:space-between}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:900px;margin:auto;padding:42px 16px 70px}.hero{text-align:center;max-width:690px;margin:auto}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p{color:var(--muted)}.card{max-width:620px;margin:28px auto 0;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.field{display:block;margin:12px 0;font-weight:700}.field input{width:100%;padding:12px;border:1px solid #c8d5e3;border-radius:10px;margin-top:6px;font:inherit}.btn{width:100%;border:0;border-radius:11px;padding:12px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn:disabled{opacity:.62;cursor:not-allowed}.btn.secondary{background:#eef4fa;color:var(--navy);margin-top:8px}.status{margin-top:13px;padding:11px;border-radius:10px;background:#f1f5f9;color:#465970}.status.error{background:#feeceb;color:var(--red)}.status.ok{background:#e9f8f1;color:var(--green)}.context{margin-top:20px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}.go{display:inline-flex;text-decoration:none;border-radius:10px;padding:9px 12px;background:var(--blue);color:#fff;font-weight:800;margin-right:6px;margin-top:7px}.privacy{background:#eef6ff;border:1px solid #cfe3fa;border-radius:11px;padding:11px 12px;margin:12px 0;color:#35536f}
   </style>
 </head>
 <body>
@@ -22,7 +22,7 @@
     <label class="field">อีเมล<input id="magicEmail" type="email" autocomplete="email" inputmode="email"></label>
     <button id="magicBtn" class="btn" type="button">ส่งลิงก์เข้าสู่ระบบ</button>
     <button id="logoutBtn" class="btn secondary hidden" type="button">ออกจากระบบ</button>
-    <div id="loginStatus" class="status">ยังไม่ได้เข้าสู่ระบบ</div>
+    <div id="loginStatus" class="status" aria-live="polite">ยังไม่ได้เข้าสู่ระบบ</div>
   </section>
 
   <section id="contextCard" class="context hidden">
@@ -47,11 +47,36 @@
 <script type="module">
   import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
   import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
-  import { requestPilotMagicLink } from './src/work-tracking/pilot-auth.mjs';
+  import { describeMagicLinkError, requestPilotMagicLink } from './src/work-tracking/pilot-auth.mjs';
 
   const $=(id)=>document.getElementById(id);
   const setStatus=(message,kind='')=>{const node=$('loginStatus');node.textContent=message;node.className=`status ${kind}`.trim();};
   const redirectTo=()=>new URL('./',location.href).href;
+  const DEFAULT_RESEND_COOLDOWN_SECONDS=60;
+  let cooldownUntil=0;
+  let cooldownTimer=null;
+
+  function resetMagicButton(){
+    if(cooldownTimer){clearInterval(cooldownTimer);cooldownTimer=null;}
+    cooldownUntil=0;
+    $('magicBtn').disabled=false;
+    $('magicBtn').textContent='ส่งลิงก์เข้าสู่ระบบ';
+  }
+
+  function updateCooldownButton(){
+    const remaining=Math.max(0,Math.ceil((cooldownUntil-Date.now())/1000));
+    if(remaining<=0){resetMagicButton();return;}
+    $('magicBtn').disabled=true;
+    $('magicBtn').textContent=`ส่งซ้ำได้ใน ${remaining} วินาที`;
+  }
+
+  function startCooldown(seconds){
+    const safeSeconds=Math.max(1,Number(seconds)||DEFAULT_RESEND_COOLDOWN_SECONDS);
+    if(cooldownTimer)clearInterval(cooldownTimer);
+    cooldownUntil=Date.now()+(safeSeconds*1000);
+    updateCooldownButton();
+    cooldownTimer=setInterval(updateCooldownButton,1000);
+  }
 
   function renderContext(resolved){
     const box=$('contextText');box.replaceChildren();
@@ -91,14 +116,20 @@
   }
 
   $('magicBtn').addEventListener('click',async()=>{
+    if(cooldownUntil>Date.now()){updateCooldownButton();return;}
     const email=$('magicEmail').value.trim();
     if(!email)return setStatus('กรอกอีเมลก่อน','error');
     $('magicBtn').disabled=true;setStatus('กำลังส่งลิงก์เข้าสู่ระบบ...');
     try{
       await requestPilotMagicLink({client:supabase,email,redirectTo:redirectTo()});
       setStatus('ส่งลิงก์แล้ว กรุณาเปิดอีเมลและกดลิงก์เพื่อกลับเข้าสู่ Pilot','ok');
-    }catch(error){setStatus(`ส่งลิงก์ไม่สำเร็จ: ${error.message||'UNKNOWN_ERROR'}`,'error');}
-    finally{$('magicBtn').disabled=false;}
+      startCooldown(DEFAULT_RESEND_COOLDOWN_SECONDS);
+    }catch(error){
+      const described=describeMagicLinkError(error);
+      setStatus(described.message,'error');
+      if(described.retryAfterSeconds>0)startCooldown(described.retryAfterSeconds);
+      else resetMagicButton();
+    }
   });
 
   $('logoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();$('contextCard').classList.add('hidden');$('logoutBtn').classList.add('hidden');setStatus('ออกจากระบบแล้ว');});
