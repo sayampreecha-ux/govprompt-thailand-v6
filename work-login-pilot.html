@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="GP Work Tracking Pilot sign in">
+  <meta name="robots" content="noindex,nofollow">
   <title>GP Work Tracking · เข้าสู่ระบบ Pilot</title>
   <style>
     :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c}
@@ -11,7 +12,7 @@
   </style>
 </head>
 <body>
-<header class="top"><strong>GovPrompt · Organization Pilot</strong><a href="index.html">GP หลัก</a></header>
+<header class="top"><strong>GovPrompt · Organization Pilot</strong><a href="../">GP หลัก</a></header>
 <main class="wrap">
   <section class="hero"><div class="muted">INTERNAL PILOT · SUPABASE AUTH + RLS</div><h1>เข้าสู่ระบบ Work Tracking</h1><p>สมัครบัญชีได้ก่อน แต่จะเห็นข้อมูลขององค์กรเมื่ออีเมลนั้นได้รับคำเชิญ Pilot และ Claim Membership สำเร็จเท่านั้น</p></section>
 
@@ -54,6 +55,39 @@
   const $ = (id) => document.getElementById(id);
   const setStatus = (id, message, kind = '') => { const node = $(id); node.textContent = message; node.className = `status ${kind}`.trim(); };
 
+  function renderContext(resolved) {
+    const box = $('contextText');
+    box.replaceChildren();
+    if (resolved.ok) {
+      const ready = document.createElement('p');
+      ready.append('พร้อมใช้งาน: ');
+      const role = document.createElement('strong');
+      role.textContent = resolved.actor.role;
+      ready.appendChild(role);
+      const scope = document.createElement('p');
+      scope.className = 'muted';
+      scope.textContent = `องค์กร: ${resolved.actor.organizationId}${resolved.actor.departmentId ? ` · กอง/หน่วย: ${resolved.actor.departmentId}` : ''}`;
+      box.append(ready, scope);
+      return;
+    }
+
+    if (resolved.code === 'ORGANIZATION_SELECTION_REQUIRED') {
+      const p = document.createElement('p');
+      p.textContent = 'บัญชีนี้มีหลายองค์กร ระบบ Pilot จะเพิ่มตัวเลือกองค์กรในขั้นถัดไป';
+      box.appendChild(p);
+      return;
+    }
+
+    const title = document.createElement('p');
+    const strong = document.createElement('strong');
+    strong.textContent = 'บัญชีสร้างแล้ว แต่ยังไม่มีสิทธิองค์กร';
+    title.appendChild(strong);
+    const detail = document.createElement('p');
+    detail.className = 'muted';
+    detail.textContent = 'ต้องมีคำเชิญ Pilot ที่ตรงกับอีเมลนี้ก่อน ระบบจึงจะ Claim Membership ให้อัตโนมัติ';
+    box.append(title, detail);
+  }
+
   async function claimInviteIfAvailable() {
     const { data, error } = await supabase.rpc('claim_work_pilot_invite');
     if (error) return { ok: false, code: 'CLAIM_FAILED' };
@@ -75,23 +109,13 @@
 
     if (memberships.length === 0 && tryClaim) {
       const claim = await claimInviteIfAvailable();
-      if (claim?.ok) {
-        ({ session, memberships } = await getPilotSessionContext());
-      }
+      if (claim?.ok) ({ session, memberships } = await getPilotSessionContext());
     }
 
     setStatus('loginStatus', 'เข้าสู่ระบบแล้ว', 'ok');
     const resolved = resolveWorkSession({ session, memberships });
-    if (resolved.ok) {
-      $('contextText').innerHTML = `<p>พร้อมใช้งาน: <strong>${resolved.actor.role}</strong></p><p class="muted">องค์กร: ${resolved.actor.organizationId}${resolved.actor.departmentId ? ` · กอง/หน่วย: ${resolved.actor.departmentId}` : ''}</p>`;
-      links.classList.remove('hidden');
-    } else if (resolved.code === 'ORGANIZATION_SELECTION_REQUIRED') {
-      $('contextText').textContent = 'บัญชีนี้มีหลายองค์กร ระบบ Pilot จะเพิ่มตัวเลือกองค์กรในขั้นถัดไป';
-      links.classList.add('hidden');
-    } else {
-      $('contextText').innerHTML = '<p><strong>บัญชีสร้างแล้ว แต่ยังไม่มีสิทธิองค์กร</strong></p><p class="muted">ต้องมีคำเชิญ Pilot ที่ตรงกับอีเมลนี้ก่อน ระบบจึงจะ Claim Membership ให้อัตโนมัติ</p>';
-      links.classList.add('hidden');
-    }
+    renderContext(resolved);
+    links.classList.toggle('hidden', !resolved.ok);
   }
 
   $('loginBtn').addEventListener('click', async () => {
