@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GP Work Tracking live operations pilot">
+  <title>GP Work Tracking · Operations Pilot</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--yellow:#9a6700}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;gap:12px;align-items:center}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1180px;margin:auto;padding:28px 16px 70px}.hero h1{margin:4px 0;font-size:clamp(28px,5vw,44px)}.hero p,.muted{color:var(--muted)}.status{margin:14px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}.status.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.card h2{margin:0 0 12px}.field{display:block;font-weight:700;margin:10px 0}.field input,.field select,.field textarea{display:block;width:100%;margin-top:5px;border:1px solid #c8d5e3;border-radius:10px;padding:10px 11px;background:#fff;font:inherit}.field textarea{min-height:92px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy)}.btn:disabled{opacity:.5;cursor:not-allowed}.project-list,.timeline{display:grid;gap:8px;max-height:460px;overflow:auto}.project,.event{border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff}.project{cursor:pointer}.project.active{outline:2px solid #9ec8f3}.project strong,.event strong{display:block}.tag{display:inline-block;border-radius:999px;padding:3px 8px;background:#eef4fa;color:var(--navy);font-size:11px;font-weight:800;margin-top:5px}.actions{display:flex;gap:8px;flex-wrap:wrap}.hidden{display:none!important}@media(max-width:850px){.grid,.two{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Operations Pilot</strong><div><a href="work-dashboard-live-pilot.html">Dashboard</a> · <a href="work-login-pilot.html">สิทธิผู้ใช้</a></div></header>
+<main class="wrap">
+  <section class="hero"><div class="muted">LIVE SUPABASE · RPC WRITES · RLS READS · AUDIT</div><h1>ปฏิบัติการ Work Tracking</h1><p>เพิ่มโครงการและอัปเดตความก้าวหน้าผ่าน RPC เท่านั้น Browser ไม่มีสิทธิเขียนตารางโครงการโดยตรง</p></section>
+  <div id="status" class="status">กำลังตรวจสิทธิ...</div>
+  <div class="actions"><button id="reloadBtn" class="btn secondary" type="button">โหลดใหม่</button><button id="logoutBtn" class="btn secondary" type="button">ออกจากระบบ</button></div>
+
+  <section id="workspace" class="hidden">
+    <div class="grid">
+      <article id="createCard" class="card">
+        <h2>➕ เพิ่มโครงการ</h2>
+        <label class="field">กอง/หน่วย<select id="departmentSelect"></select></label>
+        <div class="two">
+          <label class="field">รหัสโครงการ<input id="projectCode" placeholder="เช่น ENG-2569-001"></label>
+          <label class="field">ประเภท<input id="projectType" value="CONSTRUCTION"></label>
+        </div>
+        <label class="field">ชื่อโครงการ<input id="projectName"></label>
+        <div class="two">
+          <label class="field">วงเงินงบประมาณ<input id="budgetAmount" type="number" min="0" step="0.01" value="0"></label>
+          <label class="field">แผนความก้าวหน้า ณ ปัจจุบัน (%)<input id="plannedProgress" type="number" min="0" max="100" step="0.1" value="0"></label>
+        </div>
+        <div class="two">
+          <label class="field">วันเริ่ม<input id="startDate" type="date"></label>
+          <label class="field">กำหนดเสร็จ<input id="dueDate" type="date"></label>
+        </div>
+        <label class="field">พื้นที่/สถานที่<input id="locationText"></label>
+        <div class="two">
+          <label class="field">เลขสัญญา<input id="contractNo"></label>
+          <label class="field">ผู้รับจ้าง<input id="contractorName"></label>
+        </div>
+        <button id="createBtn" class="btn" type="button">บันทึกโครงการผ่าน RPC</button>
+        <div id="createStatus" class="status">ยังไม่ได้บันทึก</div>
+      </article>
+
+      <article class="card">
+        <h2>📋 โครงการที่มองเห็นตามสิทธิ</h2>
+        <div id="projectList" class="project-list"><div class="muted">กำลังโหลด...</div></div>
+      </article>
+    </div>
+
+    <div class="grid">
+      <article id="updateCard" class="card">
+        <h2>✏️ อัปเดตความก้าวหน้า</h2>
+        <div id="selectedProject" class="muted">เลือกโครงการจากรายการด้านบนก่อน</div>
+        <label class="field">ความก้าวหน้าจริง (%)<input id="actualProgress" type="number" min="0" max="100" step="0.1"></label>
+        <label class="field">สถานะ<select id="projectStatus"><option value="NOT_STARTED">ยังไม่เริ่ม</option><option value="IN_PROGRESS">กำลังดำเนินการ</option><option value="WAITING_REVIEW">รอตรวจ/ตรวจรับ</option><option value="COMPLETED">เสร็จสิ้น</option><option value="BLOCKED">ติดปัญหา</option></select></label>
+        <label class="field">ปัญหา/อุปสรรค<textarea id="problemSummary"></textarea></label>
+        <button id="updateBtn" class="btn" type="button" disabled>บันทึกการอัปเดตผ่าน RPC</button>
+        <div id="updateStatus" class="status">ยังไม่ได้เลือกโครงการ</div>
+      </article>
+
+      <article id="auditCard" class="card">
+        <h2>🧾 Audit Timeline</h2>
+        <p class="muted">แสดงเฉพาะเหตุการณ์ที่ RLS อนุญาตตาม Role</p>
+        <div id="timeline" class="timeline"><div class="muted">กำลังโหลด...</div></div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+
+  const $ = (id) => document.getElementById(id);
+  let actor = null;
+  let projects = [];
+  let selected = null;
+
+  const setStatus = (id, message, kind = '') => { const n=$(id); n.textContent=message; n.className=`status ${kind}`.trim(); };
+  const requestId = () => globalThis.crypto?.randomUUID?.() || `req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const formatDateTime = (v) => v ? new Intl.DateTimeFormat('th-TH',{dateStyle:'medium',timeStyle:'short'}).format(new Date(v)) : '-';
+
+  async function requireActor() {
+    const { session, memberships } = await getPilotSessionContext();
+    if (!session) { location.href='work-login-pilot.html'; return null; }
+    const resolved = resolveWorkSession({ session, memberships });
+    if (!resolved.ok) { setStatus('status','บัญชีนี้ยังไม่มี Membership สำหรับ Work Tracking','error'); return null; }
+    return resolved.actor;
+  }
+
+  async function loadDepartments() {
+    const select = $('departmentSelect');
+    select.replaceChildren();
+    const { data, error } = await supabase.from('departments').select('id,name,organization_id').eq('organization_id',actor.organizationId).eq('active',true).order('name');
+    if (error) throw error;
+    for (const dep of data || []) {
+      if (actor.departmentId && dep.id !== actor.departmentId && actor.role !== 'ORG_ADMIN') continue;
+      const opt=document.createElement('option'); opt.value=dep.id; opt.textContent=dep.name; select.appendChild(opt);
+    }
+    if (actor.departmentId) select.value=actor.departmentId;
+    select.disabled=actor.role !== 'ORG_ADMIN';
+  }
+
+  async function loadProjects() {
+    let q=supabase.from('projects').select('id,organization_id,department_id,project_code,project_type,name,owner_user_id,location_text,contract_no,contractor_name,budget_amount,spent_amount,planned_progress,actual_progress,start_date,due_date,status,problem_summary,last_updated_at,updated_at').eq('organization_id',actor.organizationId).order('due_date',{ascending:true,nullsFirst:false});
+    if (['DIRECTOR','OFFICER'].includes(actor.role) && actor.departmentId) q=q.eq('department_id',actor.departmentId);
+    const { data,error }=await q; if(error) throw error; projects=data||[]; renderProjects();
+  }
+
+  function renderProjects() {
+    const list=$('projectList'); list.replaceChildren();
+    if (!projects.length) { const e=document.createElement('div'); e.className='muted'; e.textContent='ยังไม่มีโครงการในฐานข้อมูล'; list.appendChild(e); return; }
+    for (const p of projects) {
+      const item=document.createElement('div'); item.className=`project${selected?.id===p.id?' active':''}`; item.dataset.id=p.id;
+      const title=document.createElement('strong'); title.textContent=p.name; item.appendChild(title);
+      const meta=document.createElement('div'); meta.className='muted'; meta.textContent=`${p.project_code} · แผน ${Number(p.planned_progress)}% / ผลจริง ${Number(p.actual_progress)}%`; item.appendChild(meta);
+      const tag=document.createElement('span'); tag.className='tag'; tag.textContent=p.status; item.appendChild(tag);
+      item.addEventListener('click',()=>selectProject(p.id)); list.appendChild(item);
+    }
+  }
+
+  function selectProject(id) {
+    selected=projects.find((p)=>p.id===id)||null; renderProjects();
+    if(!selected) return;
+    $('selectedProject').textContent=`${selected.project_code} · ${selected.name}`;
+    $('actualProgress').value=Number(selected.actual_progress||0);
+    $('projectStatus').value=selected.status;
+    $('problemSummary').value=selected.problem_summary||'';
+    const allowed=actor.role==='ORG_ADMIN' || actor.role==='DIRECTOR' || (actor.role==='OFFICER' && selected.owner_user_id===actor.userId);
+    $('updateBtn').disabled=!allowed;
+    setStatus('updateStatus',allowed?'พร้อมอัปเดต':'Role นี้อ่านได้ แต่ไม่มีสิทธิอัปเดตโครงการที่เลือก',allowed?'':'error');
+  }
+
+  async function loadAudit() {
+    const card=$('auditCard');
+    const readable=['ORG_ADMIN','EXECUTIVE','DIRECTOR','AUDITOR'].includes(actor.role);
+    card.classList.toggle('hidden',!readable);
+    if(!readable) return;
+    let q=supabase.from('audit_events').select('id,department_id,actor_user_id,action,entity_type,entity_id,occurred_at,metadata_json').eq('organization_id',actor.organizationId).order('occurred_at',{ascending:false}).limit(50);
+    if(actor.role==='DIRECTOR' && actor.departmentId) q=q.eq('department_id',actor.departmentId);
+    const {data,error}=await q; if(error) throw error;
+    const box=$('timeline'); box.replaceChildren();
+    if(!(data||[]).length){const e=document.createElement('div');e.className='muted';e.textContent='ยังไม่มี Audit Event ที่มองเห็น';box.appendChild(e);return;}
+    for(const ev of data){
+      const item=document.createElement('div'); item.className='event';
+      const title=document.createElement('strong'); title.textContent=ev.action; item.appendChild(title);
+      const meta=document.createElement('div'); meta.className='muted'; meta.textContent=`${ev.entity_type} · ${formatDateTime(ev.occurred_at)}`; item.appendChild(meta);
+      const changed=Array.isArray(ev.metadata_json?.changedFields)?ev.metadata_json.changedFields.join(', '):'';
+      if(changed){const c=document.createElement('div');c.className='muted';c.textContent=`เปลี่ยน: ${changed}`;item.appendChild(c);}
+      box.appendChild(item);
+    }
+  }
+
+  async function createProject() {
+    const dep=$('departmentSelect').value;
+    const code=$('projectCode').value.trim();
+    const name=$('projectName').value.trim();
+    if(!dep||!code||!name){setStatus('createStatus','กรอกกอง รหัสโครงการ และชื่อโครงการ','error');return;}
+    $('createBtn').disabled=true; setStatus('createStatus','กำลังบันทึก...');
+    const args={
+      p_organization_id:actor.organizationId,
+      p_department_id:dep,
+      p_project_code:code,
+      p_name:name,
+      p_project_type:$('projectType').value.trim()||null,
+      p_owner_user_id:null,
+      p_location_text:$('locationText').value.trim()||null,
+      p_contract_no:$('contractNo').value.trim()||null,
+      p_contractor_name:$('contractorName').value.trim()||null,
+      p_budget_amount:Number($('budgetAmount').value||0),
+      p_planned_progress:Number($('plannedProgress').value||0),
+      p_start_date:$('startDate').value||null,
+      p_due_date:$('dueDate').value||null,
+      p_request_id:requestId()
+    };
+    const {error}=await supabase.rpc('create_project',args);
+    $('createBtn').disabled=false;
+    if(error){setStatus('createStatus',`บันทึกไม่สำเร็จ: ${error.message}`,'error');return;}
+    setStatus('createStatus','บันทึกโครงการสำเร็จและสร้าง Audit Event แล้ว','ok');
+    $('projectCode').value=''; $('projectName').value='';
+    await Promise.all([loadProjects(),loadAudit()]);
+  }
+
+  async function updateProject() {
+    if(!selected) return;
+    $('updateBtn').disabled=true; setStatus('updateStatus','กำลังอัปเดต...');
+    const args={
+      p_project_id:selected.id,
+      p_actual_progress:Number($('actualProgress').value),
+      p_status:$('projectStatus').value,
+      p_problem_summary:$('problemSummary').value.trim()||null,
+      p_expected_updated_at:selected.updated_at,
+      p_request_id:requestId()
+    };
+    const {error}=await supabase.rpc('update_project_progress',args);
+    if(error){setStatus('updateStatus',error.message.includes('CONFLICT_VERSION')?'ข้อมูลถูกแก้จากอีกหน้าจอแล้ว กรุณาโหลดใหม่':`อัปเดตไม่สำเร็จ: ${error.message}`,'error'); $('updateBtn').disabled=false; return;}
+    setStatus('updateStatus','อัปเดตสำเร็จและบันทึก Audit แล้ว','ok');
+    await Promise.all([loadProjects(),loadAudit()]);
+    selected=projects.find((p)=>p.id===selected.id)||null;
+    if(selected) selectProject(selected.id);
+  }
+
+  async function init() {
+    actor=await requireActor(); if(!actor) return;
+    $('workspace').classList.remove('hidden');
+    const canWrite=['ORG_ADMIN','DIRECTOR','OFFICER'].includes(actor.role);
+    $('createCard').classList.toggle('hidden',!canWrite);
+    $('updateCard').classList.toggle('hidden',!canWrite && !['EXECUTIVE','AUDITOR'].includes(actor.role));
+    setStatus('status',`พร้อมใช้งาน · Role: ${actor.role}`,'ok');
+    await loadDepartments();
+    await Promise.all([loadProjects(),loadAudit()]);
+  }
+
+  $('createBtn').addEventListener('click',()=>createProject().catch((e)=>{ $('createBtn').disabled=false; setStatus('createStatus',`เกิดข้อผิดพลาด: ${e.message}`,'error'); }));
+  $('updateBtn').addEventListener('click',()=>updateProject().catch((e)=>{ $('updateBtn').disabled=false; setStatus('updateStatus',`เกิดข้อผิดพลาด: ${e.message}`,'error'); }));
+  $('reloadBtn').addEventListener('click',()=>Promise.all([loadProjects(),loadAudit()]).catch((e)=>setStatus('status',`โหลดไม่สำเร็จ: ${e.message}`,'error')));
+  $('logoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.href='work-login-pilot.html';});
+  init().catch((e)=>setStatus('status',`เริ่มระบบไม่สำเร็จ: ${e.message}`,'error'));
+</script>
+</body>
+</html>
