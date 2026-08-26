@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GP Work Tracking audited organization export pilot">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GP Work Tracking · ส่งออกข้อมูล</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 920px)/2));display:flex;justify-content:space-between;gap:12px}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:920px;margin:auto;padding:34px 16px 70px}.hero h1{font-size:clamp(29px,5vw,46px);margin:5px 0}.hero p,.muted{color:var(--muted)}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:20px}.notice{background:#fff8e8;border:1px solid #f0cf8f;border-radius:12px;padding:13px 14px;margin:14px 0}.status{background:#f1f5f9;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:14px 0}.status.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.btn{border:0;border-radius:11px;padding:11px 15px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn:disabled{opacity:.5;cursor:not-allowed}.hidden{display:none!important}.checks{display:grid;gap:7px;margin:13px 0}.check{display:flex;gap:8px;align-items:flex-start}.check input{margin-top:4px}.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}.fact{border:1px solid var(--line);border-radius:12px;padding:12px}.fact small{display:block;color:var(--muted)}.fact strong{font-size:22px}@media(max-width:650px){.facts{grid-template-columns:1fr}.top{flex-direction:column}}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Work Tracking Export</strong><nav><a href="work-login-pilot.html">Workspace</a> · <a href="work-dashboard-live-pilot.html">Dashboard</a> · <a href="../">GP หลัก</a></nav></header>
+<main class="wrap">
+  <section class="hero"><div class="muted">AUDITED EXPORT · TENANT SCOPED · JSON SNAPSHOT</div><h1>ส่งออกข้อมูล Work Tracking</h1><p>สร้าง logical snapshot ขององค์กรจาก Server ใน transaction เดียว พร้อมบันทึก Audit ว่ามีการส่งออกข้อมูล</p></section>
+
+  <div id="authStatus" class="status">กำลังตรวจสิทธิ...</div>
+  <section id="workspace" class="card hidden">
+    <h2>Organization Snapshot</h2>
+    <div class="notice"><strong>Privacy:</strong> Export ไม่รวม <code>auth.users</code>, อีเมลคำเชิญ Pilot หรือไฟล์ CSV ต้นฉบับ แต่ยังคง opaque user IDs ที่จำเป็นต่อความสัมพันธ์ของ Project / Task / Audit เพื่อให้ข้อมูลนำไปตรวจสอบหรือย้ายระบบได้</div>
+    <div class="checks">
+      <label class="check"><input id="confirmScope" type="checkbox"><span>ฉันยืนยันว่าจะส่งออกเฉพาะข้อมูลขององค์กรที่บัญชีนี้มีสิทธิ</span></label>
+      <label class="check"><input id="confirmHandling" type="checkbox"><span>ฉันรับทราบว่าไฟล์ที่ดาวน์โหลดเป็นข้อมูลภายในและต้องจัดเก็บตามนโยบายขององค์กร</span></label>
+    </div>
+    <button id="exportBtn" class="btn" type="button" disabled>สร้างและดาวน์โหลด Snapshot</button>
+    <div id="exportStatus" class="status">ยังไม่มีการส่งออก</div>
+    <section id="resultFacts" class="facts hidden">
+      <div class="fact"><small>โครงการ</small><strong id="projectCount">0</strong></div>
+      <div class="fact"><small>งานย่อย</small><strong id="taskCount">0</strong></div>
+      <div class="fact"><small>Audit events</small><strong id="auditCount">0</strong></div>
+    </section>
+  </section>
+</main>
+<script type="module">
+  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+
+  const $=(id)=>document.getElementById(id);
+  let actor=null;
+  let exporting=false;
+  const setStatus=(id,message,kind='')=>{const node=$(id);node.textContent=message;node.className=`status ${kind}`.trim();};
+  const requestId=()=>globalThis.crypto?.randomUUID?.()||`export-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const canExport=()=>Boolean(actor&&!exporting&&$('confirmScope').checked&&$('confirmHandling').checked);
+  const syncButton=()=>{$('exportBtn').disabled=!canExport();};
+
+  function snapshotFilename(){
+    const stamp=new Date().toISOString().slice(0,10).replaceAll('-','');
+    return `gp-work-tracking-export-${stamp}.json`;
+  }
+
+  function downloadJson(snapshot){
+    const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const anchor=document.createElement('a');
+    anchor.href=url;
+    anchor.download=snapshotFilename();
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),0);
+  }
+
+  async function init(){
+    const {session,memberships}=await getPilotSessionContext();
+    if(!session){location.href='work-login-pilot.html';return;}
+    const resolved=resolveWorkSession({session,memberships});
+    if(!resolved.ok){setStatus('authStatus','บัญชีนี้ยังไม่มี Membership สำหรับ Work Tracking','error');return;}
+    actor=resolved.actor;
+    if(!['ORG_ADMIN','AUDITOR'].includes(actor.role)){
+      setStatus('authStatus','การส่งออกข้อมูลใช้ได้เฉพาะ ORG_ADMIN หรือ AUDITOR','error');
+      return;
+    }
+    $('workspace').classList.remove('hidden');
+    setStatus('authStatus',`พร้อมส่งออก · ${actor.role}`,'ok');
+    syncButton();
+  }
+
+  async function exportSnapshot(){
+    if(!canExport())return;
+    exporting=true;syncButton();
+    setStatus('exportStatus','กำลังสร้าง Snapshot บน Server และบันทึก Audit...');
+    try{
+      const {data,error}=await supabase.rpc('export_work_tracking_snapshot',{
+        p_organization_id:actor.organizationId,
+        p_request_id:requestId(),
+      });
+      if(error)throw error;
+      if(!data||data.schemaVersion!=='work-tracking-export-v1')throw new Error('EXPORT_INVALID_RESPONSE');
+      downloadJson(data);
+      $('projectCount').textContent=String(data.projects?.length||0);
+      $('taskCount').textContent=String(data.tasks?.length||0);
+      $('auditCount').textContent=String(data.auditEvents?.length||0);
+      $('resultFacts').classList.remove('hidden');
+      setStatus('exportStatus','✅ สร้าง Snapshot และเริ่มดาวน์โหลดแล้ว · Audit EXPORT_CREATED ถูกบันทึกที่ Server','ok');
+      $('confirmScope').checked=false;$('confirmHandling').checked=false;
+    }catch(error){
+      setStatus('exportStatus',`ส่งออกไม่สำเร็จ: ${error.message||'UNKNOWN_ERROR'}`,'error');
+    }finally{exporting=false;syncButton();}
+  }
+
+  $('confirmScope').addEventListener('change',syncButton);
+  $('confirmHandling').addEventListener('change',syncButton);
+  $('exportBtn').addEventListener('click',exportSnapshot);
+  init().catch((error)=>setStatus('authStatus',`เชื่อมระบบไม่สำเร็จ: ${error.message}`,'error'));
+</script>
+</body>
+</html>

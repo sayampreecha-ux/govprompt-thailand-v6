@@ -1,0 +1,94 @@
+name: Publish GP + Work Tracking Pilot
+
+on:
+  push:
+    branches:
+      - v7/work-tracking-pilot
+    paths:
+      - 'work-*.html'
+      - 'work-*.csv'
+      - 'src/work-tracking/**'
+      - 'samples/work-tracking-*'
+      - '.github/workflows/pilot-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: work-tracking-pilot-publish
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout production GP snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: production
+
+      - name: Checkout pilot branch
+        uses: actions/checkout@v4
+        with:
+          ref: v7/work-tracking-pilot
+          path: pilot-src
+
+      - name: Build combined Pages site
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site
+
+          # Preserve the current production GP site at the repository root.
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            production/ _site/
+
+          # Publish Work Tracking only under /pilot/ so it never replaces GP root.
+          mkdir -p _site/pilot/src/work-tracking _site/pilot/samples
+          cp pilot-src/work-login-pilot.html _site/pilot/index.html
+          cp pilot-src/work-login-pilot.html _site/pilot/work-login-pilot.html
+
+          for file in pilot-src/work-*.html; do
+            [ -f "$file" ] && cp "$file" _site/pilot/
+          done
+
+          for file in pilot-src/work-*.csv; do
+            [ -f "$file" ] && cp "$file" _site/pilot/
+          done
+
+          cp pilot-src/src/work-tracking/*.mjs _site/pilot/src/work-tracking/
+
+          for file in pilot-src/samples/work-tracking-*; do
+            [ -f "$file" ] && cp "$file" _site/pilot/samples/
+          done
+
+          touch _site/.nojekyll
+          touch _site/pilot/.nojekyll
+
+          test -f _site/index.html
+          test -f _site/pilot/index.html
+          test -f _site/pilot/work-dashboard-live-pilot.html
+          test -f _site/pilot/work-import-live-pilot.html
+          test -f _site/pilot/work-export-live-pilot.html
+          test -f _site/pilot/work-tracking-template-th.csv
+
+      - name: Publish combined site to gh-pages
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd _site
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "deploy: preserve GP root + Work Tracking Pilot ${GITHUB_SHA}"
+          git branch -M gh-pages
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GP Work Tracking Pilot sign in">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GP Work Tracking · เข้าสู่ระบบ Pilot</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 900px)/2));display:flex;justify-content:space-between}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:900px;margin:auto;padding:42px 16px 70px}.hero{text-align:center;max-width:690px;margin:auto}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p{color:var(--muted)}.card{max-width:620px;margin:28px auto 0;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.field{display:block;margin:12px 0;font-weight:700}.field input{width:100%;padding:12px;border:1px solid #c8d5e3;border-radius:10px;margin-top:6px;font:inherit}.btn{width:100%;border:0;border-radius:11px;padding:12px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn:disabled{opacity:.62;cursor:not-allowed}.btn.secondary{background:#eef4fa;color:var(--navy);margin-top:8px}.status{margin-top:13px;padding:11px;border-radius:10px;background:#f1f5f9;color:#465970}.status.error{background:#feeceb;color:var(--red)}.status.ok{background:#e9f8f1;color:var(--green)}.context{margin-top:20px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}.go{display:inline-flex;text-decoration:none;border-radius:10px;padding:9px 12px;background:var(--blue);color:#fff;font-weight:800;margin-right:6px;margin-top:7px}.privacy{background:#eef6ff;border:1px solid #cfe3fa;border-radius:11px;padding:11px 12px;margin:12px 0;color:#35536f}.fallback{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.fallback summary{cursor:pointer;font-weight:800;color:var(--navy);padding:5px 0}.fallback p{color:var(--muted);font-size:13px}.fallback .status{margin-bottom:0}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Organization Pilot</strong><a href="../">GP หลัก</a></header>
+<main class="wrap">
+  <section class="hero"><div class="muted">INTERNAL PILOT · AUTH + RLS</div><h1>เข้าสู่ระบบ Work Tracking</h1><p>วิธีหลักคือรับลิงก์เข้าสู่ระบบทางอีเมล ส่วนบัญชีเดิมที่มีรหัสผ่านสามารถใช้ทางสำรองได้เมื่อระบบอีเมลติด rate limit</p></section>
+
+  <section class="card">
+    <h2>ส่งลิงก์เข้าสู่ระบบ</h2>
+    <div class="privacy">บัญชีที่ไม่มี Membership จะไม่เห็นข้อมูล Work Tracking แม้จะยืนยันตัวตนสำเร็จ</div>
+    <label class="field">อีเมล<input id="magicEmail" type="email" autocomplete="email" inputmode="email"></label>
+    <button id="magicBtn" class="btn" type="button">ส่งลิงก์เข้าสู่ระบบ</button>
+    <button id="logoutBtn" class="btn secondary hidden" type="button">ออกจากระบบ</button>
+    <div id="loginStatus" class="status" aria-live="polite">ยังไม่ได้เข้าสู่ระบบ</div>
+
+    <details id="passwordFallback" class="fallback">
+      <summary>เข้าสู่ระบบด้วยรหัสผ่าน (สำรอง)</summary>
+      <p>ใช้เฉพาะบัญชี Pilot เดิมที่เคยตั้งรหัสผ่านไว้ วิธีนี้ไม่ส่งอีเมลจึงไม่ติด email rate limit</p>
+      <label class="field">อีเมล<input id="passwordEmail" type="email" autocomplete="email" inputmode="email"></label>
+      <label class="field">รหัสผ่าน<input id="passwordValue" type="password" autocomplete="current-password"></label>
+      <button id="passwordBtn" class="btn secondary" type="button">เข้าสู่ระบบด้วยรหัสผ่าน</button>
+      <div id="passwordStatus" class="status" aria-live="polite">ยังไม่ได้ใช้การเข้าสู่ระบบสำรอง</div>
+    </details>
+  </section>
+
+  <section id="contextCard" class="context hidden">
+    <h2>สิทธิ Work Tracking</h2>
+    <div id="contextText"></div>
+    <div id="links" class="hidden">
+      <a class="go" href="work-dashboard-live-pilot.html">Dashboard ฐานข้อมูลจริง</a>
+      <a class="go" href="work-operations-live-pilot.html">เพิ่ม/อัปเดตโครงการ</a>
+      <a class="go" href="work-tasks-live-pilot.html">งานย่อย / Milestone</a>
+      <a class="go" href="work-members-live-pilot.html">สมาชิกและสิทธิ</a>
+      <a class="go" href="work-assign-live-pilot.html">มอบหมายงาน</a>
+      <a class="go" href="work-import-live-pilot.html">นำเข้า CSV จริง</a>
+      <a class="go" href="work-tracking-import-preview.html">Preview CSV local-only</a>
+      <a class="go" href="work-export-live-pilot.html">ส่งออก Snapshot</a>
+      <a class="go" href="work-command-center-pilot.html">Command Center</a>
+      <a class="go" href="work-uat-pilot.html">Internal Pilot UAT</a>
+      <a class="go" href="work-role-test-accounts.html">บัญชีทดสอบ 4 Role</a>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+  import { describeMagicLinkError, requestPilotMagicLink, signInPilotWithPassword } from './src/work-tracking/pilot-auth.mjs';
+
+  const $=(id)=>document.getElementById(id);
+  const setStatus=(message,kind='')=>{const node=$('loginStatus');node.textContent=message;node.className=`status ${kind}`.trim();};
+  const setPasswordStatus=(message,kind='')=>{const node=$('passwordStatus');node.textContent=message;node.className=`status ${kind}`.trim();};
+  const redirectTo=()=>new URL('./',location.href).href;
+  const DEFAULT_RESEND_COOLDOWN_SECONDS=60;
+  let cooldownUntil=0;
+  let cooldownTimer=null;
+
+  function resetMagicButton(){
+    if(cooldownTimer){clearInterval(cooldownTimer);cooldownTimer=null;}
+    cooldownUntil=0;
+    $('magicBtn').disabled=false;
+    $('magicBtn').textContent='ส่งลิงก์เข้าสู่ระบบ';
+  }
+
+  function updateCooldownButton(){
+    const remaining=Math.max(0,Math.ceil((cooldownUntil-Date.now())/1000));
+    if(remaining<=0){resetMagicButton();return;}
+    $('magicBtn').disabled=true;
+    $('magicBtn').textContent=`ส่งซ้ำได้ใน ${remaining} วินาที`;
+  }
+
+  function startCooldown(seconds){
+    const safeSeconds=Math.max(1,Number(seconds)||DEFAULT_RESEND_COOLDOWN_SECONDS);
+    if(cooldownTimer)clearInterval(cooldownTimer);
+    cooldownUntil=Date.now()+(safeSeconds*1000);
+    updateCooldownButton();
+    cooldownTimer=setInterval(updateCooldownButton,1000);
+  }
+
+  function renderContext(resolved){
+    const box=$('contextText');box.replaceChildren();
+    if(resolved.ok){
+      const ready=document.createElement('p');ready.append('พร้อมใช้งาน: ');
+      const role=document.createElement('strong');role.textContent=resolved.actor.role;ready.appendChild(role);
+      const scope=document.createElement('p');scope.className='muted';scope.textContent=`องค์กร: ${resolved.actor.organizationId}${resolved.actor.departmentId?` · กอง/หน่วย: ${resolved.actor.departmentId}`:''}`;
+      box.append(ready,scope);return;
+    }
+    if(resolved.code==='ORGANIZATION_SELECTION_REQUIRED'){
+      const p=document.createElement('p');p.textContent='บัญชีนี้มีหลายองค์กร ระบบ Pilot ต้องเลือกบริบทองค์กรก่อนใช้งาน';box.appendChild(p);return;
+    }
+    const title=document.createElement('p');const strong=document.createElement('strong');strong.textContent='บัญชีนี้ยังไม่มีสิทธิองค์กร';title.appendChild(strong);
+    const detail=document.createElement('p');detail.className='muted';detail.textContent='ต้องมีคำเชิญ Pilot ที่ตรงกับอีเมลนี้ก่อน ระบบจึงจะ Claim Membership ให้อัตโนมัติ';
+    box.append(title,detail);
+  }
+
+  async function claimInviteIfAvailable(){
+    const {data,error}=await supabase.rpc('claim_work_pilot_invite');
+    if(error)return{ok:false,code:'CLAIM_FAILED'};
+    return data||{ok:false,code:'NO_ACTIVE_INVITE'};
+  }
+
+  async function refreshContext({tryClaim=true}={}){
+    let {session,memberships}=await getPilotSessionContext();
+    $('contextCard').classList.toggle('hidden',!session);
+    $('logoutBtn').classList.toggle('hidden',!session);
+    if(!session){setStatus('ยังไม่ได้เข้าสู่ระบบ');return;}
+    if(memberships.length===0&&tryClaim){
+      const claim=await claimInviteIfAvailable();
+      if(claim?.ok)({session,memberships}=await getPilotSessionContext());
+    }
+    setStatus('เข้าสู่ระบบแล้ว','ok');
+    const resolved=resolveWorkSession({session,memberships});
+    renderContext(resolved);
+    $('links').classList.toggle('hidden',!resolved.ok);
+  }
+
+  $('magicEmail').addEventListener('input',()=>{if(!$('passwordEmail').value)$('passwordEmail').value=$('magicEmail').value;});
+
+  $('magicBtn').addEventListener('click',async()=>{
+    if(cooldownUntil>Date.now()){updateCooldownButton();return;}
+    const email=$('magicEmail').value.trim();
+    if(!email)return setStatus('กรอกอีเมลก่อน','error');
+    $('passwordEmail').value=email;
+    $('magicBtn').disabled=true;setStatus('กำลังส่งลิงก์เข้าสู่ระบบ...');
+    try{
+      await requestPilotMagicLink({client:supabase,email,redirectTo:redirectTo()});
+      setStatus('ส่งลิงก์แล้ว กรุณาเปิดอีเมลและกดลิงก์เพื่อกลับเข้าสู่ Pilot','ok');
+      startCooldown(DEFAULT_RESEND_COOLDOWN_SECONDS);
+    }catch(error){
+      const described=describeMagicLinkError(error);
+      setStatus(described.message,'error');
+      if(described.retryAfterSeconds>0){$('passwordFallback').open=true;startCooldown(described.retryAfterSeconds);}
+      else resetMagicButton();
+    }
+  });
+
+  $('passwordBtn').addEventListener('click',async()=>{
+    const email=$('passwordEmail').value.trim()||$('magicEmail').value.trim();
+    const password=$('passwordValue').value;
+    if(!email||!password)return setPasswordStatus('กรอกอีเมลและรหัสผ่านก่อน','error');
+    $('passwordBtn').disabled=true;setPasswordStatus('กำลังเข้าสู่ระบบ...');
+    try{
+      await signInPilotWithPassword({client:supabase,email,password});
+      setPasswordStatus('เข้าสู่ระบบสำเร็จ','ok');
+      $('passwordValue').value='';
+      await refreshContext({tryClaim:true});
+    }catch(error){
+      const message=String(error?.message||'');
+      setPasswordStatus(/invalid login credentials/i.test(message)?'อีเมลหรือรหัสผ่านไม่ถูกต้อง':'เข้าสู่ระบบด้วยรหัสผ่านไม่สำเร็จ','error');
+    }finally{$('passwordBtn').disabled=false;}
+  });
+
+  $('logoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();$('contextCard').classList.add('hidden');$('logoutBtn').classList.add('hidden');setStatus('ออกจากระบบแล้ว');});
+  supabase.auth.onAuthStateChange(()=>{setTimeout(()=>refreshContext({tryClaim:true}).catch(()=>{}),0);});
+  refreshContext({tryClaim:true}).catch(()=>setStatus('เชื่อมระบบบัญชีไม่สำเร็จ','error'));
+</script>
+</body>
+</html>
