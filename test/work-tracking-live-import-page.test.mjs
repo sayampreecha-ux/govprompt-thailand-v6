@@ -36,3 +36,17 @@ test('live import enforces pilot batch and file-size limits before commit', () =
   assert.match(html, /preview\.summary\.totalRows > MAX_ROWS/);
   assert.match(html, /selectedFile\.size > MAX_FILE_BYTES/);
 });
+
+test('live import blocks department text mismatch instead of treating selected department as a silent override', () => {
+  assert.match(html, /findImportDepartmentMismatches/);
+  assert.match(html, /departmentMismatches\(\)\.length > 0/);
+  assert.match(html, /id="departmentNotice"/);
+  assert.match(html, /กอง\/หน่วยไม่ตรง/);
+  assert.match(html, /departmentName:selectedDepartmentName\(\)/);
+});
+
+test('changing selected department revalidates the current preview and resets confirmations', () => {
+  assert.match(html, /departmentSelect'\)\.addEventListener\('change',\(\)=>\{if\(preview\)renderPreview\(preview\)/);
+  assert.match(html, /confirmCommit'\)\.checked = false/);
+  assert.match(html, /confirmWarnings'\)\.checked = false/);
+});
