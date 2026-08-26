@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GP Work Tracking · บัญชีทดสอบตาม Role</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--blue:#176fd1}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 920px)/2));display:flex;justify-content:space-between;gap:10px}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:920px;margin:auto;padding:34px 16px 70px}.hero h1{font-size:clamp(28px,5vw,44px);margin:5px 0}.hero p,.muted{color:var(--muted)}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:18px}.field{display:block;font-weight:800;margin:14px 0}.field input{display:block;width:100%;margin-top:7px;border:1px solid #c8d5e3;border-radius:11px;padding:12px;font:inherit}.status{padding:11px 13px;border-radius:11px;background:#f1f5f9;border:1px solid var(--line);margin-top:12px}.status.ok{background:#eaf9f2;color:var(--green)}.status.error{background:#fff0ee;color:var(--red)}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.role{border:1px solid var(--line);border-radius:14px;padding:15px}.role h3{margin:0 0 6px}.btn{border:0;border-radius:10px;padding:10px 13px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn:disabled{opacity:.5;cursor:not-allowed}.hidden{display:none!important}.notice{background:#eef6ff;border:1px solid #cfe3fa;border-radius:11px;padding:12px 13px;color:#35536f}@media(max-width:650px){.grid{grid-template-columns:1fr}.top{flex-direction:column}}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Role Test Accounts</strong><nav><a href="work-uat-pilot.html">UAT</a> · <a href="work-login-pilot.html">Workspace</a></nav></header>
+<main class="wrap">
+  <section class="hero"><div class="muted">ORG_ADMIN ONLY · REAL MAGIC LINK · NO LOCAL STORAGE</div><h1>ส่ง Magic Link ให้บัญชีทดสอบ 4 Role</h1><p>กรอก Gmail หลักหนึ่งครั้ง ระบบจะสร้าง plus-alias ใน Browser เท่านั้น แล้วส่ง Magic Link จริงให้แต่ละ Role แยกกัน</p></section>
+  <div id="authStatus" class="status">กำลังตรวจสิทธิ...</div>
+  <section id="workspace" class="card hidden">
+    <div class="notice"><strong>Privacy:</strong> อีเมลหลักและ alias ไม่ถูกบันทึกใน localStorage/sessionStorage และไม่ได้ hard-code ในหน้าเว็บ บัญชี alias ทั้ง 4 ส่งเข้ากล่อง Gmail เดิม แต่ Supabase Auth มองเป็นผู้ใช้คนละบัญชี</div>
+    <label class="field">Gmail หลัก<input id="baseEmail" type="email" autocomplete="email" placeholder="name@gmail.com"></label>
+    <div class="grid" id="roles"></div>
+    <div id="pageStatus" class="status">ยังไม่ได้ส่ง Magic Link</div>
+  </section>
+</main>
+<script type="module">
+  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+  import { requestPilotMagicLink } from './src/work-tracking/pilot-auth.mjs';
+  import { PILOT_TEST_ROLES, buildGmailRoleAlias, maskEmail } from './src/work-tracking/pilot-role-alias.mjs';
+
+  const $=(id)=>document.getElementById(id);
+  const state=new Map();
+  const setStatus=(id,message,kind='')=>{const node=$(id);node.textContent=message;node.className=`status ${kind}`.trim();};
+  const redirectTo=()=>new URL('./',location.href).href;
+
+  function renderRoles(){
+    const host=$('roles');host.replaceChildren();
+    for(const spec of PILOT_TEST_ROLES){
+      const card=document.createElement('section');card.className='role';
+      const h=document.createElement('h3');h.textContent=spec.role;
+      const alias=document.createElement('p');alias.className='muted';alias.textContent='กรอก Gmail หลักเพื่อสร้าง alias';
+      const btn=document.createElement('button');btn.type='button';btn.className='btn';btn.textContent='ส่ง Magic Link';
+      btn.addEventListener('click',()=>sendRole(spec.role,alias,btn));
+      card.append(h,alias,btn);host.appendChild(card);
+    }
+  }
+
+  async function sendRole(role,aliasNode,button){
+    let alias;
+    try{alias=buildGmailRoleAlias($('baseEmail').value,role);}catch(error){setStatus('pageStatus',error.message==='GMAIL_ALIAS_REQUIRED'?'ตอนนี้ helper รองรับ Gmail plus-alias เท่านั้น':'กรอก Gmail หลักให้ถูกต้อง','error');return;}
+    button.disabled=true;state.set(role,'sending');aliasNode.textContent=`กำลังส่งไป ${maskEmail(alias)}`;
+    try{
+      await requestPilotMagicLink({client:supabase,email:alias,redirectTo:redirectTo()});
+      state.set(role,'sent');aliasNode.textContent=`ส่งแล้ว → ${maskEmail(alias)}`;
+      setStatus('pageStatus',`ส่ง Magic Link สำหรับ ${role} แล้ว กรุณาเปิดอีเมลและกดลิงก์ใน Browser/Incognito แยก Session`,'ok');
+    }catch(error){
+      state.set(role,'error');aliasNode.textContent='ส่งไม่สำเร็จ';
+      setStatus('pageStatus',`ส่ง ${role} ไม่สำเร็จ: ${error.message||'UNKNOWN_ERROR'}`,'error');
+    }finally{button.disabled=false;}
+  }
+
+  async function init(){
+    const {session,memberships}=await getPilotSessionContext();
+    if(!session){location.href='work-login-pilot.html';return;}
+    const resolved=resolveWorkSession({session,memberships});
+    if(!resolved.ok||resolved.actor.role!=='ORG_ADMIN'){
+      setStatus('authStatus','หน้านี้ใช้ได้เฉพาะ ORG_ADMIN','error');return;
+    }
+    $('workspace').classList.remove('hidden');
+    setStatus('authStatus','พร้อมสร้างบัญชีทดสอบ · ORG_ADMIN','ok');
+    renderRoles();
+  }
+
+  init().catch((error)=>setStatus('authStatus',`เชื่อมระบบไม่สำเร็จ: ${error.message}`,'error'));
+</script>
+</body>
+</html>
