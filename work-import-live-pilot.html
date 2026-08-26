@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GP Work Tracking authenticated CSV import pilot">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GP Work Tracking · นำเข้า CSV จริง</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--line:#dce6f1;--muted:#64748b;--red:#b42318;--yellow:#98600c;--green:#16865c}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1160px)/2));display:flex;justify-content:space-between;align-items:center;gap:14px}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1160px;margin:auto;padding:28px 16px 60px}h1{font-size:clamp(28px,4vw,44px);margin:0 0 7px}.lead,.muted{color:var(--muted)}.lead{margin-top:0}.status,.notice,.gate{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;margin:14px 0}.status.ok,.gate.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error,.gate.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.notice{border-color:#f0cf8f;background:#fff8e8}.gate.warn{border-left:5px solid #e39a20}.upload{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.field{display:block;font-weight:700}.field input,.field select{display:block;width:100%;margin-top:6px;border:1px solid #c8d5e3;border-radius:10px;padding:10px 11px;background:#fff;font:inherit}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}.card small{display:block;color:var(--muted)}.card strong{font-size:26px}.card.error strong{color:var(--red)}.card.warning strong{color:var(--yellow)}.card.valid strong{color:var(--green)}.table{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}table{width:100%;border-collapse:collapse;min-width:840px}th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e8eef5;font-size:13px;vertical-align:top}th{background:#eef4fa}.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}.VALID{background:#e9f8f1;color:var(--green)}.WARNING{background:#fff4dc;color:var(--yellow)}.ERROR{background:#feeceb;color:var(--red)}ul{margin:5px 0;padding-left:18px}.empty{text-align:center;padding:34px;color:var(--muted)}.confirm{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;margin-top:14px;display:grid;gap:9px}.check{display:flex;gap:9px;align-items:flex-start}.check input{margin-top:4px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy);text-decoration:none}.btn:disabled{opacity:.45;cursor:not-allowed}.hidden{display:none!important}.foot{font-size:12px;color:var(--muted);margin-top:14px}@media(max-width:700px){.cards,.upload{grid-template-columns:1fr 1fr}.top{align-items:flex-start;flex-direction:column}}@media(max-width:520px){.cards,.upload{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Live Import Pilot</strong><nav><a href="work-dashboard-live-pilot.html">Dashboard</a> · <a href="work-login-pilot.html">Workspace</a> · <a href="../">GP หลัก</a></nav></header>
+<main class="wrap">
+  <h1>นำเข้า CSV เข้าฐานข้อมูลจริง</h1>
+  <p class="lead">ตรวจใน Browser ก่อน → Human confirmation → RPC ตรวจซ้ำ → commit ทั้งชุดแบบ transaction → Audit</p>
+
+  <div id="authStatus" class="status">กำลังตรวจสิทธิ...</div>
+  <div class="notice"><strong>Privacy:</strong> ไฟล์ CSV ดิบไม่ถูกอัปโหลดหรือเก็บถาวร ระบบส่งเฉพาะข้อมูลโครงการที่แปลงแล้วเมื่อคุณกด “ยืนยันบันทึกจริง” โดยชื่อไฟล์จะถูกเก็บเป็น metadata ของ Import Batch เพื่อการตรวจสอบย้อนหลัง</div>
+
+  <section id="workspace" class="hidden">
+    <section class="upload">
+      <label class="field">กอง/หน่วยที่จะรับข้อมูล<select id="departmentSelect"></select></label>
+      <label class="field">ไฟล์ CSV<input id="csvFile" type="file" accept=".csv,text/csv"></label>
+    </section>
+
+    <section class="cards">
+      <article class="card"><small>แถวทั้งหมด</small><strong id="total">0</strong></article>
+      <article class="card valid"><small>ผ่าน</small><strong id="valid">0</strong></article>
+      <article class="card warning"><small>เตือน</small><strong id="warnings">0</strong></article>
+      <article class="card error"><small>ไม่ผ่าน</small><strong id="errors">0</strong></article>
+    </section>
+
+    <div id="gate" class="gate">ยังไม่ได้เลือกไฟล์</div>
+    <div class="table">
+      <table>
+        <thead><tr><th>แถว CSV</th><th>สถานะ</th><th>โครงการ</th><th>ประเด็นตรวจพบ</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="4" class="empty">เลือกไฟล์ CSV เพื่อเริ่มตรวจ</td></tr></tbody>
+      </table>
+    </div>
+
+    <section class="confirm">
+      <label id="warningConfirmRow" class="check hidden"><input id="confirmWarnings" type="checkbox"><span>ฉันตรวจข้อสังเกต WARNING แล้ว และยืนยันให้นำเข้าตามข้อมูลนี้</span></label>
+      <label class="check"><input id="confirmCommit" type="checkbox"><span>ฉันยืนยันว่าตรวจ Preview แล้ว และต้องการบันทึกข้อมูลนี้เข้าฐานจริง</span></label>
+      <div class="actions"><button id="commitBtn" class="btn" type="button" disabled>ยืนยันบันทึกจริง</button><a class="btn secondary" href="work-tracking-import-preview.html">เปิดหน้า Preview local-only</a></div>
+      <div id="commitStatus" class="status">ยังไม่มีการบันทึก</div>
+    </section>
+    <p class="foot">ข้อจำกัด Pilot: ไม่เกิน 500 โครงการต่อ batch · ERROR ห้าม commit · WARNING ต้องยืนยันรับทราบ · Server ตรวจ role, tenant, department, duplicate code, ตัวเลข, วันที่ และสถานะอีกครั้งก่อนเขียนฐาน</p>
+  </section>
+</main>
+
+<script type="module">
+  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+  import { buildProjectImportPreview } from './src/work-tracking/import-preview.mjs';
+  import { buildCommitProjectImportRpc } from './src/work-tracking/import-rpc-adapter.mjs';
+
+  const $ = (id) => document.getElementById(id);
+  const MAX_ROWS = 500;
+  const MAX_FILE_BYTES = 2 * 1024 * 1024;
+  let actor = null;
+  let preview = null;
+  let selectedFile = null;
+  let committed = false;
+
+  const requestId = () => globalThis.crypto?.randomUUID?.() || `req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const setText = (id, value) => { $(id).textContent = String(value); };
+  const setStatus = (id, message, kind = '') => { const node=$(id); node.textContent=message; node.className=`status ${kind}`.trim(); };
+
+  function commitAllowed() {
+    if (committed || !preview || !preview.canCommit || preview.summary.totalRows > MAX_ROWS) return false;
+    if (!$('departmentSelect').value || !$('confirmCommit').checked) return false;
+    if (preview.requiresWarningConfirmation && !$('confirmWarnings').checked) return false;
+    return true;
+  }
+
+  function syncCommitButton() { $('commitBtn').disabled = !commitAllowed(); }
+
+  function renderPreview(nextPreview) {
+    preview = nextPreview;
+    committed = false;
+    setText('total', preview.summary.totalRows);
+    setText('valid', preview.summary.valid);
+    setText('warnings', preview.summary.warnings);
+    setText('errors', preview.summary.errors);
+    $('confirmCommit').checked = false;
+    $('confirmWarnings').checked = false;
+    $('warningConfirmRow').classList.toggle('hidden', !preview.requiresWarningConfirmation);
+
+    if (preview.summary.totalRows > MAX_ROWS) {
+      $('gate').className='gate error';
+      $('gate').textContent=`⛔ เกินขนาด batch: ${preview.summary.totalRows} แถว (สูงสุด ${MAX_ROWS})`;
+    } else if (preview.summary.errors > 0) {
+      $('gate').className='gate error';
+      $('gate').textContent=`⛔ ยังนำเข้าไม่ได้: พบ ${preview.summary.errors} แถวที่ต้องแก้ก่อน`;
+    } else if (preview.summary.warnings > 0) {
+      $('gate').className='gate warn';
+      $('gate').textContent=`⚠️ ผ่านแบบมีข้อสังเกต ${preview.summary.warnings} แถว ต้องยืนยัน WARNING ก่อน commit`;
+    } else if (preview.summary.totalRows > 0) {
+      $('gate').className='gate ok';
+      $('gate').textContent='✅ ผ่านด่านตรวจ Browser พร้อมให้ยืนยันบันทึกจริง';
+    } else {
+      $('gate').className='gate error';
+      $('gate').textContent='ไม่พบข้อมูลที่นำเข้าได้';
+    }
+
+    const body=$('rows'); body.replaceChildren();
+    if (!preview.rows.length) {
+      const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=4; td.className='empty'; td.textContent='ไม่พบข้อมูล'; tr.appendChild(td); body.appendChild(tr); syncCommitButton(); return;
+    }
+
+    for (const row of preview.rows) {
+      const tr=document.createElement('tr');
+      const rowNo=document.createElement('td'); rowNo.textContent=String(row.row);
+      const status=document.createElement('td'); const badge=document.createElement('span'); badge.className=`badge ${row.status}`; badge.textContent=row.status; status.appendChild(badge);
+      const project=document.createElement('td'); project.textContent=row.project ? `${row.project.id} · ${row.project.name}` : '-';
+      const issues=document.createElement('td');
+      if (!row.issues.length) issues.textContent='ไม่พบประเด็น';
+      else { const ul=document.createElement('ul'); for (const item of row.issues) { const li=document.createElement('li'); li.textContent=`${item.code}: ${item.message || item.code}`; ul.appendChild(li); } issues.appendChild(ul); }
+      tr.append(rowNo,status,project,issues); body.appendChild(tr);
+    }
+    syncCommitButton();
+  }
+
+  async function loadActorAndDepartments() {
+    const { session, memberships } = await getPilotSessionContext();
+    if (!session) { location.href='work-login-pilot.html'; return; }
+    const resolved=resolveWorkSession({session,memberships});
+    if (!resolved.ok) { setStatus('authStatus','บัญชีนี้ยังไม่มี Membership สำหรับ Work Tracking','error'); return; }
+    actor=resolved.actor;
+    if (!['ORG_ADMIN','DIRECTOR'].includes(actor.role)) {
+      setStatus('authStatus','หน้า Live Import ใช้ได้เฉพาะ ORG_ADMIN หรือ DIRECTOR','error');
+      return;
+    }
+
+    const { data,error }=await supabase.from('departments').select('id,name,organization_id').eq('organization_id',actor.organizationId).eq('active',true).order('name');
+    if (error) throw error;
+    const select=$('departmentSelect'); select.replaceChildren();
+    for (const dep of data || []) {
+      if (actor.role==='DIRECTOR' && dep.id!==actor.departmentId) continue;
+      const option=document.createElement('option'); option.value=dep.id; option.textContent=dep.name; select.appendChild(option);
+    }
+    if (actor.departmentId) select.value=actor.departmentId;
+    select.disabled=actor.role==='DIRECTOR';
+    $('workspace').classList.remove('hidden');
+    setStatus('authStatus',`พร้อมใช้งาน · ${actor.role}`,'ok');
+  }
+
+  $('csvFile').addEventListener('change', async () => {
+    selectedFile=$('csvFile').files?.[0] || null;
+    preview=null; committed=false; syncCommitButton();
+    if (!selectedFile) return;
+    if (selectedFile.size > MAX_FILE_BYTES) {
+      $('gate').className='gate error'; $('gate').textContent='⛔ ไฟล์ใหญ่เกิน 2 MB สำหรับ Pilot'; return;
+    }
+    try {
+      const text=await selectedFile.text();
+      renderPreview(buildProjectImportPreview(text,actor.organizationId));
+      setStatus('commitStatus','Preview พร้อมแล้ว · ยังไม่มีข้อมูลถูกส่งไป Server');
+    } catch (error) {
+      $('gate').className='gate error'; $('gate').textContent=`อ่านไฟล์ไม่สำเร็จ: ${error.message}`;
+    }
+  });
+
+  async function commitImport() {
+    if (!commitAllowed()) return;
+    $('commitBtn').disabled=true;
+    setStatus('commitStatus','กำลังส่งข้อมูลที่ผ่าน Preview ให้ Server ตรวจซ้ำและ commit...');
+    try {
+      const args=buildCommitProjectImportRpc({
+        preview,
+        organizationId:actor.organizationId,
+        departmentId:$('departmentSelect').value,
+        filename:selectedFile?.name || 'import.csv',
+        confirmWarnings:$('confirmWarnings').checked,
+        requestId:requestId(),
+      });
+      const { data,error }=await supabase.rpc('commit_project_import',args);
+      if (error) throw error;
+      const batch=Array.isArray(data)?data[0]:data;
+      committed=true;
+      const batchId=batch?.id ? ` · Batch ${batch.id}` : '';
+      setStatus('commitStatus',`✅ บันทึกสำเร็จ ${preview.summary.totalRows} โครงการ${batchId}`,'ok');
+      $('gate').className='gate ok'; $('gate').textContent='✅ Commit สำเร็จแล้ว เปิด Dashboard เพื่อตรวจผลได้';
+    } catch (error) {
+      setStatus('commitStatus',`บันทึกไม่สำเร็จ: ${error.message || 'UNKNOWN_ERROR'}`,'error');
+    } finally {
+      syncCommitButton();
+    }
+  }
+
+  $('commitBtn').addEventListener('click',commitImport);
+  $('confirmCommit').addEventListener('change',syncCommitButton);
+  $('confirmWarnings').addEventListener('change',syncCommitButton);
+  $('departmentSelect').addEventListener('change',syncCommitButton);
+
+  loadActorAndDepartments().catch((error)=>setStatus('authStatus',`เชื่อมระบบไม่สำเร็จ: ${error.message}`,'error'));
+</script>
+</body>
+</html>
