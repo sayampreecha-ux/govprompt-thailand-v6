@@ -3,37 +3,26 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="GP Work Tracking Pilot sign in">
+  <meta name="description" content="GP Work Tracking passwordless Pilot sign in">
   <meta name="robots" content="noindex,nofollow">
   <title>GP Work Tracking · เข้าสู่ระบบ Pilot</title>
   <style>
     :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c}
-    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 960px)/2));display:flex;justify-content:space-between}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:960px;margin:auto;padding:36px 16px 70px}.hero{text-align:center;max-width:680px;margin:auto}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p{color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}.card h2{margin-top:0}.field{display:block;margin:12px 0;font-weight:700}.field input{width:100%;padding:11px 12px;border:1px solid #c8d5e3;border-radius:10px;margin-top:6px}.btn{width:100%;border:0;border-radius:11px;padding:11px 14px;background:var(--navy);color:#fff;font-weight:800}.btn.secondary{background:#eef4fa;color:var(--navy);margin-top:8px}.status{margin-top:13px;padding:11px;border-radius:10px;background:#f1f5f9;color:#465970}.status.error{background:#feeceb;color:var(--red)}.status.ok{background:#e9f8f1;color:var(--green)}.context{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px}.muted{color:var(--muted);font-size:13px}.hidden{display:none}.go{display:inline-flex;text-decoration:none;border-radius:10px;padding:9px 12px;background:var(--blue);color:#fff;font-weight:800;margin-right:6px;margin-top:7px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 900px)/2));display:flex;justify-content:space-between}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:900px;margin:auto;padding:42px 16px 70px}.hero{text-align:center;max-width:690px;margin:auto}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p{color:var(--muted)}.card{max-width:620px;margin:28px auto 0;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.field{display:block;margin:12px 0;font-weight:700}.field input{width:100%;padding:12px;border:1px solid #c8d5e3;border-radius:10px;margin-top:6px;font:inherit}.btn{width:100%;border:0;border-radius:11px;padding:12px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy);margin-top:8px}.status{margin-top:13px;padding:11px;border-radius:10px;background:#f1f5f9;color:#465970}.status.error{background:#feeceb;color:var(--red)}.status.ok{background:#e9f8f1;color:var(--green)}.context{margin-top:20px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}.go{display:inline-flex;text-decoration:none;border-radius:10px;padding:9px 12px;background:var(--blue);color:#fff;font-weight:800;margin-right:6px;margin-top:7px}.privacy{background:#eef6ff;border:1px solid #cfe3fa;border-radius:11px;padding:11px 12px;margin:12px 0;color:#35536f}
   </style>
 </head>
 <body>
 <header class="top"><strong>GovPrompt · Organization Pilot</strong><a href="../">GP หลัก</a></header>
 <main class="wrap">
-  <section class="hero"><div class="muted">INTERNAL PILOT · SUPABASE AUTH + RLS</div><h1>เข้าสู่ระบบ Work Tracking</h1><p>สมัครบัญชีได้ก่อน แต่จะเห็นข้อมูลขององค์กรเมื่ออีเมลนั้นได้รับคำเชิญ Pilot และ Claim Membership สำเร็จเท่านั้น</p></section>
+  <section class="hero"><div class="muted">INTERNAL PILOT · PASSWORDLESS AUTH + RLS</div><h1>เข้าสู่ระบบ Work Tracking</h1><p>รับลิงก์เข้าสู่ระบบทางอีเมล ไม่ต้องสร้างหรือจำรหัสผ่าน และจะเห็นข้อมูลองค์กรได้ต่อเมื่ออีเมลนั้นมีคำเชิญ Pilot ที่ถูกต้องเท่านั้น</p></section>
 
-  <section class="grid">
-    <article class="card">
-      <h2>เข้าสู่ระบบ</h2>
-      <label class="field">อีเมล<input id="loginEmail" type="email" autocomplete="email"></label>
-      <label class="field">รหัสผ่าน<input id="loginPassword" type="password" autocomplete="current-password"></label>
-      <button id="loginBtn" class="btn" type="button">เข้าสู่ระบบ</button>
-      <button id="logoutBtn" class="btn secondary hidden" type="button">ออกจากระบบ</button>
-      <div id="loginStatus" class="status">ยังไม่ได้เข้าสู่ระบบ</div>
-    </article>
-
-    <article class="card">
-      <h2>สร้างบัญชี Pilot</h2>
-      <p class="muted">ใช้เฉพาะผู้ที่จะร่วมทดสอบภายในองค์กร หลังสมัครอาจต้องยืนยันอีเมลตามการตั้งค่า Supabase</p>
-      <label class="field">อีเมล<input id="signupEmail" type="email" autocomplete="email"></label>
-      <label class="field">รหัสผ่าน<input id="signupPassword" type="password" autocomplete="new-password" minlength="8"></label>
-      <button id="signupBtn" class="btn" type="button">สร้างบัญชี</button>
-      <div id="signupStatus" class="status">ยังไม่ได้สมัครบัญชี</div>
-    </article>
+  <section class="card">
+    <h2>ส่งลิงก์เข้าสู่ระบบ</h2>
+    <div class="privacy">ระบบจะสร้างบัญชี Auth ได้เมื่อจำเป็น แต่บัญชีที่ไม่มี Membership จะไม่เห็นข้อมูล Work Tracking</div>
+    <label class="field">อีเมล<input id="magicEmail" type="email" autocomplete="email" inputmode="email"></label>
+    <button id="magicBtn" class="btn" type="button">ส่งลิงก์เข้าสู่ระบบ</button>
+    <button id="logoutBtn" class="btn secondary hidden" type="button">ออกจากระบบ</button>
+    <div id="loginStatus" class="status">ยังไม่ได้เข้าสู่ระบบ</div>
   </section>
 
   <section id="contextCard" class="context hidden">
@@ -56,107 +45,63 @@
 <script type="module">
   import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
   import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+  import { requestPilotMagicLink } from './src/work-tracking/pilot-auth.mjs';
 
-  const $ = (id) => document.getElementById(id);
-  const setStatus = (id, message, kind = '') => { const node = $(id); node.textContent = message; node.className = `status ${kind}`.trim(); };
+  const $=(id)=>document.getElementById(id);
+  const setStatus=(message,kind='')=>{const node=$('loginStatus');node.textContent=message;node.className=`status ${kind}`.trim();};
+  const redirectTo=()=>new URL('./',location.href).href;
 
-  function renderContext(resolved) {
-    const box = $('contextText');
-    box.replaceChildren();
-    if (resolved.ok) {
-      const ready = document.createElement('p');
-      ready.append('พร้อมใช้งาน: ');
-      const role = document.createElement('strong');
-      role.textContent = resolved.actor.role;
-      ready.appendChild(role);
-      const scope = document.createElement('p');
-      scope.className = 'muted';
-      scope.textContent = `องค์กร: ${resolved.actor.organizationId}${resolved.actor.departmentId ? ` · กอง/หน่วย: ${resolved.actor.departmentId}` : ''}`;
-      box.append(ready, scope);
-      return;
+  function renderContext(resolved){
+    const box=$('contextText');box.replaceChildren();
+    if(resolved.ok){
+      const ready=document.createElement('p');ready.append('พร้อมใช้งาน: ');
+      const role=document.createElement('strong');role.textContent=resolved.actor.role;ready.appendChild(role);
+      const scope=document.createElement('p');scope.className='muted';scope.textContent=`องค์กร: ${resolved.actor.organizationId}${resolved.actor.departmentId?` · กอง/หน่วย: ${resolved.actor.departmentId}`:''}`;
+      box.append(ready,scope);return;
     }
-
-    if (resolved.code === 'ORGANIZATION_SELECTION_REQUIRED') {
-      const p = document.createElement('p');
-      p.textContent = 'บัญชีนี้มีหลายองค์กร ระบบ Pilot จะเพิ่มตัวเลือกองค์กรในขั้นถัดไป';
-      box.appendChild(p);
-      return;
+    if(resolved.code==='ORGANIZATION_SELECTION_REQUIRED'){
+      const p=document.createElement('p');p.textContent='บัญชีนี้มีหลายองค์กร ระบบ Pilot ต้องเลือกบริบทองค์กรก่อนใช้งาน';box.appendChild(p);return;
     }
-
-    const title = document.createElement('p');
-    const strong = document.createElement('strong');
-    strong.textContent = 'บัญชีสร้างแล้ว แต่ยังไม่มีสิทธิองค์กร';
-    title.appendChild(strong);
-    const detail = document.createElement('p');
-    detail.className = 'muted';
-    detail.textContent = 'ต้องมีคำเชิญ Pilot ที่ตรงกับอีเมลนี้ก่อน ระบบจึงจะ Claim Membership ให้อัตโนมัติ';
-    box.append(title, detail);
+    const title=document.createElement('p');const strong=document.createElement('strong');strong.textContent='บัญชีนี้ยังไม่มีสิทธิองค์กร';title.appendChild(strong);
+    const detail=document.createElement('p');detail.className='muted';detail.textContent='ต้องมีคำเชิญ Pilot ที่ตรงกับอีเมลนี้ก่อน ระบบจึงจะ Claim Membership ให้อัตโนมัติ';
+    box.append(title,detail);
   }
 
-  async function claimInviteIfAvailable() {
-    const { data, error } = await supabase.rpc('claim_work_pilot_invite');
-    if (error) return { ok: false, code: 'CLAIM_FAILED' };
-    return data || { ok: false, code: 'NO_ACTIVE_INVITE' };
+  async function claimInviteIfAvailable(){
+    const {data,error}=await supabase.rpc('claim_work_pilot_invite');
+    if(error)return{ok:false,code:'CLAIM_FAILED'};
+    return data||{ok:false,code:'NO_ACTIVE_INVITE'};
   }
 
-  async function refreshContext({ tryClaim = true } = {}) {
-    let { session, memberships } = await getPilotSessionContext();
-    const card = $('contextCard');
-    const links = $('links');
-    const logout = $('logoutBtn');
-    card.classList.toggle('hidden', !session);
-    logout.classList.toggle('hidden', !session);
-
-    if (!session) {
-      setStatus('loginStatus', 'ยังไม่ได้เข้าสู่ระบบ');
-      return;
+  async function refreshContext({tryClaim=true}={}){
+    let {session,memberships}=await getPilotSessionContext();
+    $('contextCard').classList.toggle('hidden',!session);
+    $('logoutBtn').classList.toggle('hidden',!session);
+    if(!session){setStatus('ยังไม่ได้เข้าสู่ระบบ');return;}
+    if(memberships.length===0&&tryClaim){
+      const claim=await claimInviteIfAvailable();
+      if(claim?.ok)({session,memberships}=await getPilotSessionContext());
     }
-
-    if (memberships.length === 0 && tryClaim) {
-      const claim = await claimInviteIfAvailable();
-      if (claim?.ok) ({ session, memberships } = await getPilotSessionContext());
-    }
-
-    setStatus('loginStatus', 'เข้าสู่ระบบแล้ว', 'ok');
-    const resolved = resolveWorkSession({ session, memberships });
+    setStatus('เข้าสู่ระบบแล้ว','ok');
+    const resolved=resolveWorkSession({session,memberships});
     renderContext(resolved);
-    links.classList.toggle('hidden', !resolved.ok);
+    $('links').classList.toggle('hidden',!resolved.ok);
   }
 
-  $('loginBtn').addEventListener('click', async () => {
-    const email = $('loginEmail').value.trim();
-    const password = $('loginPassword').value;
-    if (!email || !password) return setStatus('loginStatus', 'กรอกอีเมลและรหัสผ่าน', 'error');
-    setStatus('loginStatus', 'กำลังเข้าสู่ระบบ...');
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return setStatus('loginStatus', 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจข้อมูลหรือยืนยันอีเมลก่อน', 'error');
-    await refreshContext({ tryClaim: true });
+  $('magicBtn').addEventListener('click',async()=>{
+    const email=$('magicEmail').value.trim();
+    if(!email)return setStatus('กรอกอีเมลก่อน','error');
+    $('magicBtn').disabled=true;setStatus('กำลังส่งลิงก์เข้าสู่ระบบ...');
+    try{
+      await requestPilotMagicLink({client:supabase,email,redirectTo:redirectTo()});
+      setStatus('ส่งลิงก์แล้ว กรุณาเปิดอีเมลและกดลิงก์เพื่อกลับเข้าสู่ Pilot','ok');
+    }catch(error){setStatus(`ส่งลิงก์ไม่สำเร็จ: ${error.message||'UNKNOWN_ERROR'}`,'error');}
+    finally{$('magicBtn').disabled=false;}
   });
 
-  $('signupBtn').addEventListener('click', async () => {
-    const email = $('signupEmail').value.trim();
-    const password = $('signupPassword').value;
-    if (!email || password.length < 8) return setStatus('signupStatus', 'กรอกอีเมลและรหัสผ่านอย่างน้อย 8 ตัวอักษร', 'error');
-    setStatus('signupStatus', 'กำลังสร้างบัญชี...');
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return setStatus('signupStatus', 'สร้างบัญชีไม่สำเร็จ', 'error');
-    if (data.session) {
-      setStatus('signupStatus', 'สร้างบัญชีและเข้าสู่ระบบแล้ว · กำลังตรวจคำเชิญ Pilot', 'ok');
-      await refreshContext({ tryClaim: true });
-    } else {
-      setStatus('signupStatus', 'สร้างบัญชีแล้ว · กรุณาตรวจอีเมลเพื่อยืนยัน จากนั้นกลับมาเข้าสู่ระบบ', 'ok');
-    }
-  });
-
-  $('logoutBtn').addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    $('contextCard').classList.add('hidden');
-    $('logoutBtn').classList.add('hidden');
-    setStatus('loginStatus', 'ออกจากระบบแล้ว');
-  });
-
-  supabase.auth.onAuthStateChange(() => { setTimeout(() => refreshContext({ tryClaim: true }).catch(() => {}), 0); });
-  refreshContext({ tryClaim: true }).catch(() => setStatus('loginStatus', 'เชื่อมระบบบัญชีไม่สำเร็จ', 'error'));
+  $('logoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();$('contextCard').classList.add('hidden');$('logoutBtn').classList.add('hidden');setStatus('ออกจากระบบแล้ว');});
+  supabase.auth.onAuthStateChange(()=>{setTimeout(()=>refreshContext({tryClaim:true}).catch(()=>{}),0);});
+  refreshContext({tryClaim:true}).catch(()=>setStatus('เชื่อมระบบบัญชีไม่สำเร็จ','error'));
 </script>
 </body>
 </html>
