@@ -5,11 +5,14 @@ import fs from 'node:fs';
 const html = fs.readFileSync(new URL('../work-login-pilot.html', import.meta.url), 'utf8');
 const client = fs.readFileSync(new URL('../src/work-tracking/supabase-browser.mjs', import.meta.url), 'utf8');
 
-test('pilot auth page uses Supabase Auth and membership resolver', () => {
-  assert.match(html, /signInWithPassword/);
-  assert.match(html, /auth\.signUp/);
+test('pilot auth page uses passwordless magic link and membership resolver', () => {
+  assert.match(html, /requestPilotMagicLink/);
   assert.match(html, /resolveWorkSession/);
+  assert.match(html, /claim_work_pilot_invite/);
   assert.match(client, /organization_memberships/);
+  assert.doesNotMatch(html, /signInWithPassword/);
+  assert.doesNotMatch(html, /auth\.signUp/);
+  assert.doesNotMatch(html, /type="password"/);
 });
 
 test('browser client contains only publishable credential class, never server secret', () => {
@@ -21,13 +24,13 @@ test('browser client contains only publishable credential class, never server se
 
 test('membership is required before organization links are shown', () => {
   assert.match(html, /ยังไม่มีสิทธิองค์กร/);
-  assert.match(html, /links\.classList\.toggle\('hidden', !resolved\.ok\)/);
+  assert.match(html, /classList\.toggle\('hidden',!resolved\.ok\)/);
   assert.match(html, /resolveWorkSession/);
 });
 
 test('pilot login safely renders session context and links back to production GP root', () => {
   assert.match(html, /box\.replaceChildren\(\)/);
-  assert.match(html, /textContent\s*=/);
+  assert.match(html, /textContent=/);
   assert.doesNotMatch(html, /innerHTML\s*=/);
   assert.match(html, /href="\.\.\/">GP หลัก/);
   assert.match(html, /noindex,nofollow/);
