@@ -36,6 +36,7 @@ jobs:
           node --check src/work-tracking/access-control.mjs
           node --check src/work-tracking/audit.mjs
           node --check src/work-tracking/import-preview.mjs
+          node --check src/work-tracking/import-rpc-adapter.mjs
           node --check src/work-tracking/project-service.mjs
           node --check src/work-tracking/task-model.mjs
           node --check src/work-tracking/task-service.mjs
