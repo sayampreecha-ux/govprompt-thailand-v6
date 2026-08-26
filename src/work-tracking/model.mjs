@@ -29,9 +29,11 @@ export function normalizeProject(input = {}) {
   return {
     id: String(input.id || '').trim(),
     organizationId: String(input.organizationId || '').trim(),
+    departmentId: String(input.departmentId || '').trim(),
     department: String(input.department || '').trim(),
     projectType: String(input.projectType || '').trim(),
     name: String(input.name || '').trim(),
+    ownerUserId: String(input.ownerUserId || '').trim(),
     owner: String(input.owner || '').trim(),
     location: String(input.location || '').trim(),
     contractNo: String(input.contractNo || '').trim(),
@@ -114,20 +116,13 @@ export function assessProjectRisk(projectInput, now = new Date()) {
     level,
     score,
     reasons: reasons.length ? reasons : ['ยังไม่พบสัญญาณความเสี่ยงสำคัญ'],
-    metrics: {
-      variance,
-      daysRemaining,
-      budgetUtilization,
-    },
+    metrics: { variance, daysRemaining, budgetUtilization },
   };
 }
 
 export function buildDashboardSummary(projects = [], now = new Date()) {
   const normalized = projects.map(normalizeProject);
-  const risks = normalized.map((project) => ({
-    project,
-    risk: assessProjectRisk(project, now),
-  }));
+  const risks = normalized.map((project) => ({ project, risk: assessProjectRisk(project, now) }));
 
   const counts = {
     total: normalized.length,
