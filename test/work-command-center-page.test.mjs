@@ -1,0 +1,19 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const html = fs.readFileSync(new URL('../work-command-center-pilot.html', import.meta.url), 'utf8');
+
+test('command center page uses deterministic command center core', () => {
+  assert.match(html, /buildCommandCenter/);
+  assert.match(html, /Action Queue/);
+  assert.match(html, /โครงการเร่งด่วน/);
+  assert.match(html, /งานย่อยเร่งด่วน/);
+});
+
+test('command center page does not add network or persistence primitives', () => {
+  assert.doesNotMatch(html, /\bfetch\s*\(/);
+  assert.doesNotMatch(html, /XMLHttpRequest/);
+  assert.doesNotMatch(html, /localStorage|sessionStorage|indexedDB/i);
+  assert.doesNotMatch(html, /createClient|supabase\.(from|rpc)/i);
+});
