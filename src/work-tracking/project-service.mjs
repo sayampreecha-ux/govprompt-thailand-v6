@@ -3,8 +3,9 @@ import { AUDIT_ACTION, createAuditEvent } from './audit.mjs';
 import { normalizeProject } from './model.mjs';
 import { validateProjectQuality, DATA_QUALITY_SEVERITY } from './data-quality.mjs';
 
+// ownerUserId is intentionally excluded. Re-assignment requires PROJECT_ASSIGN.
 const MUTABLE_FIELDS = Object.freeze([
-  'name', 'projectType', 'ownerUserId', 'owner', 'location', 'contractNo', 'contractor',
+  'name', 'projectType', 'owner', 'location', 'contractNo', 'contractor',
   'budget', 'spent', 'plannedProgress', 'actualProgress', 'startDate', 'dueDate',
   'status', 'lastUpdatedAt', 'problem',
 ]);
@@ -37,6 +38,7 @@ export function prepareProjectUpdate({ actor = {}, existingProject = {}, patch =
     organizationId: existing.organizationId,
     departmentId: existing.departmentId,
     department: existing.department,
+    ownerUserId: existing.ownerUserId,
   });
 
   const issues = validateProjectQuality(next);
@@ -71,4 +73,46 @@ export function prepareProjectUpdate({ actor = {}, existingProject = {}, patch =
   });
 
   return { ok: true, code: 'READY_TO_PERSIST', authorization, project: next, issues, auditEvent };
+}
+
+export function prepareProjectAssignment({ actor = {}, existingProject = {}, ownerUserId = '', owner = '', audit = {} } = {}) {
+  const existing = normalizeProject(existingProject);
+  const authorization = authorizeWorkAction({
+    actor,
+    action: ACCESS_ACTION.PROJECT_ASSIGN,
+    resource: {
+      organizationId: existing.organizationId,
+      departmentId: existing.departmentId,
+      ownerUserId: existing.ownerUserId,
+    },
+  });
+
+  if (!authorization.allowed) {
+    return { ok: false, code: authorization.reason, authorization, project: existing, issues: [] };
+  }
+
+  const nextOwnerUserId = String(ownerUserId || '').trim();
+  if (!nextOwnerUserId) {
+    return { ok: false, code: 'OWNER_REQUIRED', authorization, project: existing, issues: [] };
+  }
+
+  const next = normalizeProject({ ...existing, ownerUserId: nextOwnerUserId, owner: owner || existing.owner });
+  const auditEvent = createAuditEvent({
+    eventId: audit.eventId,
+    organizationId: existing.organizationId,
+    departmentId: existing.departmentId,
+    actorUserId: actor.userId,
+    action: AUDIT_ACTION.PROJECT_ASSIGNED,
+    entityType: 'PROJECT',
+    entityId: existing.id,
+    occurredAt: audit.occurredAt,
+    requestId: audit.requestId,
+    metadata: {
+      projectId: existing.id,
+      changedFields: ['ownerUserId'],
+      source: audit.source || 'WORK_TRACKING',
+    },
+  });
+
+  return { ok: true, code: 'READY_TO_PERSIST', authorization, project: next, issues: [], auditEvent };
 }
