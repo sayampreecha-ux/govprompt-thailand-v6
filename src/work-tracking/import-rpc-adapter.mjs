@@ -2,6 +2,7 @@ import { IMPORT_ROW_STATUS } from './import-preview.mjs';
 import { normalizeProject } from './model.mjs';
 
 const normalize = (value) => String(value || '').trim();
+const normalizeDepartment = (value) => normalize(value).replace(/\s+/g, ' ').toLocaleLowerCase('th-TH');
 const MAX_IMPORT_ROWS = 500;
 
 export function toImportProjectRow(projectInput = {}) {
@@ -33,10 +34,29 @@ export function countUnresolvedImportOwners(preview = {}) {
   }).length;
 }
 
+export function findImportDepartmentMismatches(preview = {}, departmentName = '') {
+  if (!Array.isArray(preview.rows)) return [];
+  const selected = normalizeDepartment(departmentName);
+  if (!selected) return [];
+
+  return preview.rows.flatMap((row) => {
+    if (!row?.project || row.status === IMPORT_ROW_STATUS.ERROR) return [];
+    const source = normalize(row.project.department);
+    if (!source || normalizeDepartment(source) === selected) return [];
+    return [{
+      row: row.row,
+      projectCode: normalize(row.project.id),
+      sourceDepartment: source,
+      selectedDepartment: normalize(departmentName),
+    }];
+  });
+}
+
 export function buildCommitProjectImportRpc({
   preview = {},
   organizationId = '',
   departmentId = '',
+  departmentName = '',
   filename = '',
   confirmWarnings = false,
   requestId = '',
@@ -53,6 +73,10 @@ export function buildCommitProjectImportRpc({
 
   const errors = preview.rows.filter((row) => row.status === IMPORT_ROW_STATUS.ERROR);
   if (errors.length) throw new Error('IMPORT_HAS_ERRORS');
+
+  if (findImportDepartmentMismatches(preview, departmentName).length > 0) {
+    throw new Error('IMPORT_DEPARTMENT_MISMATCH');
+  }
 
   const warnings = preview.rows.filter((row) => row.status === IMPORT_ROW_STATUS.WARNING);
   const unresolvedOwners = countUnresolvedImportOwners(preview);
