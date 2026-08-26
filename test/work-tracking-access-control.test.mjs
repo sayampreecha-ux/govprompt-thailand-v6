@@ -57,14 +57,35 @@ test('director is restricted to their department for operational changes', () =>
   assert.equal(result.reason, 'DEPARTMENT_MISMATCH');
 });
 
-test('officer cannot update another assigned owner project', () => {
-  const result = authorizeWorkAction({
+test('officer can update only work explicitly assigned to them', () => {
+  const assigned = authorizeWorkAction({
+    actor: actor(),
+    action: ACCESS_ACTION.PROJECT_UPDATE,
+    resource: resource({ ownerUserId: 'U-1' }),
+  });
+  const otherOwner = authorizeWorkAction({
     actor: actor(),
     action: ACCESS_ACTION.PROJECT_UPDATE,
     resource: resource({ ownerUserId: 'U-OTHER' }),
   });
-  assert.equal(result.allowed, false);
-  assert.equal(result.reason, 'NOT_ASSIGNED_OWNER');
+  const unassignedProject = authorizeWorkAction({
+    actor: actor(),
+    action: ACCESS_ACTION.PROJECT_UPDATE,
+    resource: resource({ ownerUserId: '' }),
+  });
+  const unassignedTask = authorizeWorkAction({
+    actor: actor(),
+    action: ACCESS_ACTION.TASK_UPDATE,
+    resource: resource({ ownerUserId: null }),
+  });
+
+  assert.equal(assigned.allowed, true);
+  assert.equal(otherOwner.allowed, false);
+  assert.equal(otherOwner.reason, 'NOT_ASSIGNED_OWNER');
+  assert.equal(unassignedProject.allowed, false);
+  assert.equal(unassignedProject.reason, 'NOT_ASSIGNED_OWNER');
+  assert.equal(unassignedTask.allowed, false);
+  assert.equal(unassignedTask.reason, 'NOT_ASSIGNED_OWNER');
 });
 
 test('auditor is read-only and can read audit events', () => {
