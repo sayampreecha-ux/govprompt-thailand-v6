@@ -11,9 +11,15 @@ test('command center page uses deterministic command center core', () => {
   assert.match(html, /งานย่อยเร่งด่วน/);
 });
 
-test('command center page does not add network or persistence primitives', () => {
+test('command center page reads live RLS data without direct writes or browser persistence', () => {
+  assert.match(html, /getPilotSessionContext/);
+  assert.match(html, /resolveWorkSession/);
+  assert.match(html, /supabase\.from\('projects'\)/);
+  assert.match(html, /supabase\.from\('tasks'\)/);
+
   assert.doesNotMatch(html, /\bfetch\s*\(/);
   assert.doesNotMatch(html, /XMLHttpRequest/);
   assert.doesNotMatch(html, /localStorage|sessionStorage|indexedDB/i);
-  assert.doesNotMatch(html, /createClient|supabase\.(from|rpc)/i);
+  assert.doesNotMatch(html, /supabase\.rpc\s*\(/i);
+  assert.doesNotMatch(html, /\.insert\s*\(|\.update\s*\(|\.delete\s*\(|\.upsert\s*\(/i);
 });
