@@ -5,6 +5,7 @@ import { buildProjectImportPreview } from '../src/work-tracking/import-preview.m
 import {
   buildCommitProjectImportRpc,
   countUnresolvedImportOwners,
+  findImportDepartmentMismatches,
 } from '../src/work-tracking/import-rpc-adapter.mjs';
 
 const csv = [
@@ -18,6 +19,7 @@ test('maps acknowledged preview into RPC payload without raw CSV content', () =>
     preview,
     organizationId: 'ORG-A',
     departmentId: 'DEP-ENG',
+    departmentName: 'กองช่าง',
     filename: 'projects.csv',
     requestId: 'REQ-1',
     confirmWarnings: true,
@@ -37,7 +39,7 @@ test('does not build commit payload when preview contains errors', () => {
     'PJ-1,โครงการ A,กองช่าง,นาย ก,1000000,90,เสร็จสิ้น',
   ].join('\n'), 'ORG-A');
   assert.throws(() => buildCommitProjectImportRpc({
-    preview: bad, organizationId: 'ORG-A', departmentId: 'DEP-ENG', filename: 'bad.csv',
+    preview: bad, organizationId: 'ORG-A', departmentId: 'DEP-ENG', departmentName: 'กองช่าง', filename: 'bad.csv',
   }), /IMPORT_HAS_ERRORS/);
 });
 
@@ -48,11 +50,11 @@ test('warning preview requires explicit confirmation', () => {
   ].join('\n'), 'ORG-A');
 
   assert.throws(() => buildCommitProjectImportRpc({
-    preview: warning, organizationId: 'ORG-A', departmentId: 'DEP-ENG', filename: 'warning.csv',
+    preview: warning, organizationId: 'ORG-A', departmentId: 'DEP-ENG', departmentName: 'กองช่าง', filename: 'warning.csv',
   }), /WARNING_CONFIRMATION_REQUIRED/);
 
   const args = buildCommitProjectImportRpc({
-    preview: warning, organizationId: 'ORG-A', departmentId: 'DEP-ENG', filename: 'warning.csv', confirmWarnings: true,
+    preview: warning, organizationId: 'ORG-A', departmentId: 'DEP-ENG', departmentName: 'กองช่าง', filename: 'warning.csv', confirmWarnings: true,
   });
   assert.equal(args.p_confirm_warnings, true);
 });
@@ -61,8 +63,44 @@ test('CSV owner text requires acknowledgement because it is not silently mapped 
   const preview = buildProjectImportPreview(csv, 'ORG-A');
   assert.equal(countUnresolvedImportOwners(preview), 1);
   assert.throws(() => buildCommitProjectImportRpc({
-    preview, organizationId: 'ORG-A', departmentId: 'DEP-ENG', filename: 'owners.csv',
+    preview, organizationId: 'ORG-A', departmentId: 'DEP-ENG', departmentName: 'กองช่าง', filename: 'owners.csv',
   }), /WARNING_CONFIRMATION_REQUIRED/);
+});
+
+test('blocks non-empty CSV department that differs from selected commit department', () => {
+  const preview = buildProjectImportPreview([
+    'รหัสโครงการ,ชื่อโครงการ,กอง,งบประมาณ',
+    'PJ-MISMATCH,โครงการผิดกอง,กองคลัง,1000',
+  ].join('\n'), 'ORG-A');
+
+  const mismatches = findImportDepartmentMismatches(preview, 'กองช่าง');
+  assert.equal(mismatches.length, 1);
+  assert.equal(mismatches[0].row, 2);
+  assert.equal(mismatches[0].sourceDepartment, 'กองคลัง');
+  assert.throws(() => buildCommitProjectImportRpc({
+    preview,
+    organizationId: 'ORG-A',
+    departmentId: 'DEP-ENG',
+    departmentName: 'กองช่าง',
+    filename: 'wrong-department.csv',
+    confirmWarnings: true,
+  }), /IMPORT_DEPARTMENT_MISMATCH/);
+});
+
+test('department comparison tolerates surrounding and repeated whitespace but not a different unit', () => {
+  const preview = buildProjectImportPreview([
+    'รหัสโครงการ,ชื่อโครงการ,กอง,งบประมาณ',
+    'PJ-SPACES,โครงการกองตรง,"  กองช่าง  ",1000',
+  ].join('\n'), 'ORG-A');
+  assert.equal(findImportDepartmentMismatches(preview, 'กองช่าง').length, 0);
+});
+
+test('blank CSV department does not override or conflict with selected department authority', () => {
+  const preview = buildProjectImportPreview([
+    'รหัสโครงการ,ชื่อโครงการ,กอง,งบประมาณ',
+    'PJ-BLANK,โครงการไม่ระบุกอง,,1000',
+  ].join('\n'), 'ORG-A');
+  assert.equal(findImportDepartmentMismatches(preview, 'กองช่าง').length, 0);
 });
 
 test('adapter enforces the same 500-row pilot ceiling as the server', () => {
