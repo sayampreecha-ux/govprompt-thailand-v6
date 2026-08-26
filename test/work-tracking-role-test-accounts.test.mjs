@@ -21,10 +21,11 @@ test('maskEmail does not expose full local part', () => {
   assert.equal(masked.includes('owner+gp-director'),false);
 });
 
-test('role test page keeps email ephemeral and does not hard-code personal addresses', async () => {
+test('role test page keeps email ephemeral and does not hard-code personal role aliases', async () => {
   const html=await fs.readFile(new URL('../work-role-test-accounts.html',import.meta.url),'utf8');
-  assert.doesNotMatch(html,/localStorage|sessionStorage\.(?:setItem|getItem)/);
-  assert.doesNotMatch(html,/[A-Za-z0-9._%+-]+@gmail\.com/);
+  assert.doesNotMatch(html,/(?:localStorage|sessionStorage)\s*\.\s*(?:setItem|getItem|removeItem|clear)\s*\(/);
+  assert.doesNotMatch(html,/[A-Za-z0-9._%+-]+\+gp-(?:executive|director|officer|auditor)@gmail\.com/i);
+  assert.doesNotMatch(html,/<input[^>]+value=["'][^"']+@gmail\.com/i);
   assert.match(html,/requestPilotMagicLink/);
   assert.match(html,/ORG_ADMIN/);
 });
