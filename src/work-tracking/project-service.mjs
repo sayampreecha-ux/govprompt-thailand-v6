@@ -9,12 +9,7 @@ const MUTABLE_FIELDS = Object.freeze([
   'status', 'lastUpdatedAt', 'problem',
 ]);
 
-export function prepareProjectUpdate({
-  actor = {},
-  existingProject = {},
-  patch = {},
-  audit = {},
-} = {}) {
+export function prepareProjectUpdate({ actor = {}, existingProject = {}, patch = {}, audit = {} } = {}) {
   const existing = normalizeProject(existingProject);
   const authorization = authorizeWorkAction({
     actor,
@@ -59,6 +54,7 @@ export function prepareProjectUpdate({
   const auditEvent = createAuditEvent({
     eventId: audit.eventId,
     organizationId: existing.organizationId,
+    departmentId: existing.departmentId,
     actorUserId: actor.userId,
     action: statusChanged ? AUDIT_ACTION.PROJECT_STATUS_CHANGED : AUDIT_ACTION.PROJECT_UPDATED,
     entityType: 'PROJECT',
