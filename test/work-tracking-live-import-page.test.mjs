@@ -57,3 +57,11 @@ test('live import exposes the UTF-8 CSV template and documents accepted Thai dat
   assert.match(html, /วว\/ดด\/พ\.ศ\./);
   assert.match(html, /31\/12\/2569/);
 });
+
+test('legacy source update timestamps are disclosed and require acknowledgement', () => {
+  assert.match(html, /countIgnoredImportUpdateTimestamps/);
+  assert.match(html, /id="legacyTimestampNotice"/);
+  assert.match(html, /เวลาที่นำเข้าจริงเป็น last_updated_at/);
+  assert.match(html, /ignoredTimestampCount\(\) > 0/);
+  assert.match(html, /วันที่อัปเดตเดิม/);
+});
