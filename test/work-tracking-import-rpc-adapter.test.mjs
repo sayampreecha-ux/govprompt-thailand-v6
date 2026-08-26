@@ -14,19 +14,21 @@ const csv = [
   'PJ-1,โครงการ A,กองช่าง,นาย ก,1000000,200000,50,40,2026-12-31,กำลังดำเนินการ',
 ].join('\n');
 
-test('maps acknowledged preview into RPC payload without raw CSV content', () => {
+test('maps acknowledged preview into RPC payload without raw CSV or source filename metadata', () => {
   const preview = buildProjectImportPreview(csv, 'ORG-A');
   const args = buildCommitProjectImportRpc({
     preview,
     organizationId: 'ORG-A',
     departmentId: 'DEP-ENG',
     departmentName: 'กองช่าง',
-    filename: 'projects.csv',
+    filename: 'นายสมชาย_ข้อมูลภายใน.csv',
     requestId: 'REQ-1',
     confirmWarnings: true,
   });
   assert.equal(args.p_organization_id, 'ORG-A');
   assert.equal(args.p_department_id, 'DEP-ENG');
+  assert.equal(args.p_filename, 'work-tracking-import.csv');
+  assert.doesNotMatch(args.p_filename, /สมชาย|ข้อมูลภายใน/);
   assert.equal(args.p_rows.length, 1);
   assert.equal(args.p_rows[0].projectCode, 'PJ-1');
   assert.equal('csvText' in args, false);
