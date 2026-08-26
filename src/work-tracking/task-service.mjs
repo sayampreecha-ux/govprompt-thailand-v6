@@ -3,8 +3,9 @@ import { AUDIT_ACTION, createAuditEvent } from './audit.mjs';
 import { WORK_STATUS } from './model.mjs';
 import { TASK_PRIORITY, normalizeTask } from './task-model.mjs';
 
+// Assignment is intentionally excluded. Re-assignment must pass TASK_ASSIGN authorization.
 const MUTABLE_FIELDS = Object.freeze([
-  'title', 'assignedUserId', 'status', 'priority', 'dueAt', 'completedAt', 'lastUpdatedAt',
+  'title', 'status', 'priority', 'dueAt', 'completedAt', 'lastUpdatedAt',
 ]);
 
 const validDateOrNull = (value) => !value || !Number.isNaN(new Date(value).getTime());
@@ -59,6 +60,7 @@ export function prepareTaskUpdate({ actor = {}, existingTask = {}, patch = {}, a
     organizationId: existing.organizationId,
     departmentId: existing.departmentId,
     projectId: existing.projectId,
+    assignedUserId: existing.assignedUserId,
   });
 
   const issues = validateTaskQuality(next);
@@ -71,13 +73,12 @@ export function prepareTaskUpdate({ actor = {}, existingTask = {}, patch = {}, a
     return { ok: true, code: 'NO_CHANGE', authorization, task: existing, issues, auditEvent: null };
   }
 
-  const assignmentChanged = existing.assignedUserId !== next.assignedUserId;
   const auditEvent = createAuditEvent({
     eventId: audit.eventId,
     organizationId: existing.organizationId,
     departmentId: existing.departmentId,
     actorUserId: actor.userId,
-    action: assignmentChanged ? AUDIT_ACTION.TASK_ASSIGNED : AUDIT_ACTION.TASK_UPDATED,
+    action: AUDIT_ACTION.TASK_UPDATED,
     entityType: 'TASK',
     entityId: existing.id,
     occurredAt: audit.occurredAt,
