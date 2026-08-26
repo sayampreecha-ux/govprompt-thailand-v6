@@ -2,7 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { PILOT_SUPABASE_PUBLISHABLE_KEY, assertPilotSupabaseConfig } from '../src/work-tracking/pilot-supabase-config.mjs';
-import { claimPilotInvite, loadOwnMemberships, requestPilotMagicLink } from '../src/work-tracking/pilot-auth.mjs';
+import {
+  claimPilotInvite,
+  describeMagicLinkError,
+  getMagicLinkRetrySeconds,
+  loadOwnMemberships,
+  requestPilotMagicLink,
+} from '../src/work-tracking/pilot-auth.mjs';
 
 test('pilot browser configuration exposes only a publishable key', () => {
   assert.equal(assertPilotSupabaseConfig(), true);
@@ -29,6 +35,21 @@ test('magic link request normalizes email and uses explicit redirect', async () 
     email: 'test@example.com',
     options: { shouldCreateUser: true, emailRedirectTo: 'https://example.test/work-pilot-login.html' },
   });
+});
+
+test('magic-link throttle errors become Thai retry guidance without exposing backend text', () => {
+  const raw = { message: 'For security purposes, you can only request this after 13 seconds.', status: 429 };
+  assert.equal(getMagicLinkRetrySeconds(raw), 13);
+  const described = describeMagicLinkError(raw);
+  assert.equal(described.retryAfterSeconds, 13);
+  assert.match(described.message, /รออีก 13 วินาที/);
+  assert.doesNotMatch(described.message, /security purposes|only request/i);
+});
+
+test('generic rate-limit response uses a conservative cooldown', () => {
+  const described = describeMagicLinkError({ message: 'rate limit exceeded', status: 429 });
+  assert.equal(described.retryAfterSeconds, 60);
+  assert.match(described.message, /60 วินาที/);
 });
 
 test('invite claim is performed only through the audited RPC', async () => {
