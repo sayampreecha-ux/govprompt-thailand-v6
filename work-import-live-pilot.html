@@ -34,6 +34,7 @@
     </section>
 
     <div id="gate" class="gate">ยังไม่ได้เลือกไฟล์</div>
+    <div id="ownerNotice" class="notice hidden"><strong>ผู้รับผิดชอบจาก CSV:</strong> <span id="ownerNoticeText"></span> ระบบจะไม่เดาชื่อคนเพื่อผูกบัญชีอัตโนมัติ หลังนำเข้าให้ใช้หน้า “มอบหมายงาน” เพื่อเลือกสมาชิกจาก Directory ที่ถูกต้อง</div>
     <div class="table">
       <table>
         <thead><tr><th>แถว CSV</th><th>สถานะ</th><th>โครงการ</th><th>ประเด็นตรวจพบ</th></tr></thead>
@@ -42,12 +43,12 @@
     </div>
 
     <section class="confirm">
-      <label id="warningConfirmRow" class="check hidden"><input id="confirmWarnings" type="checkbox"><span>ฉันตรวจข้อสังเกต WARNING แล้ว และยืนยันให้นำเข้าตามข้อมูลนี้</span></label>
+      <label id="warningConfirmRow" class="check hidden"><input id="confirmWarnings" type="checkbox"><span id="warningConfirmText">ฉันตรวจข้อสังเกตแล้ว และยืนยันให้นำเข้าตามข้อมูลนี้</span></label>
       <label class="check"><input id="confirmCommit" type="checkbox"><span>ฉันยืนยันว่าตรวจ Preview แล้ว และต้องการบันทึกข้อมูลนี้เข้าฐานจริง</span></label>
-      <div class="actions"><button id="commitBtn" class="btn" type="button" disabled>ยืนยันบันทึกจริง</button><a class="btn secondary" href="work-tracking-import-preview.html">เปิดหน้า Preview local-only</a></div>
+      <div class="actions"><button id="commitBtn" class="btn" type="button" disabled>ยืนยันบันทึกจริง</button><a class="btn secondary" href="work-tracking-import-preview.html">เปิดหน้า Preview local-only</a><a class="btn secondary" href="work-assign-live-pilot.html">ไปหน้ามอบหมายงาน</a></div>
       <div id="commitStatus" class="status">ยังไม่มีการบันทึก</div>
     </section>
-    <p class="foot">ข้อจำกัด Pilot: ไม่เกิน 500 โครงการต่อ batch · ERROR ห้าม commit · WARNING ต้องยืนยันรับทราบ · Server ตรวจ role, tenant, department, duplicate code, ตัวเลข, วันที่ และสถานะอีกครั้งก่อนเขียนฐาน</p>
+    <p class="foot">ข้อจำกัด Pilot: ไม่เกิน 500 โครงการต่อ batch · ERROR ห้าม commit · WARNING/ชื่อผู้รับผิดชอบที่ยังไม่ผูกบัญชีต้องยืนยันรับทราบ · Server ตรวจ role, tenant, department, duplicate code, ตัวเลข, วันที่ และสถานะอีกครั้งก่อนเขียนฐาน</p>
   </section>
 </main>
 
@@ -55,7 +56,7 @@
   import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
   import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
   import { buildProjectImportPreview } from './src/work-tracking/import-preview.mjs';
-  import { buildCommitProjectImportRpc } from './src/work-tracking/import-rpc-adapter.mjs';
+  import { buildCommitProjectImportRpc, countUnresolvedImportOwners } from './src/work-tracking/import-rpc-adapter.mjs';
 
   const $ = (id) => document.getElementById(id);
   const MAX_ROWS = 500;
@@ -68,11 +69,13 @@
   const requestId = () => globalThis.crypto?.randomUUID?.() || `req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const setText = (id, value) => { $(id).textContent = String(value); };
   const setStatus = (id, message, kind = '') => { const node=$(id); node.textContent=message; node.className=`status ${kind}`.trim(); };
+  const unresolvedOwnerCount = () => countUnresolvedImportOwners(preview || {});
+  const needsAcknowledgement = () => Boolean(preview?.requiresWarningConfirmation || unresolvedOwnerCount() > 0);
 
   function commitAllowed() {
     if (committed || !preview || !preview.canCommit || preview.summary.totalRows > MAX_ROWS) return false;
     if (!$('departmentSelect').value || !$('confirmCommit').checked) return false;
-    if (preview.requiresWarningConfirmation && !$('confirmWarnings').checked) return false;
+    if (needsAcknowledgement() && !$('confirmWarnings').checked) return false;
     return true;
   }
 
@@ -81,13 +84,19 @@
   function renderPreview(nextPreview) {
     preview = nextPreview;
     committed = false;
+    const ownerCount=unresolvedOwnerCount();
     setText('total', preview.summary.totalRows);
     setText('valid', preview.summary.valid);
     setText('warnings', preview.summary.warnings);
     setText('errors', preview.summary.errors);
     $('confirmCommit').checked = false;
     $('confirmWarnings').checked = false;
-    $('warningConfirmRow').classList.toggle('hidden', !preview.requiresWarningConfirmation);
+    $('warningConfirmRow').classList.toggle('hidden', !needsAcknowledgement());
+    $('ownerNotice').classList.toggle('hidden', ownerCount===0);
+    if(ownerCount>0) $('ownerNoticeText').textContent=`พบ ${ownerCount} โครงการที่มีชื่อผู้รับผิดชอบเป็นข้อความ แต่ยังไม่มี user_id`;
+    $('warningConfirmText').textContent=ownerCount>0
+      ? `ฉันรับทราบ WARNING และรับทราบว่าผู้รับผิดชอบจาก CSV จำนวน ${ownerCount} โครงการยังไม่ถูกผูกบัญชีอัตโนมัติ`
+      : 'ฉันตรวจข้อสังเกต WARNING แล้ว และยืนยันให้นำเข้าตามข้อมูลนี้';
 
     if (preview.summary.totalRows > MAX_ROWS) {
       $('gate').className='gate error';
@@ -95,9 +104,9 @@
     } else if (preview.summary.errors > 0) {
       $('gate').className='gate error';
       $('gate').textContent=`⛔ ยังนำเข้าไม่ได้: พบ ${preview.summary.errors} แถวที่ต้องแก้ก่อน`;
-    } else if (preview.summary.warnings > 0) {
+    } else if (preview.summary.warnings > 0 || ownerCount>0) {
       $('gate').className='gate warn';
-      $('gate').textContent=`⚠️ ผ่านแบบมีข้อสังเกต ${preview.summary.warnings} แถว ต้องยืนยัน WARNING ก่อน commit`;
+      $('gate').textContent=`⚠️ พร้อมนำเข้าแบบต้องรับทราบ: WARNING ${preview.summary.warnings} แถว · ผู้รับผิดชอบยังไม่ผูกบัญชี ${ownerCount} โครงการ`;
     } else if (preview.summary.totalRows > 0) {
       $('gate').className='gate ok';
       $('gate').textContent='✅ ผ่านด่านตรวจ Browser พร้อมให้ยืนยันบันทึกจริง';
@@ -169,6 +178,7 @@
     $('commitBtn').disabled=true;
     setStatus('commitStatus','กำลังส่งข้อมูลที่ผ่าน Preview ให้ Server ตรวจซ้ำและ commit...');
     try {
+      const ownerCount=unresolvedOwnerCount();
       const args=buildCommitProjectImportRpc({
         preview,
         organizationId:actor.organizationId,
@@ -182,8 +192,9 @@
       const batch=Array.isArray(data)?data[0]:data;
       committed=true;
       const batchId=batch?.id ? ` · Batch ${batch.id}` : '';
-      setStatus('commitStatus',`✅ บันทึกสำเร็จ ${preview.summary.totalRows} โครงการ${batchId}`,'ok');
-      $('gate').className='gate ok'; $('gate').textContent='✅ Commit สำเร็จแล้ว เปิด Dashboard เพื่อตรวจผลได้';
+      const assignmentReminder=ownerCount>0 ? ` · มี ${ownerCount} โครงการที่ต้องมอบหมายผู้รับผิดชอบต่อ` : '';
+      setStatus('commitStatus',`✅ บันทึกสำเร็จ ${preview.summary.totalRows} โครงการ${batchId}${assignmentReminder}`,'ok');
+      $('gate').className='gate ok'; $('gate').textContent='✅ Commit สำเร็จแล้ว เปิด Dashboard หรือหน้ามอบหมายงานเพื่อตรวจผลต่อได้';
     } catch (error) {
       setStatus('commitStatus',`บันทึกไม่สำเร็จ: ${error.message || 'UNKNOWN_ERROR'}`,'error');
     } finally {
