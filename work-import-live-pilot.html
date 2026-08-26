@@ -18,7 +18,7 @@
   <p class="lead">ตรวจใน Browser ก่อน → Human confirmation → RPC ตรวจซ้ำ → commit ทั้งชุดแบบ transaction → Audit</p>
 
   <div id="authStatus" class="status">กำลังตรวจสิทธิ...</div>
-  <div class="notice"><strong>Privacy:</strong> ไฟล์ CSV ดิบไม่ถูกอัปโหลดหรือเก็บถาวร ระบบส่งเฉพาะข้อมูลโครงการที่แปลงแล้วเมื่อคุณกด “ยืนยันบันทึกจริง” โดยชื่อไฟล์จะถูกเก็บเป็น metadata ของ Import Batch เพื่อการตรวจสอบย้อนหลัง</div>
+  <div class="notice"><strong>Privacy:</strong> ไฟล์ CSV ดิบและชื่อไฟล์ต้นฉบับอยู่ใน Browser เท่านั้น ไม่ถูกส่งหรือเก็บถาวร เมื่อยืนยัน ระบบส่งเฉพาะข้อมูลโครงการที่แปลงแล้ว และใช้ label กลาง <code>work-tracking-import.csv</code> ใน Import Batch</div>
 
   <section id="workspace" class="hidden">
     <section class="upload">
@@ -211,7 +211,7 @@
         organizationId:actor.organizationId,
         departmentId:$('departmentSelect').value,
         departmentName:selectedDepartmentName(),
-        filename:selectedFile?.name || 'import.csv',
+        filename:'work-tracking-import.csv',
         confirmWarnings:$('confirmWarnings').checked,
         requestId:requestId(),
       });
