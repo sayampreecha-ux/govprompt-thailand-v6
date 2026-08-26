@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>GovPrompt Automation Pilot</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--yellow:#9a6700}*{box-sizing:border-box}body{margin:0}.top{padding:14px max(16px,calc((100vw - 1160px)/2));background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.top nav{display:flex;gap:14px;flex-wrap:wrap}.top a{color:var(--navy);text-decoration:none;font-weight:800}.wrap{max-width:1160px;margin:auto;padding:28px 16px 70px}.hero{display:flex;justify-content:space-between;gap:24px;align-items:end}.hero h1{font-size:clamp(31px,5vw,50px);margin:5px 0;line-height:1.15}.hero p,.muted{color:var(--muted)}.safe-note{max-width:430px;padding:14px 16px;background:#fff8e7;border:1px solid #f1d58d;border-radius:14px;color:#765307}.card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:19px;margin-top:16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.field{display:block;margin:10px 0;font-weight:750}.field input,.field select,.field textarea{width:100%;padding:11px 12px;border:1px solid #c8d5e3;border-radius:10px;margin-top:5px;background:#fff}.field textarea{min-height:88px;resize:vertical}.check{display:flex;align-items:flex-start;gap:9px;font-weight:700;margin:13px 0}.check input{margin-top:5px}.btn{border:0;border-radius:10px;padding:10px 13px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy)}.btn.approve{background:var(--green)}.btn.reject{background:var(--red)}.btn:disabled{opacity:.45;cursor:not-allowed}.row-actions{display:flex;gap:7px;flex-wrap:wrap}.status{padding:11px 12px;border-radius:10px;background:#f1f5f9;color:#465970;margin-top:10px}.status.ok{background:#e9f8f1;color:var(--green)}.status.error{background:#feeceb;color:var(--red)}.hidden{display:none!important}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}.kpi small{display:block;color:var(--muted)}.kpi strong{font-size:25px;display:block;margin-top:3px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:12px}table{border-collapse:collapse;width:100%;min-width:920px}th,td{padding:11px;border-bottom:1px solid #e8eef5;text-align:left;font-size:13px;vertical-align:top}th{background:#f4f7fb}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:850;background:#eef4fa;color:var(--navy)}.badge.ACTIVE,.badge.APPROVED{background:#e9f8f1;color:var(--green)}.badge.WAITING_APPROVAL{background:#fff4dc;color:var(--yellow)}.badge.PAUSED,.badge.DRAFT{background:#eef1f5;color:#536174}.badge.REJECTED,.badge.FAILED{background:#feeceb;color:var(--red)}dialog{width:min(760px,calc(100% - 24px));border:0;border-radius:18px;padding:0;box-shadow:0 25px 90px rgba(3,20,45,.28)}dialog::backdrop{background:rgba(5,20,42,.65)}.dialog-head{display:flex;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}.dialog-body{padding:18px 20px}.draft{white-space:pre-wrap;background:#0d2545;color:#eef6ff;padding:17px;border-radius:12px;max-height:52vh;overflow:auto;line-height:1.75}.dialog-close{border:0;background:#eef4fa;color:var(--navy);border-radius:9px;width:38px;height:38px;font-size:22px}.section-title{display:flex;justify-content:space-between;gap:12px;align-items:center}.section-title h2{margin:0}@media(max-width:820px){.hero,.grid,.grid3{display:block}.kpis{grid-template-columns:1fr 1fr}.safe-note{max-width:none;margin-top:14px}.top{align-items:flex-start}}
+</style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Automation Pilot</strong><nav><a href="work-pilot.html">ติดตามงาน</a><a href="index.html">GP หลัก</a></nav></header>
+<main class="wrap">
+<section class="hero">
+  <div><div class="muted">INTERNAL PILOT · SCHEDULE · HUMAN APPROVAL</div><h1>ศูนย์งานอัตโนมัติ</h1><p>สร้างรายงานจากข้อมูลติดตามงานขององค์กรตามเวลาที่กำหนด</p></div>
+  <div class="safe-note"><strong>หลักควบคุม</strong><br>ระบบสร้างได้เฉพาะฉบับร่างและหยุดรอเจ้าหน้าที่ตรวจ ไม่มีการส่งอีเมล เผยแพร่ หรืออนุมัติแทนผู้มีอำนาจ</div>
+</section>
+
+<section id="authCard" class="card">
+  <div class="grid">
+    <div><h2>เข้าสู่ระบบองค์กร</h2><label class="field">อีเมล<input id="loginEmail" type="email" autocomplete="email" value="sayampreecha@gmail.com"></label><label class="field">รหัสผ่าน<input id="loginPassword" type="password" autocomplete="current-password"></label><button id="loginBtn" class="btn">เข้าสู่ระบบ</button></div>
+    <div><h2>ใช้บัญชี Pilot เดิม</h2><p class="muted">สิทธิ์องค์กร กอง/หน่วย และบทบาท ใช้ชุดเดียวกับ Work Tracking Pilot</p><p>ผู้ดูแลระบบและผู้อำนวยการกำหนดงานได้ ผู้บริหารตรวจอนุมัติได้ และผู้ตรวจสอบอ่านประวัติได้ตามสิทธิ์</p></div>
+  </div>
+  <div id="authStatus" class="status">ยังไม่ได้เข้าสู่ระบบ</div>
+</section>
+
+<section id="app" class="hidden">
+  <section class="card"><div class="row-actions"><button id="reloadBtn" class="btn">โหลดข้อมูลใหม่</button><button id="logoutBtn" class="btn secondary">ออกจากระบบ</button></div><div id="whoami" class="status"></div></section>
+  <section class="kpis">
+    <article class="kpi"><small>งานอัตโนมัติ</small><strong id="kTotal">0</strong></article>
+    <article class="kpi"><small>กำลังทำงาน</small><strong id="kActive">0</strong></article>
+    <article class="kpi"><small>รออนุมัติ</small><strong id="kWaiting">0</strong></article>
+    <article class="kpi"><small>อนุมัติแล้ว</small><strong id="kApproved">0</strong></article>
+  </section>
+
+  <section id="createCard" class="card">
+    <div class="section-title"><h2>เพิ่มงานอัตโนมัติ</h2><span class="badge">Asia/Bangkok</span></div>
+    <div class="grid3">
+      <label class="field">ชื่องาน<input id="automationName" maxlength="120" placeholder="เช่น สรุปโครงการทุกเช้า"></label>
+      <label class="field">ขอบเขตข้อมูล<select id="department"></select></label>
+      <label class="field">ประเภทงาน<select id="workflowType"></select></label>
+      <label class="field">รอบการทำงาน<select id="cadence"></select></label>
+      <label id="dayField" class="field hidden">วันประจำสัปดาห์<select id="dayOfWeek"><option value="1">จันทร์</option><option value="2">อังคาร</option><option value="3">พุธ</option><option value="4">พฤหัสบดี</option><option value="5">ศุกร์</option><option value="6">เสาร์</option><option value="7">อาทิตย์</option></select></label>
+      <label class="field">เวลาเริ่มทำงาน<input id="runTime" type="time" value="07:30"></label>
+      <label class="field">รูปแบบรายงาน<select id="outputFormat"></select></label>
+    </div>
+    <label class="check"><input id="activeNow" type="checkbox"> เปิดใช้งานทันทีหลังบันทึก</label>
+    <label class="check"><input type="checkbox" checked disabled> บังคับให้เจ้าหน้าที่ตรวจและอนุมัติก่อนนำรายงานไปใช้</label>
+    <button id="createBtn" class="btn">บันทึกงานอัตโนมัติ</button>
+    <div id="createStatus" class="status">ยังไม่มีการบันทึก</div>
+  </section>
+
+  <section class="card">
+    <div class="section-title"><h2>งานที่ตั้งไว้</h2><span class="muted">กด “ทดลองรันทันที” เพื่อสร้างฉบับร่างโดยไม่รอเวลา</span></div>
+    <div class="table-wrap"><table><thead><tr><th>ชื่องาน</th><th>ประเภท</th><th>กำหนดเวลา</th><th>ครั้งถัดไป</th><th>สถานะ</th><th>คำสั่ง</th></tr></thead><tbody id="automationRows"></tbody></table></div>
+  </section>
+
+  <section class="card">
+    <div class="section-title"><h2>รายงานฉบับรอตรวจ</h2><span class="muted">ย้อนหลัง 50 รายการ</span></div>
+    <div class="table-wrap"><table><thead><tr><th>รายงาน</th><th>เวลาสร้าง</th><th>รูปแบบ</th><th>สถานะ</th><th>ตรวจสอบ</th></tr></thead><tbody id="runRows"></tbody></table></div>
+  </section>
+</section>
+</main>
+
+<dialog id="reviewDialog">
+  <div class="dialog-head"><div><strong id="reviewTitle">รายงานฉบับร่าง</strong><div id="reviewMeta" class="muted"></div></div><button id="closeDialog" class="dialog-close" aria-label="ปิด">×</button></div>
+  <div class="dialog-body"><pre id="reviewDraft" class="draft"></pre><label class="field">หมายเหตุการตรวจ<textarea id="reviewNote" placeholder="ระบุเหตุผลเมื่อต้องส่งกลับแก้ไข"></textarea></label><div class="row-actions"><button id="approveBtn" class="btn approve">อนุมัติรายงาน</button><button id="rejectBtn" class="btn reject">ส่งกลับแก้ไข</button><button id="downloadRunBtn" class="btn secondary">ดาวน์โหลด .txt</button></div><div id="reviewStatus" class="status">กรุณาตรวจชื่อ วันที่ ตัวเลข และข้อเท็จจริงก่อนอนุมัติ</div></div>
+</dialog>
+
+<script src="output-formats.js"></script>
+<script src="automation-pilot.js"></script>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const supabase=createClient('https://bswokqqhfuvmsomzulyl.supabase.co','sb_publishable_ZRVlOTC0jJIaFxPJrqYpUA_ZgrTnHOZ',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const config=window.GOVPROMPT_AUTOMATION_PILOT,formats=window.GOVPROMPT_OUTPUT_FORMATS,$=id=>document.getElementById(id);
+let actor=null,automations=[],runs=[],selectedRun=null;
+const setStatus=(id,msg,kind='')=>{const node=$(id);node.textContent=msg;node.className=('status '+kind).trim()};
+const dateTime=value=>value?new Intl.DateTimeFormat('th-TH',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Bangkok'}).format(new Date(value)):'-';
+const timeLabel=value=>String(value||'').slice(0,5)+' น.';
+const dayNames=['','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
+const workflowLabel=id=>config.workflows.find(item=>item.id===id)?.label||id;
+const formatLabel=id=>formats.resolve(id).label;
+const canManage=()=>['ORG_ADMIN','DIRECTOR'].includes(actor?.role);
+const canReview=run=>['ORG_ADMIN','EXECUTIVE'].includes(actor?.role)||(actor?.role==='DIRECTOR'&&actor.departmentId===run.department_id);
+
+function fillStaticOptions(){
+  for(const item of config.workflows){const option=document.createElement('option');option.value=item.id;option.textContent=item.label;$('workflowType').appendChild(option)}
+  for(const item of config.cadences){const option=document.createElement('option');option.value=item.id;option.textContent=item.label;$('cadence').appendChild(option)}
+  for(const item of formats.formats){const option=document.createElement('option');option.value=item.id;option.textContent=item.icon+' '+item.label;$('outputFormat').appendChild(option)}
+}
+
+async function context(){
+  const {data:{session}}=await supabase.auth.getSession();
+  if(!session?.user?.id)return null;
+  let {data:memberships,error}=await supabase.from('organization_memberships').select('organization_id,department_id,role,active').eq('user_id',session.user.id).eq('active',true);
+  if(error)throw error;
+  if(!memberships?.length){
+    const {data:claim,error:claimError}=await supabase.rpc('claim_work_pilot_invite');
+    if(claimError)throw claimError;
+    if(claim?.ok){({data:memberships,error}=await supabase.from('organization_memberships').select('organization_id,department_id,role,active').eq('user_id',session.user.id).eq('active',true));if(error)throw error}
+  }
+  return{session,membership:memberships?.[0]||null};
+}
+
+async function boot(){
+  try{
+    const current=await context();
+    if(!current?.session){$('app').classList.add('hidden');$('authCard').classList.remove('hidden');setStatus('authStatus','ยังไม่ได้เข้าสู่ระบบ');return}
+    if(!current.membership){$('app').classList.add('hidden');$('authCard').classList.remove('hidden');setStatus('authStatus','เข้าสู่ระบบแล้ว แต่ยังไม่มีสิทธิองค์กร','error');return}
+    actor={userId:current.session.user.id,organizationId:current.membership.organization_id,departmentId:current.membership.department_id,role:current.membership.role};
+    $('authCard').classList.add('hidden');$('app').classList.remove('hidden');$('createCard').classList.toggle('hidden',!canManage());
+    setStatus('whoami','พร้อมใช้งาน · '+actor.role+' · ทุกผลลัพธ์ต้องผ่าน Human Approval','ok');
+    await loadAll();
+  }catch(error){setStatus('authStatus','เชื่อมระบบไม่สำเร็จ: '+(error.message||'unknown error'),'error')}
+}
+
+async function loadAll(){await loadDepartments();await Promise.all([loadAutomations(),loadRuns()])}
+
+async function loadDepartments(){
+  let query=supabase.from('departments').select('id,name').eq('organization_id',actor.organizationId).eq('active',true).order('name');
+  if(actor.role==='DIRECTOR'&&actor.departmentId)query=query.eq('id',actor.departmentId);
+  const {data,error}=await query;if(error)throw error;
+  const select=$('department');select.replaceChildren();
+  if(actor.role==='ORG_ADMIN'){const option=document.createElement('option');option.value='';option.textContent='ทั้งองค์กร';select.appendChild(option)}
+  for(const department of data||[]){const option=document.createElement('option');option.value=department.id;option.textContent=department.name;select.appendChild(option)}
+}
+
+async function loadAutomations(){
+  const {data,error}=await supabase.from('automation_definitions').select('id,organization_id,department_id,name,workflow_type,cadence,run_time,day_of_week,timezone,output_format_id,status,next_run_at,last_run_at,created_at').eq('organization_id',actor.organizationId).order('created_at',{ascending:false});
+  if(error)throw error;automations=data||[];renderAutomations();
+}
+
+function renderAutomations(){
+  const body=$('automationRows');body.replaceChildren();
+  for(const item of automations){
+    const row=document.createElement('tr');
+    const schedule=item.cadence==='WEEKLY'?'ทุก'+dayNames[item.day_of_week]+' '+timeLabel(item.run_time):'ทุกวัน '+timeLabel(item.run_time);
+    for(const value of [item.name,workflowLabel(item.workflow_type),schedule,dateTime(item.next_run_at)]){const cell=document.createElement('td');cell.textContent=value;row.appendChild(cell)}
+    const statusCell=document.createElement('td'),badge=document.createElement('span');badge.className='badge '+item.status;badge.textContent=config.statusLabel(item.status);statusCell.appendChild(badge);row.appendChild(statusCell);
+    const action=document.createElement('td'),buttons=document.createElement('div');buttons.className='row-actions';
+    const run=document.createElement('button');run.className='btn';run.textContent='ทดลองรันทันที';run.disabled=!canManage();run.onclick=()=>runNow(item.id);
+    const toggle=document.createElement('button');toggle.className='btn secondary';toggle.textContent=item.status==='ACTIVE'?'หยุดชั่วคราว':'เปิดใช้งาน';toggle.disabled=!canManage();toggle.onclick=()=>setAutomationStatus(item.id,item.status==='ACTIVE'?'PAUSED':'ACTIVE');
+    buttons.append(run,toggle);action.appendChild(buttons);row.appendChild(action);body.appendChild(row);
+  }
+  $('kTotal').textContent=automations.length;$('kActive').textContent=automations.filter(item=>item.status==='ACTIVE').length;
+}
+
+async function loadRuns(){
+  const {data,error}=await supabase.from('automation_runs').select('id,automation_id,organization_id,department_id,workflow_type,output_format_id,status,scheduled_for,generated_at,draft_output,reviewed_by_user_id,reviewed_at,review_note').eq('organization_id',actor.organizationId).order('generated_at',{ascending:false}).limit(50);
+  if(error)throw error;runs=data||[];renderRuns();
+}
+
+function renderRuns(){
+  const names=new Map(automations.map(item=>[item.id,item.name])),body=$('runRows');body.replaceChildren();
+  for(const item of runs){
+    const row=document.createElement('tr');
+    for(const value of [names.get(item.automation_id)||workflowLabel(item.workflow_type),dateTime(item.generated_at),formatLabel(item.output_format_id)]){const cell=document.createElement('td');cell.textContent=value;row.appendChild(cell)}
+    const statusCell=document.createElement('td'),badge=document.createElement('span');badge.className='badge '+item.status;badge.textContent=config.statusLabel(item.status);statusCell.appendChild(badge);row.appendChild(statusCell);
+    const action=document.createElement('td'),open=document.createElement('button');open.className='btn secondary';open.textContent='เปิดตรวจ';open.onclick=()=>openReview(item);action.appendChild(open);row.appendChild(action);body.appendChild(row);
+  }
+  $('kWaiting').textContent=runs.filter(item=>item.status==='WAITING_APPROVAL').length;$('kApproved').textContent=runs.filter(item=>item.status==='APPROVED').length;
+}
+
+async function createAutomation(){
+  if(!canManage())return;
+  const checked=config.validate({name:$('automationName').value,departmentId:$('department').value||null,workflowType:$('workflowType').value,cadence:$('cadence').value,runTime:$('runTime').value,dayOfWeek:$('dayOfWeek').value,outputFormatId:$('outputFormat').value,active:$('activeNow').checked,requiresHumanApproval:true});
+  if(!checked.ok)return setStatus('createStatus',checked.errors.join(' · '),'error');
+  setStatus('createStatus','กำลังบันทึก...');
+  const value=checked.value;
+  const {error}=await supabase.rpc('create_automation_definition',{p_organization_id:actor.organizationId,p_department_id:value.departmentId,p_name:value.name,p_workflow_type:value.workflowType,p_cadence:value.cadence,p_run_time:value.runTime,p_day_of_week:value.cadence==='WEEKLY'?value.dayOfWeek:null,p_output_format_id:value.outputFormatId,p_activate:value.active,p_request_id:crypto.randomUUID()});
+  if(error)return setStatus('createStatus','บันทึกไม่สำเร็จ: '+error.message,'error');
+  $('automationName').value='';$('activeNow').checked=false;setStatus('createStatus','บันทึกงานอัตโนมัติสำเร็จ','ok');await Promise.all([loadAutomations(),loadRuns()]);
+}
+
+async function setAutomationStatus(id,status){
+  const {error}=await supabase.rpc('set_automation_definition_status',{p_automation_id:id,p_status:status,p_request_id:crypto.randomUUID()});
+  if(error)return alert('เปลี่ยนสถานะไม่สำเร็จ: '+error.message);await loadAutomations();
+}
+
+async function runNow(id){
+  const {error}=await supabase.rpc('run_automation_now',{p_automation_id:id,p_request_id:crypto.randomUUID()});
+  if(error)return alert('สร้างรายงานไม่สำเร็จ: '+error.message);await Promise.all([loadAutomations(),loadRuns()]);
+}
+
+function openReview(item){
+  selectedRun=item;$('reviewTitle').textContent=workflowLabel(item.workflow_type);$('reviewMeta').textContent='สร้าง '+dateTime(item.generated_at)+' · '+formatLabel(item.output_format_id)+' · '+config.statusLabel(item.status);$('reviewDraft').textContent=item.draft_output||'ไม่มีเนื้อหา';$('reviewNote').value=item.review_note||'';
+  const pending=item.status==='WAITING_APPROVAL'&&canReview(item);$('approveBtn').disabled=!pending;$('rejectBtn').disabled=!pending;$('downloadRunBtn').disabled=item.status!=='APPROVED';setStatus('reviewStatus',pending?'กรุณาตรวจชื่อ วันที่ ตัวเลข และข้อเท็จจริงก่อนอนุมัติ':'รายการนี้ตรวจแล้วหรือคุณไม่มีสิทธิอนุมัติ');$('reviewDialog').showModal();
+}
+
+async function review(decision){
+  if(!selectedRun)return;setStatus('reviewStatus','กำลังบันทึกผลการตรวจ...');
+  const note=$('reviewNote').value.trim();if(decision==='REJECT'&&!note)return setStatus('reviewStatus','กรุณาระบุเหตุผลที่ส่งกลับแก้ไข','error');
+  const {error}=await supabase.rpc('review_automation_run',{p_run_id:selectedRun.id,p_decision:decision,p_note:note||null,p_request_id:crypto.randomUUID()});
+  if(error)return setStatus('reviewStatus','บันทึกไม่สำเร็จ: '+error.message,'error');$('reviewDialog').close();await loadRuns();
+}
+
+function downloadRun(){
+  if(!selectedRun||selectedRun.status!=='APPROVED')return;
+  const blob=new Blob([selectedRun.draft_output||''],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download='GovPrompt-Automation-'+selectedRun.id.slice(0,8)+'.txt';anchor.click();URL.revokeObjectURL(url);
+}
+
+$('cadence').onchange=()=>$('dayField').classList.toggle('hidden',$('cadence').value!=='WEEKLY');
+$('createBtn').onclick=createAutomation;$('reloadBtn').onclick=loadAll;$('logoutBtn').onclick=async()=>{await supabase.auth.signOut();actor=null;await boot()};
+$('loginBtn').onclick=async()=>{setStatus('authStatus','กำลังเข้าสู่ระบบ...');const {error}=await supabase.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)return setStatus('authStatus','เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจรหัสผ่าน/ยืนยันอีเมล','error');await boot()};
+$('closeDialog').onclick=()=>$('reviewDialog').close();$('approveBtn').onclick=()=>review('APPROVE');$('rejectBtn').onclick=()=>review('REJECT');$('downloadRunBtn').onclick=downloadRun;
+supabase.auth.onAuthStateChange(()=>setTimeout(()=>boot(),0));fillStaticOptions();boot();
+</script>
+</body>
+</html>
