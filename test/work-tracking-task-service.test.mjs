@@ -27,6 +27,19 @@ test('assigned officer can update own task', () => {
   assert.ok(result.auditEvent.metadata.changedFields.includes('priority'));
 });
 
+test('generic task update cannot reassign even when officer supplies assignedUserId', () => {
+  const result = prepareTaskUpdate({
+    actor: { userId: 'U-1', organizationId: 'ORG-A', departmentId: 'DEP-ENG', role: ORG_ROLE.OFFICER, active: true },
+    existingTask: task,
+    patch: { assignedUserId: 'U-2', priority: TASK_PRIORITY.HIGH },
+    audit,
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.task.assignedUserId, 'U-1');
+  assert.equal(result.auditEvent.action, 'TASK_UPDATED');
+  assert.equal(result.auditEvent.metadata.changedFields.includes('assignedUserId'), false);
+});
+
 test('officer cannot update another assignee task', () => {
   const result = prepareTaskUpdate({
     actor: { userId: 'U-2', organizationId: 'ORG-A', departmentId: 'DEP-ENG', role: ORG_ROLE.OFFICER, active: true },
