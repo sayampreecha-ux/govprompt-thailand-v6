@@ -11,15 +11,8 @@ export const AUDIT_ACTION = Object.freeze({
 });
 
 const SAFE_METADATA_KEYS = new Set([
-  'projectId',
-  'taskId',
-  'importBatchId',
-  'changedFields',
-  'previousStatus',
-  'nextStatus',
-  'source',
-  'reasonCode',
-  'recordCount',
+  'projectId', 'taskId', 'importBatchId', 'changedFields', 'previousStatus',
+  'nextStatus', 'source', 'reasonCode', 'recordCount',
 ]);
 
 const normalize = (value) => String(value || '').trim();
@@ -28,11 +21,8 @@ export function sanitizeAuditMetadata(metadata = {}) {
   const result = {};
   for (const [key, value] of Object.entries(metadata || {})) {
     if (!SAFE_METADATA_KEYS.has(key)) continue;
-    if (Array.isArray(value)) {
-      result[key] = value.map((item) => String(item)).slice(0, 50);
-    } else if (['string', 'number', 'boolean'].includes(typeof value)) {
-      result[key] = value;
-    }
+    if (Array.isArray(value)) result[key] = value.map((item) => String(item)).slice(0, 50);
+    else if (['string', 'number', 'boolean'].includes(typeof value)) result[key] = value;
   }
   return result;
 }
@@ -40,6 +30,7 @@ export function sanitizeAuditMetadata(metadata = {}) {
 export function createAuditEvent(input = {}) {
   const eventId = normalize(input.eventId);
   const organizationId = normalize(input.organizationId);
+  const departmentId = normalize(input.departmentId);
   const actorUserId = normalize(input.actorUserId);
   const action = normalize(input.action);
   const entityType = normalize(input.entityType);
@@ -56,6 +47,7 @@ export function createAuditEvent(input = {}) {
   return Object.freeze({
     eventId,
     organizationId,
+    departmentId,
     actorUserId,
     action,
     entityType,
