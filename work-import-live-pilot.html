@@ -38,6 +38,7 @@
     <div id="gate" class="gate">ยังไม่ได้เลือกไฟล์</div>
     <div id="departmentNotice" class="notice error hidden"><strong>กอง/หน่วยไม่ตรง:</strong> <span id="departmentNoticeText"></span> กรุณาเลือกกองปลายทางให้ตรงกับ CSV หรือแก้ไฟล์ก่อนนำเข้า</div>
     <div id="ownerNotice" class="notice hidden"><strong>ผู้รับผิดชอบจาก CSV:</strong> <span id="ownerNoticeText"></span> ระบบจะไม่เดาชื่อคนเพื่อผูกบัญชีอัตโนมัติ หลังนำเข้าให้ใช้หน้า “มอบหมายงาน” เพื่อเลือกสมาชิกจาก Directory ที่ถูกต้อง</div>
+    <div id="legacyTimestampNotice" class="notice hidden"><strong>วันที่อัปเดตจากไฟล์เก่า:</strong> <span id="legacyTimestampNoticeText"></span> ค่านี้ไม่ถูกนำไปเขียนทับประวัติในระบบ โดยฐานข้อมูลจะใช้เวลาที่นำเข้าจริงเป็น last_updated_at</div>
     <div class="table">
       <table>
         <thead><tr><th>แถว CSV</th><th>สถานะ</th><th>โครงการ</th><th>ประเด็นตรวจพบ</th></tr></thead>
@@ -51,7 +52,7 @@
       <div class="actions"><button id="commitBtn" class="btn" type="button" disabled>ยืนยันบันทึกจริง</button><a class="btn secondary" href="work-tracking-import-preview.html">เปิดหน้า Preview local-only</a><a class="btn secondary" href="work-assign-live-pilot.html">ไปหน้ามอบหมายงาน</a></div>
       <div id="commitStatus" class="status">ยังไม่มีการบันทึก</div>
     </section>
-    <p class="foot">ข้อจำกัด Pilot: ไม่เกิน 500 โครงการต่อ batch · ERROR/กองไม่ตรงห้าม commit · WARNING/ชื่อผู้รับผิดชอบที่ยังไม่ผูกบัญชีต้องยืนยันรับทราบ · Server ตรวจ role, tenant, department, duplicate code, ตัวเลข, วันที่ และสถานะอีกครั้งก่อนเขียนฐาน</p>
+    <p class="foot">ข้อจำกัด Pilot: ไม่เกิน 500 โครงการต่อ batch · ERROR/กองไม่ตรงห้าม commit · WARNING/ชื่อผู้รับผิดชอบที่ยังไม่ผูกบัญชี/legacy timestamp ต้องยืนยันรับทราบ · Server ตรวจ role, tenant, department, duplicate code, ตัวเลข, วันที่ และสถานะอีกครั้งก่อนเขียนฐาน</p>
   </section>
 </main>
 
@@ -61,6 +62,7 @@
   import { buildProjectImportPreview } from './src/work-tracking/import-preview.mjs';
   import {
     buildCommitProjectImportRpc,
+    countIgnoredImportUpdateTimestamps,
     countUnresolvedImportOwners,
     findImportDepartmentMismatches,
   } from './src/work-tracking/import-rpc-adapter.mjs';
@@ -78,8 +80,9 @@
   const setStatus = (id, message, kind = '') => { const node=$(id); node.textContent=message; node.className=`status ${kind}`.trim(); };
   const selectedDepartmentName = () => $('departmentSelect').selectedOptions?.[0]?.textContent?.trim() || '';
   const unresolvedOwnerCount = () => countUnresolvedImportOwners(preview || {});
+  const ignoredTimestampCount = () => countIgnoredImportUpdateTimestamps(preview || {});
   const departmentMismatches = () => findImportDepartmentMismatches(preview || {}, selectedDepartmentName());
-  const needsAcknowledgement = () => Boolean(preview?.requiresWarningConfirmation || unresolvedOwnerCount() > 0);
+  const needsAcknowledgement = () => Boolean(preview?.requiresWarningConfirmation || unresolvedOwnerCount() > 0 || ignoredTimestampCount() > 0);
 
   function commitAllowed() {
     if (committed || !preview || !preview.canCommit || preview.summary.totalRows > MAX_ROWS) return false;
@@ -94,6 +97,7 @@
     preview = nextPreview;
     committed = false;
     const ownerCount=unresolvedOwnerCount();
+    const timestampCount=ignoredTimestampCount();
     const mismatches=departmentMismatches();
     setText('total', preview.summary.totalRows);
     setText('valid', preview.summary.valid);
@@ -103,16 +107,20 @@
     $('confirmWarnings').checked = false;
     $('warningConfirmRow').classList.toggle('hidden', !needsAcknowledgement());
     $('ownerNotice').classList.toggle('hidden', ownerCount===0);
+    $('legacyTimestampNotice').classList.toggle('hidden', timestampCount===0);
     $('departmentNotice').classList.toggle('hidden', mismatches.length===0);
     if(ownerCount>0) $('ownerNoticeText').textContent=`พบ ${ownerCount} โครงการที่มีชื่อผู้รับผิดชอบเป็นข้อความ แต่ยังไม่มี user_id`;
+    if(timestampCount>0) $('legacyTimestampNoticeText').textContent=`พบ ${timestampCount} โครงการที่มีค่า “วันที่อัปเดต” จาก CSV เดิม`;
     if(mismatches.length>0) {
       const sample=mismatches.slice(0,3).map((item)=>`แถว ${item.row}: ${item.sourceDepartment}`).join(' · ');
       const more=mismatches.length>3?` · และอีก ${mismatches.length-3} แถว`:'';
       $('departmentNoticeText').textContent=`เลือก “${selectedDepartmentName()}” แต่พบ ${sample}${more}`;
     }
-    $('warningConfirmText').textContent=ownerCount>0
-      ? `ฉันรับทราบ WARNING และรับทราบว่าผู้รับผิดชอบจาก CSV จำนวน ${ownerCount} โครงการยังไม่ถูกผูกบัญชีอัตโนมัติ`
-      : 'ฉันตรวจข้อสังเกต WARNING แล้ว และยืนยันให้นำเข้าตามข้อมูลนี้';
+    const acknowledgement=[];
+    if(preview.summary.warnings>0) acknowledgement.push(`WARNING ${preview.summary.warnings} แถว`);
+    if(ownerCount>0) acknowledgement.push(`ผู้รับผิดชอบ ${ownerCount} โครงการยังไม่ผูกบัญชี`);
+    if(timestampCount>0) acknowledgement.push(`วันที่อัปเดตเดิม ${timestampCount} โครงการจะไม่ถูกใช้แทนเวลา import`);
+    $('warningConfirmText').textContent=`ฉันตรวจและรับทราบ: ${acknowledgement.join(' · ')}`;
 
     if (preview.summary.totalRows > MAX_ROWS) {
       $('gate').className='gate error';
@@ -123,9 +131,9 @@
     } else if (mismatches.length > 0) {
       $('gate').className='gate error';
       $('gate').textContent=`⛔ ยังนำเข้าไม่ได้: พบ ${mismatches.length} แถวที่ระบุกองไม่ตรงกับ “${selectedDepartmentName()}”`;
-    } else if (preview.summary.warnings > 0 || ownerCount>0) {
+    } else if (needsAcknowledgement()) {
       $('gate').className='gate warn';
-      $('gate').textContent=`⚠️ พร้อมนำเข้าแบบต้องรับทราบ: WARNING ${preview.summary.warnings} แถว · ผู้รับผิดชอบยังไม่ผูกบัญชี ${ownerCount} โครงการ`;
+      $('gate').textContent=`⚠️ พร้อมนำเข้าแบบต้องรับทราบ: ${acknowledgement.join(' · ')}`;
     } else if (preview.summary.totalRows > 0) {
       $('gate').className='gate ok';
       $('gate').textContent='✅ ผ่านด่านตรวจ Browser พร้อมให้ยืนยันบันทึกจริง';
