@@ -2,6 +2,7 @@ import { IMPORT_ROW_STATUS } from './import-preview.mjs';
 import { normalizeProject } from './model.mjs';
 
 const normalize = (value) => String(value || '').trim();
+const MAX_IMPORT_ROWS = 500;
 
 export function toImportProjectRow(projectInput = {}) {
   const project = normalizeProject(projectInput);
@@ -24,6 +25,14 @@ export function toImportProjectRow(projectInput = {}) {
   };
 }
 
+export function countUnresolvedImportOwners(preview = {}) {
+  if (!Array.isArray(preview.rows)) return 0;
+  return preview.rows.filter((row) => {
+    if (!row?.project || row.status === IMPORT_ROW_STATUS.ERROR) return false;
+    return Boolean(normalize(row.project.owner)) && !normalize(row.project.ownerUserId);
+  }).length;
+}
+
 export function buildCommitProjectImportRpc({
   preview = {},
   organizationId = '',
@@ -40,12 +49,16 @@ export function buildCommitProjectImportRpc({
   if (!department) throw new Error('DEPARTMENT_REQUIRED');
   if (!safeFilename) throw new Error('FILENAME_REQUIRED');
   if (!Array.isArray(preview.rows) || preview.rows.length === 0) throw new Error('IMPORT_ROWS_REQUIRED');
+  if (preview.rows.length > MAX_IMPORT_ROWS) throw new Error('IMPORT_TOO_LARGE');
 
   const errors = preview.rows.filter((row) => row.status === IMPORT_ROW_STATUS.ERROR);
   if (errors.length) throw new Error('IMPORT_HAS_ERRORS');
 
   const warnings = preview.rows.filter((row) => row.status === IMPORT_ROW_STATUS.WARNING);
-  if (warnings.length && !confirmWarnings) throw new Error('WARNING_CONFIRMATION_REQUIRED');
+  const unresolvedOwners = countUnresolvedImportOwners(preview);
+  if ((warnings.length || unresolvedOwners > 0) && !confirmWarnings) {
+    throw new Error('WARNING_CONFIRMATION_REQUIRED');
+  }
 
   const projects = preview.rows
     .filter((row) => row.project && row.status !== IMPORT_ROW_STATUS.ERROR)
