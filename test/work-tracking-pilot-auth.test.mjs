@@ -8,6 +8,7 @@ import {
   getMagicLinkRetrySeconds,
   loadOwnMemberships,
   requestPilotMagicLink,
+  signInPilotWithPassword,
 } from '../src/work-tracking/pilot-auth.mjs';
 
 test('pilot browser configuration exposes only a publishable key', () => {
@@ -43,13 +44,28 @@ test('magic-link throttle errors become Thai retry guidance without exposing bac
   const described = describeMagicLinkError(raw);
   assert.equal(described.retryAfterSeconds, 13);
   assert.match(described.message, /รออีก 13 วินาที/);
+  assert.match(described.message, /รหัสผ่าน/);
   assert.doesNotMatch(described.message, /security purposes|only request/i);
 });
 
-test('generic rate-limit response uses a conservative cooldown', () => {
-  const described = describeMagicLinkError({ message: 'rate limit exceeded', status: 429 });
+test('generic rate-limit response uses a conservative cooldown and password fallback guidance', () => {
+  const described = describeMagicLinkError({ message: 'email rate limit exceeded', status: 429 });
   assert.equal(described.retryAfterSeconds, 60);
   assert.match(described.message, /60 วินาที/);
+  assert.match(described.message, /เข้าสู่ระบบด้วยรหัสผ่าน/);
+});
+
+test('password fallback normalizes email and does not create an account', async () => {
+  const calls = [];
+  const client = {
+    auth: {
+      async signInWithPassword(args) { calls.push(args); return { data: { session: { access_token: 'demo' } }, error: null }; },
+    },
+  };
+  const result = await signInPilotWithPassword({ client, email: ' TEST@Example.COM ', password: 'example-password' });
+  assert.equal(result.ok, true);
+  assert.equal(result.email, 'test@example.com');
+  assert.deepEqual(calls, [{ email: 'test@example.com', password: 'example-password' }]);
 });
 
 test('invite claim is performed only through the audited RPC', async () => {
