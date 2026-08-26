@@ -40,5 +40,7 @@ jobs:
           node --check src/work-tracking/task-model.mjs
           node --check src/work-tracking/task-service.mjs
           node --check src/work-tracking/command-center.mjs
+          node --check src/work-tracking/session-context.mjs
+          node --check src/work-tracking/supabase-adapter.mjs
       - name: Run test suite
         run: node --test test/*.test.mjs
