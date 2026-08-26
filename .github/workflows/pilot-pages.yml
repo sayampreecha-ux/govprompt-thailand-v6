@@ -74,6 +74,7 @@ jobs:
           test -f _site/pilot/index.html
           test -f _site/pilot/work-dashboard-live-pilot.html
           test -f _site/pilot/work-import-live-pilot.html
+          test -f _site/pilot/work-export-live-pilot.html
           test -f _site/pilot/work-tracking-template-th.csv
 
       - name: Publish combined site to gh-pages
