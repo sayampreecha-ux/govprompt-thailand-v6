@@ -7,13 +7,13 @@
   <title>GP Work Tracking · เข้าสู่ระบบ Pilot</title>
   <style>
     :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c}
-    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 960px)/2));display:flex;justify-content:space-between}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:960px;margin:auto;padding:36px 16px 70px}.hero{text-align:center;max-width:680px;margin:auto}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p{color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}.card h2{margin-top:0}.field{display:block;margin:12px 0;font-weight:700}.field input{width:100%;padding:11px 12px;border:1px solid #c8d5e3;border-radius:10px;margin-top:6px}.btn{width:100%;border:0;border-radius:11px;padding:11px 14px;background:var(--navy);color:#fff;font-weight:800}.btn.secondary{background:#eef4fa;color:var(--navy);margin-top:8px}.status{margin-top:13px;padding:11px;border-radius:10px;background:#f1f5f9;color:#465970}.status.error{background:#feeceb;color:var(--red)}.status.ok{background:#e9f8f1;color:var(--green)}.context{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px}.context ul{margin-bottom:0}.muted{color:var(--muted);font-size:13px}.hidden{display:none}.go{display:inline-flex;text-decoration:none;border-radius:10px;padding:9px 12px;background:var(--blue);color:#fff;font-weight:800;margin-right:6px;margin-top:7px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 960px)/2));display:flex;justify-content:space-between}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:960px;margin:auto;padding:36px 16px 70px}.hero{text-align:center;max-width:680px;margin:auto}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p{color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}.card h2{margin-top:0}.field{display:block;margin:12px 0;font-weight:700}.field input{width:100%;padding:11px 12px;border:1px solid #c8d5e3;border-radius:10px;margin-top:6px}.btn{width:100%;border:0;border-radius:11px;padding:11px 14px;background:var(--navy);color:#fff;font-weight:800}.btn.secondary{background:#eef4fa;color:var(--navy);margin-top:8px}.status{margin-top:13px;padding:11px;border-radius:10px;background:#f1f5f9;color:#465970}.status.error{background:#feeceb;color:var(--red)}.status.ok{background:#e9f8f1;color:var(--green)}.context{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px}.muted{color:var(--muted);font-size:13px}.hidden{display:none}.go{display:inline-flex;text-decoration:none;border-radius:10px;padding:9px 12px;background:var(--blue);color:#fff;font-weight:800;margin-right:6px;margin-top:7px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <header class="top"><strong>GovPrompt · Organization Pilot</strong><a href="index.html">GP หลัก</a></header>
 <main class="wrap">
-  <section class="hero"><div class="muted">INTERNAL PILOT · SUPABASE AUTH + RLS</div><h1>เข้าสู่ระบบ Work Tracking</h1><p>บัญชีผู้ใช้กับสิทธิในองค์กรเป็นคนละชั้นกัน: สมัครบัญชีได้ก่อน แต่จะเห็นข้อมูลองค์กรเมื่อได้รับ Membership เท่านั้น</p></section>
+  <section class="hero"><div class="muted">INTERNAL PILOT · SUPABASE AUTH + RLS</div><h1>เข้าสู่ระบบ Work Tracking</h1><p>สมัครบัญชีได้ก่อน แต่จะเห็นข้อมูลขององค์กรเมื่ออีเมลนั้นได้รับคำเชิญ Pilot และ Claim Membership สำเร็จเท่านั้น</p></section>
 
   <section class="grid">
     <article class="card">
@@ -39,7 +39,7 @@
     <h2>สิทธิ Work Tracking</h2>
     <div id="contextText"></div>
     <div id="links" class="hidden">
-      <a class="go" href="work-tracking-pilot.html">Dashboard โครงการ</a>
+      <a class="go" href="work-dashboard-live-pilot.html">Dashboard ฐานข้อมูลจริง</a>
       <a class="go" href="work-command-center-pilot.html">Command Center</a>
       <a class="go" href="work-tracking-import-preview.html">ตรวจไฟล์นำเข้า</a>
     </div>
@@ -53,8 +53,14 @@
   const $ = (id) => document.getElementById(id);
   const setStatus = (id, message, kind = '') => { const node = $(id); node.textContent = message; node.className = `status ${kind}`.trim(); };
 
-  async function refreshContext() {
-    const { session, memberships } = await getPilotSessionContext();
+  async function claimInviteIfAvailable() {
+    const { data, error } = await supabase.rpc('claim_work_pilot_invite');
+    if (error) return { ok: false, code: 'CLAIM_FAILED' };
+    return data || { ok: false, code: 'NO_ACTIVE_INVITE' };
+  }
+
+  async function refreshContext({ tryClaim = true } = {}) {
+    let { session, memberships } = await getPilotSessionContext();
     const card = $('contextCard');
     const links = $('links');
     const logout = $('logoutBtn');
@@ -66,6 +72,13 @@
       return;
     }
 
+    if (memberships.length === 0 && tryClaim) {
+      const claim = await claimInviteIfAvailable();
+      if (claim?.ok) {
+        ({ session, memberships } = await getPilotSessionContext());
+      }
+    }
+
     setStatus('loginStatus', 'เข้าสู่ระบบแล้ว', 'ok');
     const resolved = resolveWorkSession({ session, memberships });
     if (resolved.ok) {
@@ -75,7 +88,7 @@
       $('contextText').textContent = 'บัญชีนี้มีหลายองค์กร ระบบ Pilot จะเพิ่มตัวเลือกองค์กรในขั้นถัดไป';
       links.classList.add('hidden');
     } else {
-      $('contextText').innerHTML = '<p><strong>บัญชีสร้างแล้ว แต่ยังไม่มีสิทธิองค์กร</strong></p><p class="muted">ผู้ดูแล Pilot ต้องเพิ่ม Membership ก่อน จึงจะอ่านข้อมูล Work Tracking ได้</p>';
+      $('contextText').innerHTML = '<p><strong>บัญชีสร้างแล้ว แต่ยังไม่มีสิทธิองค์กร</strong></p><p class="muted">ต้องมีคำเชิญ Pilot ที่ตรงกับอีเมลนี้ก่อน ระบบจึงจะ Claim Membership ให้อัตโนมัติ</p>';
       links.classList.add('hidden');
     }
   }
@@ -87,7 +100,7 @@
     setStatus('loginStatus', 'กำลังเข้าสู่ระบบ...');
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return setStatus('loginStatus', 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจข้อมูลหรือยืนยันอีเมลก่อน', 'error');
-    await refreshContext();
+    await refreshContext({ tryClaim: true });
   });
 
   $('signupBtn').addEventListener('click', async () => {
@@ -98,8 +111,8 @@
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return setStatus('signupStatus', 'สร้างบัญชีไม่สำเร็จ', 'error');
     if (data.session) {
-      setStatus('signupStatus', 'สร้างบัญชีและเข้าสู่ระบบแล้ว · รอการกำหนดสิทธิองค์กร', 'ok');
-      await refreshContext();
+      setStatus('signupStatus', 'สร้างบัญชีและเข้าสู่ระบบแล้ว · กำลังตรวจคำเชิญ Pilot', 'ok');
+      await refreshContext({ tryClaim: true });
     } else {
       setStatus('signupStatus', 'สร้างบัญชีแล้ว · กรุณาตรวจอีเมลเพื่อยืนยัน จากนั้นกลับมาเข้าสู่ระบบ', 'ok');
     }
@@ -112,8 +125,8 @@
     setStatus('loginStatus', 'ออกจากระบบแล้ว');
   });
 
-  supabase.auth.onAuthStateChange(() => { setTimeout(() => refreshContext().catch(() => {}), 0); });
-  refreshContext().catch(() => setStatus('loginStatus', 'เชื่อมระบบบัญชีไม่สำเร็จ', 'error'));
+  supabase.auth.onAuthStateChange(() => { setTimeout(() => refreshContext({ tryClaim: true }).catch(() => {}), 0); });
+  refreshContext({ tryClaim: true }).catch(() => setStatus('loginStatus', 'เชื่อมระบบบัญชีไม่สำเร็จ', 'error'));
 </script>
 </body>
 </html>
