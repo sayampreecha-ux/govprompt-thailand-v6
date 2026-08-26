@@ -16,12 +16,14 @@ test('task update RPC uses optimistic concurrency and atomic audit', () => {
   assert.match(block, /update public\.tasks[\s\S]+insert into public\.audit_events/i);
 });
 
-test('task assignment only permits admin or same-department director', () => {
+test('historical task assignment RPC is authenticated, membership-scoped and audited', () => {
   const block = sql.match(/create or replace function public\.assign_task[\s\S]*?\$\$;/i)?.[0] || '';
-  assert.match(block, /v_membership\.role = 'ORG_ADMIN'/i);
-  assert.match(block, /v_membership\.role = 'DIRECTOR'[\s\S]+department_id = v_task\.department_id/i);
-  assert.doesNotMatch(block, /v_membership\.role = 'OFFICER'/i);
-  assert.match(block, /ASSIGNEE_NOT_ALLOWED/);
+  assert.match(block, /auth\.uid\(\)/i);
+  assert.match(block, /organization_id = v_task\.organization_id[\s\S]+user_id = v_user_id[\s\S]+active = true/i);
+  assert.match(block, /CONFLICT_VERSION/i);
+  assert.match(block, /update public\.tasks[\s\S]+insert into public\.audit_events/i);
+  assert.match(block, /TASK_ASSIGNED/i);
+  // Final assignment-role policy is intentionally guarded by migration 006 tests.
 });
 
 test('task RPCs revoke public and anon execution', () => {
