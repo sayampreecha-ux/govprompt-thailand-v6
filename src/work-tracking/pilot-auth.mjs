@@ -15,7 +15,7 @@ export function describeMagicLinkError(error) {
   if (retryAfterSeconds > 0) {
     return {
       retryAfterSeconds,
-      message: `ระบบป้องกันการส่งลิงก์ซ้ำ กรุณารออีก ${retryAfterSeconds} วินาที แล้วลองใหม่`,
+      message: `ระบบส่งอีเมลถึงขีดจำกัดชั่วคราว กรุณารออีก ${retryAfterSeconds} วินาที หรือใช้ “เข้าสู่ระบบด้วยรหัสผ่าน (สำรอง)” ด้านล่าง`,
     };
   }
 
@@ -26,7 +26,7 @@ export function describeMagicLinkError(error) {
 
   return {
     retryAfterSeconds: 0,
-    message: 'ส่งลิงก์เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+    message: 'ส่งลิงก์เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่ หรือใช้การเข้าสู่ระบบด้วยรหัสผ่านสำหรับบัญชีเดิม',
   };
 }
 
@@ -45,6 +45,28 @@ export async function requestPilotMagicLink({ client, email, redirectTo } = {}) 
   const { data, error } = await client.auth.signInWithOtp({
     email: normalizedEmail,
     options,
+  });
+  if (error) throw error;
+  return { ok: true, email: normalizedEmail, data };
+}
+
+export async function signInPilotWithPassword({ client, email, password } = {}) {
+  const normalizedEmail = cleanEmail(email);
+  if (!client?.auth?.signInWithPassword) throw new Error('SUPABASE_CLIENT_REQUIRED');
+  if (!normalizedEmail || !normalizedEmail.includes('@')) {
+    const error = new Error('VALID_EMAIL_REQUIRED');
+    error.code = 'VALID_EMAIL_REQUIRED';
+    throw error;
+  }
+  if (!String(password || '')) {
+    const error = new Error('PASSWORD_REQUIRED');
+    error.code = 'PASSWORD_REQUIRED';
+    throw error;
+  }
+
+  const { data, error } = await client.auth.signInWithPassword({
+    email: normalizedEmail,
+    password: String(password),
   });
   if (error) throw error;
   return { ok: true, email: normalizedEmail, data };
