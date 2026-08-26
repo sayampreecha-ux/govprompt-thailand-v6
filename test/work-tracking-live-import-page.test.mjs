@@ -50,3 +50,10 @@ test('changing selected department revalidates the current preview and resets co
   assert.match(html, /confirmCommit'\)\.checked = false/);
   assert.match(html, /confirmWarnings'\)\.checked = false/);
 });
+
+test('live import exposes the UTF-8 CSV template and documents accepted Thai date format', () => {
+  assert.match(html, /href="work-tracking-template-th\.csv" download/);
+  assert.match(html, /ดาวน์โหลดแม่แบบ CSV สำหรับ Excel/);
+  assert.match(html, /วว\/ดด\/พ\.ศ\./);
+  assert.match(html, /31\/12\/2569/);
+});
