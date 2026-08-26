@@ -37,5 +37,8 @@ jobs:
           node --check src/work-tracking/audit.mjs
           node --check src/work-tracking/import-preview.mjs
           node --check src/work-tracking/project-service.mjs
+          node --check src/work-tracking/task-model.mjs
+          node --check src/work-tracking/task-service.mjs
+          node --check src/work-tracking/command-center.mjs
       - name: Run test suite
         run: node --test test/*.test.mjs
