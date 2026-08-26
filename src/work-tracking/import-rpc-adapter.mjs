@@ -4,6 +4,7 @@ import { normalizeProject } from './model.mjs';
 const normalize = (value) => String(value || '').trim();
 const normalizeDepartment = (value) => normalize(value).replace(/\s+/g, ' ').toLocaleLowerCase('th-TH');
 const MAX_IMPORT_ROWS = 500;
+const SAFE_IMPORT_BATCH_FILENAME = 'work-tracking-import.csv';
 
 export function toImportProjectRow(projectInput = {}) {
   const project = normalizeProject(projectInput);
@@ -71,11 +72,11 @@ export function buildCommitProjectImportRpc({
 } = {}) {
   const tenant = normalize(organizationId);
   const department = normalize(departmentId);
-  const safeFilename = normalize(filename);
+  const sourceFilename = normalize(filename);
 
   if (!tenant) throw new Error('ORGANIZATION_REQUIRED');
   if (!department) throw new Error('DEPARTMENT_REQUIRED');
-  if (!safeFilename) throw new Error('FILENAME_REQUIRED');
+  if (!sourceFilename) throw new Error('FILENAME_REQUIRED');
   if (!Array.isArray(preview.rows) || preview.rows.length === 0) throw new Error('IMPORT_ROWS_REQUIRED');
   if (preview.rows.length > MAX_IMPORT_ROWS) throw new Error('IMPORT_TOO_LARGE');
 
@@ -102,7 +103,7 @@ export function buildCommitProjectImportRpc({
   return {
     p_organization_id: tenant,
     p_department_id: department,
-    p_filename: safeFilename,
+    p_filename: SAFE_IMPORT_BATCH_FILENAME,
     p_rows: projects,
     p_confirm_warnings: Boolean(confirmWarnings),
     p_request_id: normalize(requestId) || null,
