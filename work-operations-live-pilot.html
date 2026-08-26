@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="GP Work Tracking live operations pilot">
+  <meta name="robots" content="noindex,nofollow">
   <title>GP Work Tracking · Operations Pilot</title>
   <style>
     :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--yellow:#9a6700}
@@ -11,7 +12,7 @@
   </style>
 </head>
 <body>
-<header class="top"><strong>GovPrompt · Operations Pilot</strong><div><a href="work-dashboard-live-pilot.html">Dashboard</a> · <a href="work-login-pilot.html">สิทธิผู้ใช้</a></div></header>
+<header class="top"><strong>GovPrompt · Operations Pilot</strong><div><a href="work-dashboard-live-pilot.html">Dashboard</a> · <a href="work-command-center-pilot.html">Command Center</a> · <a href="work-login-pilot.html">สิทธิผู้ใช้</a> · <a href="../">GP หลัก</a></div></header>
 <main class="wrap">
   <section class="hero"><div class="muted">LIVE SUPABASE · RPC WRITES · RLS READS · AUDIT</div><h1>ปฏิบัติการ Work Tracking</h1><p>เพิ่มโครงการและอัปเดตความก้าวหน้าผ่าน RPC เท่านั้น Browser ไม่มีสิทธิเขียนตารางโครงการโดยตรง</p></section>
   <div id="status" class="status">กำลังตรวจสิทธิ...</div>
@@ -82,6 +83,7 @@
   const setStatus = (id, message, kind = '') => { const n=$(id); n.textContent=message; n.className=`status ${kind}`.trim(); };
   const requestId = () => globalThis.crypto?.randomUUID?.() || `req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const formatDateTime = (v) => v ? new Intl.DateTimeFormat('th-TH',{dateStyle:'medium',timeStyle:'short'}).format(new Date(v)) : '-';
+  const normalizedProblem = (value) => String(value || '').trim() || null;
 
   async function requireActor() {
     const { session, memberships } = await getPilotSessionContext();
@@ -186,12 +188,25 @@
 
   async function updateProject() {
     if(!selected) return;
+
+    const nextProgress=Number($('actualProgress').value);
+    const nextStatus=$('projectStatus').value;
+    const nextProblem=normalizedProblem($('problemSummary').value);
+    const currentProgress=Number(selected.actual_progress||0);
+    const currentStatus=selected.status;
+    const currentProblem=normalizedProblem(selected.problem_summary);
+
+    if(nextProgress===currentProgress && nextStatus===currentStatus && nextProblem===currentProblem){
+      setStatus('updateStatus','ไม่มีข้อมูลเปลี่ยนแปลง จึงไม่บันทึกและไม่สร้าง Audit','ok');
+      return;
+    }
+
     $('updateBtn').disabled=true; setStatus('updateStatus','กำลังอัปเดต...');
     const args={
       p_project_id:selected.id,
-      p_actual_progress:Number($('actualProgress').value),
-      p_status:$('projectStatus').value,
-      p_problem_summary:$('problemSummary').value.trim()||null,
+      p_actual_progress:nextProgress,
+      p_status:nextStatus,
+      p_problem_summary:nextProblem,
       p_expected_updated_at:selected.updated_at,
       p_request_id:requestId()
     };
