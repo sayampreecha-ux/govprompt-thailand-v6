@@ -32,5 +32,5 @@ test('member directory is privacy-minimal and safe DOM rendered', () => {
 test('invite UI is explicitly restricted and explains manual pilot-link delivery', () => {
   assert.match(html, /actor\.role!=='ORG_ADMIN'/);
   assert.match(html, /ระบบ Pilot ยังไม่ส่งอีเมลอัตโนมัติ/);
-  assert.doesNotMatch(html, /ORG_ADMIN ·/);
+  assert.doesNotMatch(html, /<option\s+value="ORG_ADMIN"/i);
 });
