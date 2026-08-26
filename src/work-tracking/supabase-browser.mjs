@@ -4,7 +4,7 @@ const SUPABASE_URL = 'https://bswokqqhfuvmsomzulyl.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ZRVlOTC0jJIaFxPJrqYpUA_ZgrTnHOZ';
 
 // Publishable keys are designed for browser use. Security must come from Auth + RLS.
-// Never put service_role / sb_secret credentials in this client module.
+// Privileged server credentials must never be shipped in this client module.
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     persistSession: true,
