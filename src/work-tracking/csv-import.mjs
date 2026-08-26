@@ -64,9 +64,8 @@ function parseCsvRows(text = '') {
       continue;
     }
 
-    if (char === '"') {
-      quoted = true;
-    } else if (char === ',') {
+    if (char === '"') quoted = true;
+    else if (char === ',') {
       row.push(field.trim());
       field = '';
     } else if (char === '\n') {
@@ -74,9 +73,7 @@ function parseCsvRows(text = '') {
       rows.push(row);
       row = [];
       field = '';
-    } else if (char !== '\r') {
-      field += char;
-    }
+    } else if (char !== '\r') field += char;
   }
 
   row.push(field.trim());
@@ -113,24 +110,25 @@ function mapStatus(value) {
   return STATUS_ALIASES.get(raw) || STATUS_ALIASES.get(raw.toUpperCase()) || WORK_STATUS.NOT_STARTED;
 }
 
+const emptyResult = (errors = [], headers = []) => ({ projects: [], projectRows: [], errors, headers });
+
 export function importProjectsFromCsv(csvText, organizationId) {
   const tenant = String(organizationId || '').trim();
-  if (!tenant) {
-    return { projects: [], errors: [{ row: 0, message: 'ต้องระบุ organizationId ก่อนนำเข้าข้อมูล' }], headers: [] };
-  }
+  if (!tenant) return emptyResult([{ row: 0, message: 'ต้องระบุ organizationId ก่อนนำเข้าข้อมูล' }]);
 
   const rows = parseCsvRows(csvText);
   if (rows.length < 2) {
-    return { projects: [], errors: [{ row: 0, message: 'CSV ต้องมีหัวตารางและข้อมูลอย่างน้อย 1 รายการ' }], headers: rows[0] || [] };
+    return emptyResult([{ row: 0, message: 'CSV ต้องมีหัวตารางและข้อมูลอย่างน้อย 1 รายการ' }], rows[0] || []);
   }
 
   const headers = rows[0];
   const columnMap = buildColumnMap(headers);
   if (columnMap.name === undefined) {
-    return { projects: [], errors: [{ row: 1, message: 'ไม่พบคอลัมน์ชื่อโครงการ' }], headers };
+    return emptyResult([{ row: 1, message: 'ไม่พบคอลัมน์ชื่อโครงการ' }], headers);
   }
 
   const projects = [];
+  const projectRows = [];
   const errors = [];
 
   rows.slice(1).forEach((row, offset) => {
@@ -141,7 +139,7 @@ export function importProjectsFromCsv(csvText, organizationId) {
       return;
     }
 
-    projects.push(normalizeProject({
+    const project = normalizeProject({
       id: cell(row, columnMap, 'id') || `CSV-${String(rowNumber - 1).padStart(4, '0')}`,
       organizationId: tenant,
       name,
@@ -160,10 +158,13 @@ export function importProjectsFromCsv(csvText, organizationId) {
       status: mapStatus(cell(row, columnMap, 'status')),
       lastUpdatedAt: cell(row, columnMap, 'lastUpdatedAt') || null,
       problem: cell(row, columnMap, 'problem'),
-    }));
+    });
+
+    projects.push(project);
+    projectRows.push({ row: rowNumber, project });
   });
 
-  return { projects, errors, headers };
+  return { projects, projectRows, errors, headers };
 }
 
 export const CSV_TEMPLATE_HEADERS = [
