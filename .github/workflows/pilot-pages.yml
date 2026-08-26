@@ -1,4 +1,4 @@
-name: Deploy Work Tracking Pilot to GitHub Pages
+name: Publish Work Tracking Pilot Branch
 
 on:
   push:
@@ -12,16 +12,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: work-tracking-pilot-pages
+  group: work-tracking-pilot-publish
   cancel-in-progress: true
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout pilot branch
@@ -34,11 +32,11 @@ jobs:
           rm -rf _pilot_site
           mkdir -p _pilot_site/src/work-tracking _pilot_site/samples
 
-          # Login is the pilot landing page.
+          # Pilot login is the landing page. Production GP index.html is not copied.
           cp work-login-pilot.html _pilot_site/index.html
           cp work-login-pilot.html _pilot_site/work-login-pilot.html
 
-          # Copy only Work Tracking pilot pages, not the GP production homepage.
+          # Copy only Work Tracking pilot pages.
           for file in work-*.html; do
             [ -f "$file" ] && cp "$file" _pilot_site/
           done
@@ -51,21 +49,18 @@ jobs:
 
           touch _pilot_site/.nojekyll
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload pilot artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _pilot_site
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy pilot to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish isolated site to gh-pages
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd _pilot_site
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "deploy: Work Tracking Pilot ${GITHUB_SHA}"
+          git branch -M gh-pages
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages
