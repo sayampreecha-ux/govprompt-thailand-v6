@@ -1,9 +1,43 @@
 const cleanEmail = (value) => String(value || '').trim().toLowerCase();
 
+export function getMagicLinkRetrySeconds(error) {
+  const message = String(error?.message || error || '');
+  const explicit = message.match(/after\s+(\d+)\s+seconds?/i)
+    || message.match(/retry\s+(?:in|after)\s+(\d+)\s+seconds?/i)
+    || message.match(/(\d+)\s*seconds?/i);
+  if (explicit) return Math.max(1, Number(explicit[1]));
+  if (Number(error?.status) === 429 || /rate\s*limit|too many requests/i.test(message)) return 60;
+  return 0;
+}
+
+export function describeMagicLinkError(error) {
+  const retryAfterSeconds = getMagicLinkRetrySeconds(error);
+  if (retryAfterSeconds > 0) {
+    return {
+      retryAfterSeconds,
+      message: `ระบบป้องกันการส่งลิงก์ซ้ำ กรุณารออีก ${retryAfterSeconds} วินาที แล้วลองใหม่`,
+    };
+  }
+
+  const code = String(error?.code || '');
+  if (code === 'VALID_EMAIL_REQUIRED') {
+    return { retryAfterSeconds: 0, message: 'กรุณาตรวจสอบรูปแบบอีเมลให้ถูกต้อง' };
+  }
+
+  return {
+    retryAfterSeconds: 0,
+    message: 'ส่งลิงก์เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+  };
+}
+
 export async function requestPilotMagicLink({ client, email, redirectTo } = {}) {
   const normalizedEmail = cleanEmail(email);
   if (!client?.auth?.signInWithOtp) throw new Error('SUPABASE_CLIENT_REQUIRED');
-  if (!normalizedEmail || !normalizedEmail.includes('@')) throw new Error('VALID_EMAIL_REQUIRED');
+  if (!normalizedEmail || !normalizedEmail.includes('@')) {
+    const error = new Error('VALID_EMAIL_REQUIRED');
+    error.code = 'VALID_EMAIL_REQUIRED';
+    throw error;
+  }
 
   const options = { shouldCreateUser: true };
   if (redirectTo) options.emailRedirectTo = String(redirectTo);
