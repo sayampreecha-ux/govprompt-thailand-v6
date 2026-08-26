@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { buildProjectImportPreview } from '../src/work-tracking/import-preview.mjs';
 import {
   buildCommitProjectImportRpc,
+  countIgnoredImportUpdateTimestamps,
   countUnresolvedImportOwners,
   findImportDepartmentMismatches,
 } from '../src/work-tracking/import-rpc-adapter.mjs';
@@ -31,6 +32,7 @@ test('maps acknowledged preview into RPC payload without raw CSV content', () =>
   assert.equal('csvText' in args, false);
   assert.equal('role' in args, false);
   assert.equal('owner' in args.p_rows[0], false);
+  assert.equal('lastUpdatedAt' in args.p_rows[0], false);
 });
 
 test('does not build commit payload when preview contains errors', () => {
@@ -65,6 +67,32 @@ test('CSV owner text requires acknowledgement because it is not silently mapped 
   assert.throws(() => buildCommitProjectImportRpc({
     preview, organizationId: 'ORG-A', departmentId: 'DEP-ENG', departmentName: 'กองช่าง', filename: 'owners.csv',
   }), /WARNING_CONFIRMATION_REQUIRED/);
+});
+
+test('legacy source update timestamp requires acknowledgement because server stamps the real import time', () => {
+  const preview = buildProjectImportPreview([
+    'รหัสโครงการ,ชื่อโครงการ,กอง,งบประมาณ,วันที่อัปเดต',
+    'PJ-OLD-TIME,โครงการไฟล์เก่า,กองช่าง,1000,2026-07-01T09:30:00+07:00',
+  ].join('\n'), 'ORG-A');
+
+  assert.equal(countIgnoredImportUpdateTimestamps(preview), 1);
+  assert.throws(() => buildCommitProjectImportRpc({
+    preview,
+    organizationId: 'ORG-A',
+    departmentId: 'DEP-ENG',
+    departmentName: 'กองช่าง',
+    filename: 'legacy.csv',
+  }), /WARNING_CONFIRMATION_REQUIRED/);
+
+  const args = buildCommitProjectImportRpc({
+    preview,
+    organizationId: 'ORG-A',
+    departmentId: 'DEP-ENG',
+    departmentName: 'กองช่าง',
+    filename: 'legacy.csv',
+    confirmWarnings: true,
+  });
+  assert.equal('lastUpdatedAt' in args.p_rows[0], false);
 });
 
 test('blocks non-empty CSV department that differs from selected commit department', () => {
