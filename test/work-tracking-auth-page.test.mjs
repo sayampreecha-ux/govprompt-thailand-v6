@@ -21,6 +21,14 @@ test('browser client contains only publishable credential class, never server se
 
 test('membership is required before organization links are shown', () => {
   assert.match(html, /ยังไม่มีสิทธิองค์กร/);
-  assert.match(html, /links\.classList\.remove\('hidden'\)/);
-  assert.match(html, /links\.classList\.add\('hidden'\)/);
+  assert.match(html, /links\.classList\.toggle\('hidden', !resolved\.ok\)/);
+  assert.match(html, /resolveWorkSession/);
+});
+
+test('pilot login safely renders session context and links back to production GP root', () => {
+  assert.match(html, /box\.replaceChildren\(\)/);
+  assert.match(html, /textContent\s*=/);
+  assert.doesNotMatch(html, /innerHTML\s*=/);
+  assert.match(html, /href="\.\.\/">GP หลัก/);
+  assert.match(html, /noindex,nofollow/);
 });
