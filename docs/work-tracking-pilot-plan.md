@@ -1,64 +1,76 @@
 # GP Work Tracking Pilot
 
-สถานะ: Sprint 2 กำลังพัฒนา — Data Quality + Access Control + Audit Core + Data Model
+สถานะ: Sprint 2 — Prototype + Security Core + Supabase Pilot migrations พร้อมเข้าสู่ environment test
 
 ## เป้าหมาย
-สร้างแกนติดตามงานสำหรับการทดลองใช้ภายในองค์กรก่อน โดยไม่รอ Tavily และไม่กระทบเมนู AI ทั่วไปเดิม
-
-## ขอบเขต MVP ระยะแรก
-- โครงข้อมูล Organization / Project / Task / Status / Progress / Budget
-- รองรับ `organization_id` ตั้งแต่ต้น เพื่อพร้อมขยายเป็น multi-tenant ภายหลัง
-- Dashboard ภาพรวมงานแบบไม่พึ่ง LLM
-- กติกาสถานะสี เขียว/เหลือง/แดง จากข้อมูลจริง
-- Pilot แรก: โครงการก่อสร้างกองช่าง
-- Audit trail เป็น requirement ตั้งแต่ต้น แต่ยังไม่เปิด persistence จริงจนกว่าจะเลือก backend/database
+สร้าง Work Tracking / Command Center สำหรับทดลองใช้ภายในองค์กรก่อน โดยไม่รอ Tavily และไม่กระทบเมนู AI ทั่วไปเดิม
 
 ## ทำเสร็จแล้ว — Sprint 1
-- [x] Work Tracking domain model แบบ deterministic
-- [x] Project fields สำหรับงานก่อสร้าง: พื้นที่ เลขสัญญา ผู้รับจ้าง งบประมาณ แผน/ผลจริง กำหนดเสร็จ ปัญหา
-- [x] Risk scoring เขียว/เหลือง/แดง โดยใช้ progress variance, deadline, blocked status และ stale update
-- [x] Organization scoping: ถ้าไม่มี `organizationId` จะไม่คืนข้อมูล เพื่อป้องกันการเห็นข้อมูลข้ามองค์กรโดยพลาด
-- [x] Dashboard view model + search/filter ตามสถานะและความเสี่ยง
-- [x] หน้า `work-tracking-pilot.html` แบบ responsive โดยไม่เพิ่มเมนูบนหน้า GP หลัก
-- [x] Priority queue สำหรับงานที่ควรติดตามก่อน
-- [x] CSV import core ทำงานฝั่ง client และบังคับ `organizationId` จากระบบ ไม่เชื่อค่าจากไฟล์ผู้ใช้
-- [x] CSV Preview เชื่อมเข้าหน้า Pilot: เลือกไฟล์ → อ่านใน Browser → สร้าง Dashboard โดยยังไม่ส่งข้อมูลขึ้น Server
-- [x] ไฟล์ CSV ตัวอย่างสำหรับให้เจ้าหน้าที่จัดรูปแบบข้อมูล
-- [x] Unit/static tests ครอบคลุม risk, tenant isolation, dashboard/filter, CSV import และขอบเขตหน้า Pilot
+- [x] Work Tracking deterministic Project model + Risk scoring เขียว/เหลือง/แดง
+- [x] Dashboard ก่อสร้าง responsive + search/filter + priority queue
+- [x] CSV import/preview ฝั่ง Browser โดยยังไม่ส่งข้อมูลขึ้น Server
+- [x] Construction CSV template + tenant injection จากระบบ
+- [x] Organization scoping แบบ fail closed
 
-## ทำแล้ว — Sprint 2
-- [x] Data Quality Gate: ชื่อ/หน่วยงาน/ผู้รับผิดชอบ/งบประมาณ/วันที่/สถานะ/ความก้าวหน้า/ข้อมูลซ้ำ
-- [x] Batch validation แยก ERROR กับ WARNING และกันรายการ error ออกจาก valid batch
+## ทำเสร็จแล้ว — Sprint 2 Core
+- [x] Data Quality Gate แยก ERROR / WARNING / VALID
+- [x] Row-level CSV Preview พร้อมเลขแถวต้นทาง + commit gate
+- [x] หน้า `work-tracking-import-preview.html` สำหรับตรวจไฟล์ก่อนนำเข้า
 - [x] Role model: ORG_ADMIN / EXECUTIVE / DIRECTOR / OFFICER / AUDITOR
-- [x] Access-control core แบบ fail closed: tenant mismatch ปฏิเสธก่อนตรวจ role
-- [x] Department scope สำหรับ Director/Officer และ owner scope สำหรับการแก้ไขของ Officer
-- [x] Privacy-safe Audit Event core แบบ metadata allowlist ไม่รับ raw PII โดยอัตโนมัติ
-- [x] Data model สำหรับ Organization / Department / User / Membership / Project / Task / Attachment / Import Batch / Audit Event
-- [x] CI เพิ่ม syntax check สำหรับ Work Tracking modules
-- [x] Unit tests สำหรับ access boundary และ audit core
+- [x] Tenant / Department / Assigned-owner authorization core
+- [x] แยก Project Assignment และ Task Assignment ออกจาก generic update เพื่อกัน privilege escalation
+- [x] Privacy-safe Audit Event core แบบ metadata allowlist
+- [x] Project service + Task service: authorize → field allowlist → quality gate → audit event
+- [x] Task model + urgency scoring + task priority queue
+- [x] Command Center aggregator รวม Project risk + Task urgency
+- [x] หน้า `work-command-center-pilot.html` สำหรับผู้บริหารจากข้อมูลจำลอง
+- [x] Session/Membership resolver แบบ fail closed
+- [x] Data model + Backend API contract
 
-## งานถัดไป — Sprint 2 ต่อเนื่อง
-1. เชื่อม Data Quality Gate เข้าหน้า CSV Preview ให้เห็น “ผ่าน / เตือน / ไม่ผ่าน” ก่อนใช้ข้อมูล
-2. เพิ่ม row-level import result เพื่อชี้กลับไปยังบรรทัดต้นทางได้แม้รหัสโครงการว่างหรือซ้ำ
-3. ออกแบบ backend contract/API สำหรับ Project / Task / Import / Audit โดย tenant มาจาก session ไม่มาจาก client
-4. ประเมิน backend/database ตาม Issue #20 และเลือกทาง Pilot ที่ rollback/export ได้ง่าย
-5. ทำ Login + Membership resolver + Role enforcement ฝั่ง backend/database
-6. ทำ persistence เฉพาะ Pilot กองช่าง แล้วทดลองข้อมูลจริงแบบจำกัด
-7. ผ่าน Pilot กองช่างแล้วค่อยเพิ่ม Template รพ.สต. / Solar / ถนน
+## Backend Pilot
+ADR-001 เลือก **Supabase (Postgres + Auth + RLS)** เป็นตัวเลือกแรกสำหรับ Pilot; Cloudflare D1 เป็น fallback
 
-## สิ่งที่ยังไม่ทำในระยะแรก
+ทำแล้ว:
+- [x] Schema: organizations / departments / organization_memberships / projects / tasks / import_batches / audit_events
+- [x] RLS ทุก business table + minimum grants
+- [x] Harden mutation boundary: Browser อ่านผ่าน RLS แต่ไม่ mutate Project/Task โดยตรง
+- [x] Atomic Project progress RPC: auth → membership/role → optimistic concurrency → update + audit
+- [x] Atomic Task update / Task assignment RPC
+- [x] Audited Project create / Task create RPC
+- [x] Static security tests ป้องกัน RLS, grant และ RPC regression
+- [x] Supabase row/domain adapter + RPC argument mapping
+
+## งานถัดไป — Environment / Integration Gate
+1. Provision Supabase Pilot project แยกจาก Production
+2. Apply migrations ใน environment จริง
+3. สร้างข้อมูลทดสอบ ORG-A / ORG-B + Role ทุกแบบ
+4. Integration test ยืนยัน ORG-A ไม่มี path อ่าน/แก้ ORG-B
+5. ทดสอบ Director scope / Officer owner scope / Executive & Auditor read-only
+6. ทดสอบ atomic mutation + audit และ optimistic concurrency
+7. เชื่อม Login + Membership resolver กับ Pilot UI
+8. ต่อ Dashboard Read จากฐานจริง แล้วค่อยเปิด Project/Task mutation UI
+9. ทำ Export + Backup/Restore test ก่อนใช้ข้อมูลจริง
+10. ใช้ข้อมูลจริงกองช่างแบบจำกัดหลัง Security Gate ผ่าน
+
+## หลัง Pilot กองช่าง
+- Template รพ.สต.
+- Asset + Solar/ไฟสาธารณะ
+- ถนน/งานซ่อม
+- SLA
 - Citizen Report
 - GIS
-- SLA เต็มรูปแบบ
-- Tavily / official web search integration
-- AI auto-decision
-- production database migration สำหรับการเปิดใช้ทั่วไป
+- AI Executive Summary/ถามข้อมูลด้วยภาษาธรรมชาติ โดย AI เป็น read/analyze/draft ไม่ใช่ผู้อนุมัติ
 
-## หลักการ
-1. ระบบเดิมต้องยังใช้งานได้เหมือนเดิม
-2. Dashboard คำนวณด้วย code/database ก่อนเรียก AI
-3. AI ทำหน้าที่สรุป วิเคราะห์ และร่างข้อเสนอ ไม่ตัดสินใจแทนเจ้าหน้าที่
-4. ข้อมูลแต่ละองค์กรต้องแยกด้วย `organization_id`
-5. สิทธิและ audit log เป็นส่วนพื้นฐาน ไม่ใช่ premium feature
-6. Pilot ใช้ข้อมูลจำลองหรือข้อมูลที่ผ่านการคัดกรองก่อน จนกว่าระบบสิทธิและฐานข้อมูลจริงพร้อม
-7. Client-side validation เป็น UX เท่านั้น; authorization และ tenant isolation ต้องบังคับซ้ำที่ backend/database
+## ยังแยกจาก Work Tracking
+- Tavily / official web search integration เป็นงานอีกเส้นหนึ่ง ไม่บล็อก Pilot นี้
+
+## หลักบังคับ
+1. ระบบ GP เดิมต้องยังใช้งานได้เหมือนเดิม
+2. Dashboard/ตัวเลขคำนวณด้วย Code/Database ก่อนเรียก AI
+3. AI วิเคราะห์/สรุป/ร่าง แต่ไม่ approve/close/accept งานเอง
+4. `organization_id` + membership ต้องถูกบังคับที่ backend/database ไม่ใช่ Frontend
+5. สิทธิและ audit log เป็น baseline security ไม่ใช่ premium feature
+6. Import ต้อง Preview + Quality Gate + Human confirmation + server-side revalidation
+7. Mutation สำคัญต้องบันทึก business change + audit แบบ atomic
+8. ห้ามมี service/secret key ใน Browser
+9. ข้อมูลจริงยังไม่เข้าระบบจน Supabase environment + RLS integration test + backup/export gate ผ่าน
