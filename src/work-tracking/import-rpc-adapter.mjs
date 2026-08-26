@@ -34,6 +34,14 @@ export function countUnresolvedImportOwners(preview = {}) {
   }).length;
 }
 
+export function countIgnoredImportUpdateTimestamps(preview = {}) {
+  if (!Array.isArray(preview.rows)) return 0;
+  return preview.rows.filter((row) => {
+    if (!row?.project || row.status === IMPORT_ROW_STATUS.ERROR) return false;
+    return Boolean(normalize(row.project.lastUpdatedAt));
+  }).length;
+}
+
 export function findImportDepartmentMismatches(preview = {}, departmentName = '') {
   if (!Array.isArray(preview.rows)) return [];
   const selected = normalizeDepartment(departmentName);
@@ -80,7 +88,8 @@ export function buildCommitProjectImportRpc({
 
   const warnings = preview.rows.filter((row) => row.status === IMPORT_ROW_STATUS.WARNING);
   const unresolvedOwners = countUnresolvedImportOwners(preview);
-  if ((warnings.length || unresolvedOwners > 0) && !confirmWarnings) {
+  const ignoredUpdateTimestamps = countIgnoredImportUpdateTimestamps(preview);
+  if ((warnings.length || unresolvedOwners > 0 || ignoredUpdateTimestamps > 0) && !confirmWarnings) {
     throw new Error('WARNING_CONFIRMATION_REQUIRED');
   }
 
