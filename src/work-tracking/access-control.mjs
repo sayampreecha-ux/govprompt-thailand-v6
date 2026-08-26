@@ -104,7 +104,7 @@ export function authorizeWorkAction({ actor = {}, action = '', resource = {} } =
   }
 
   if (role === ORG_ROLE.OFFICER && [ACCESS_ACTION.PROJECT_UPDATE, ACCESS_ACTION.TASK_UPDATE].includes(action)) {
-    if (resourceOwnerUserId && resourceOwnerUserId !== userId) {
+    if (!resourceOwnerUserId || resourceOwnerUserId !== userId) {
       return { allowed: false, reason: 'NOT_ASSIGNED_OWNER' };
     }
   }
