@@ -71,13 +71,13 @@ begin
   v_previous_status := v_project.status;
 
   if v_project.actual_progress is distinct from p_actual_progress then
-    v_changed_fields := v_changed_fields || '"actualProgress"'::jsonb;
+    v_changed_fields := v_changed_fields || jsonb_build_array('actualProgress');
   end if;
   if v_project.status is distinct from p_status then
-    v_changed_fields := v_changed_fields || '"status"'::jsonb;
+    v_changed_fields := v_changed_fields || jsonb_build_array('status');
   end if;
   if v_project.problem_summary is distinct from p_problem_summary then
-    v_changed_fields := v_changed_fields || '"problem"'::jsonb;
+    v_changed_fields := v_changed_fields || jsonb_build_array('problem');
   end if;
 
   update public.projects
