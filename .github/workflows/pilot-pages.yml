@@ -6,6 +6,7 @@ on:
       - v7/work-tracking-pilot
     paths:
       - 'work-*.html'
+      - 'work-*.csv'
       - 'src/work-tracking/**'
       - 'samples/work-tracking-*'
       - '.github/workflows/pilot-pages.yml'
@@ -56,6 +57,10 @@ jobs:
             [ -f "$file" ] && cp "$file" _site/pilot/
           done
 
+          for file in pilot-src/work-*.csv; do
+            [ -f "$file" ] && cp "$file" _site/pilot/
+          done
+
           cp pilot-src/src/work-tracking/*.mjs _site/pilot/src/work-tracking/
 
           for file in pilot-src/samples/work-tracking-*; do
@@ -68,6 +73,8 @@ jobs:
           test -f _site/index.html
           test -f _site/pilot/index.html
           test -f _site/pilot/work-dashboard-live-pilot.html
+          test -f _site/pilot/work-import-live-pilot.html
+          test -f _site/pilot/work-tracking-template-th.csv
 
       - name: Publish combined site to gh-pages
         shell: bash
