@@ -32,3 +32,8 @@ test('pilot login safely renders session context and links back to production GP
   assert.match(html, /href="\.\.\/">GP หลัก/);
   assert.match(html, /noindex,nofollow/);
 });
+
+test('workspace clearly separates live CSV commit from local-only preview', () => {
+  assert.match(html, /href="work-import-live-pilot\.html">นำเข้า CSV จริง/);
+  assert.match(html, /href="work-tracking-import-preview\.html">Preview CSV local-only/);
+});
