@@ -7,15 +7,20 @@
   <title>GP Work Tracking · Live Dashboard Pilot</title>
   <style>
     :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--muted:#64748b;--line:#dce6f1;--red:#b42318;--yellow:#9a6700;--green:#16865c}
-    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;gap:10px;align-items:center}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1180px;margin:auto;padding:28px 16px 64px}.hero h1{margin:4px 0;font-size:clamp(28px,5vw,46px)}.hero p{color:var(--muted);margin:5px 0}.status{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}.status.error{border-color:#f3c5bf;background:#fff0ee;color:var(--red)}.status.ok{border-color:#b9e5d2;background:#edfaf4;color:var(--green)}.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}.kpi,.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px}.kpi small{display:block;color:var(--muted)}.kpi strong{display:block;font-size:26px;margin-top:5px}.grid{display:grid;grid-template-columns:1fr 2fr;gap:16px}.panel h2{margin:0 0 12px}.queue{display:grid;gap:9px}.item{border:1px solid var(--line);border-left-width:5px;border-radius:11px;padding:11px}.item.RED{border-left-color:var(--red)}.item.YELLOW{border-left-color:#d99a23}.item.GREEN{border-left-color:var(--green)}.item strong{display:block}.muted{color:var(--muted);font-size:13px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:10px 11px;border-bottom:1px solid #e7edf4;text-align:left;font-size:13px;vertical-align:top}th{background:#f3f7fb}.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:800;font-size:11px}.badge.RED{background:#feeceb;color:var(--red)}.badge.YELLOW{background:#fff4dc;color:var(--yellow)}.badge.GREEN{background:#e9f8f1;color:var(--green)}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:9px 12px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy)}@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;gap:10px;align-items:center}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1180px;margin:auto;padding:28px 16px 64px}.hero h1{margin:4px 0;font-size:clamp(28px,5vw,46px)}.hero p{color:var(--muted);margin:5px 0}.status{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}.status.error{border-color:#f3c5bf;background:#fff0ee;color:var(--red)}.status.ok{border-color:#b9e5d2;background:#edfaf4;color:var(--green)}.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}.kpi,.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px}.kpi small{display:block;color:var(--muted)}.kpi strong{display:block;font-size:26px;margin-top:5px}.grid{display:grid;grid-template-columns:1fr 2fr;gap:16px}.panel h2{margin:0 0 12px}.queue{display:grid;gap:9px}.item{border:1px solid var(--line);border-left-width:5px;border-radius:11px;padding:11px}.item.RED{border-left-color:var(--red)}.item.YELLOW{border-left-color:#d99a23}.item.GREEN{border-left-color:var(--green)}.item strong{display:block}.muted{color:var(--muted);font-size:13px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:10px 11px;border-bottom:1px solid #e7edf4;text-align:left;font-size:13px;vertical-align:top}th{background:#f3f7fb}.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:800;font-size:11px}.badge.RED{background:#feeceb;color:var(--red)}.badge.YELLOW{background:#fff4dc;color:var(--yellow)}.badge.GREEN{background:#e9f8f1;color:var(--green)}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:9px 12px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer;text-decoration:none}.btn.secondary{background:#eef4fa;color:var(--navy)}@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-<header class="top"><strong>GovPrompt · Live Work Tracking Pilot</strong><div><a href="work-login-pilot.html">สิทธิผู้ใช้</a> · <a href="index.html">GP หลัก</a></div></header>
+<header class="top"><strong>GovPrompt · Live Work Tracking Pilot</strong><div><a href="work-login-pilot.html">สิทธิผู้ใช้</a> · <a href="../">GP หลัก</a></div></header>
 <main class="wrap">
   <section class="hero"><div class="muted">AUTHENTICATED · RLS-PROTECTED · LIVE SUPABASE</div><h1>Dashboard โครงการจากฐานข้อมูลจริง</h1><p>หน้านี้ไม่ใช้ข้อมูลจำลอง หากไม่มี Session/Membership จะไม่อ่านข้อมูลโครงการและจะพากลับหน้า Login</p></section>
   <div id="status" class="status">กำลังตรวจสิทธิและโหลดข้อมูล...</div>
-  <div class="actions"><button id="reloadBtn" class="btn" type="button">โหลดใหม่</button><button id="logoutBtn" class="btn secondary" type="button">ออกจากระบบ</button></div>
+  <div class="actions">
+    <button id="reloadBtn" class="btn" type="button">โหลดใหม่</button>
+    <a class="btn secondary" href="work-operations-live-pilot.html">เพิ่ม/อัปเดตโครงการ</a>
+    <a class="btn secondary" href="work-command-center-pilot.html">Command Center</a>
+    <button id="logoutBtn" class="btn secondary" type="button">ออกจากระบบ</button>
+  </div>
 
   <section id="dashboard" hidden>
     <section class="kpis">
@@ -40,9 +45,10 @@
   const dashboardNode = document.getElementById('dashboard');
   const priorityNode = document.getElementById('priority');
   const rowsNode = document.getElementById('rows');
-  const setText = (id, value) => { document.getElementById(id).textContent = value; };
+  const setText = (id, value) => { document.getElementById(id).textContent = String(value); };
   const setStatus = (message, kind = '') => { statusNode.textContent = message; statusNode.className = `status ${kind}`.trim(); };
   const fmtDate = (v) => v ? new Intl.DateTimeFormat('th-TH',{dateStyle:'medium'}).format(new Date(v)) : '-';
+  let loading = false;
 
   function mapProject(row) {
     return {
@@ -51,6 +57,7 @@
       departmentId: row.department_id,
       projectType: row.project_type,
       name: row.name,
+      projectCode: row.project_code,
       ownerUserId: row.owner_user_id,
       location: row.location_text,
       contractNo: row.contract_no,
@@ -67,6 +74,13 @@
     };
   }
 
+  function addMuted(parent, text) {
+    const node = document.createElement('div');
+    node.className = 'muted';
+    node.textContent = text;
+    parent.appendChild(node);
+  }
+
   function render(view) {
     setText('kpiTotal', view.summary.counts.total);
     setText('kpiRed', view.summary.counts.red);
@@ -75,47 +89,100 @@
     setText('kpiBudget', formatBaht(view.summary.finance.totalBudget));
 
     priorityNode.replaceChildren();
-    if (!view.priorityRows.length) priorityNode.innerHTML = '<div class="muted">ยังไม่มีงานเร่งด่วน</div>';
+    if (!view.priorityRows.length) addMuted(priorityNode, 'ยังไม่มีงานเร่งด่วน');
     for (const row of view.priorityRows.slice(0,10)) {
       const el = document.createElement('div');
       el.className = `item ${row.riskLevel}`;
-      el.innerHTML = `<strong>${row.name}</strong><span class="muted">${row.riskReasons.join(' · ') || 'ปกติ'}</span>`;
+      const title = document.createElement('strong');
+      title.textContent = row.name || '-';
+      const reason = document.createElement('span');
+      reason.className = 'muted';
+      reason.textContent = row.riskReasons.join(' · ') || 'ปกติ';
+      el.append(title, reason);
       priorityNode.appendChild(el);
     }
 
     rowsNode.replaceChildren();
-    if (!view.rows.length) rowsNode.innerHTML = '<tr><td colspan="6" class="muted">ยังไม่มีโครงการในฐานข้อมูลสำหรับสิทธินี้</td></tr>';
+    if (!view.rows.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 6;
+      td.className = 'muted';
+      td.textContent = 'ยังไม่มีโครงการในฐานข้อมูลสำหรับสิทธินี้';
+      tr.appendChild(td);
+      rowsNode.appendChild(tr);
+      return;
+    }
+
     for (const row of view.rows) {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td><strong>${row.name}</strong><div class="muted">${row.contractNo || '-'}</div></td><td>${row.budgetText}</td><td>${row.plannedProgress}% / ${row.actualProgress}%</td><td>${fmtDate(row.dueDate)}</td><td>${row.statusLabel}</td><td><span class="badge ${row.riskLevel}">${row.riskLabel}</span><div class="muted">${row.riskReasons.join(' · ')}</div></td>`;
+
+      const projectTd = document.createElement('td');
+      const name = document.createElement('strong');
+      name.textContent = row.name || '-';
+      const projectMeta = document.createElement('div');
+      projectMeta.className = 'muted';
+      projectMeta.textContent = row.contractNo || '-';
+      projectTd.append(name, projectMeta);
+
+      const budgetTd = document.createElement('td');
+      budgetTd.textContent = row.budgetText;
+
+      const progressTd = document.createElement('td');
+      progressTd.textContent = `${row.plannedProgress}% / ${row.actualProgress}%`;
+
+      const dueTd = document.createElement('td');
+      dueTd.textContent = fmtDate(row.dueDate);
+
+      const statusTd = document.createElement('td');
+      statusTd.textContent = row.statusLabel;
+
+      const riskTd = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = `badge ${row.riskLevel}`;
+      badge.textContent = row.riskLabel;
+      const reasons = document.createElement('div');
+      reasons.className = 'muted';
+      reasons.textContent = row.riskReasons.join(' · ');
+      riskTd.append(badge, reasons);
+
+      tr.append(projectTd, budgetTd, progressTd, dueTd, statusTd, riskTd);
       rowsNode.appendChild(tr);
     }
   }
 
   async function loadLive() {
+    if (loading) return;
+    loading = true;
     dashboardNode.hidden = true;
     setStatus('กำลังตรวจสิทธิและโหลดข้อมูล...');
-    const { session, memberships } = await getPilotSessionContext();
-    if (!session) { location.href = 'work-login-pilot.html'; return; }
-    const resolved = resolveWorkSession({ session, memberships });
-    if (!resolved.ok) { setStatus('บัญชีนี้ยังไม่มี Membership สำหรับ Work Tracking', 'error'); return; }
+    try {
+      const { session, memberships } = await getPilotSessionContext();
+      if (!session) { location.href = 'work-login-pilot.html'; return; }
+      const resolved = resolveWorkSession({ session, memberships });
+      if (!resolved.ok) { setStatus('บัญชีนี้ยังไม่มี Membership สำหรับ Work Tracking', 'error'); return; }
 
-    const actor = resolved.actor;
-    let query = supabase.from('projects').select('id, organization_id, department_id, project_type, name, owner_user_id, location_text, contract_no, contractor_name, budget_amount, spent_amount, planned_progress, actual_progress, start_date, due_date, status, problem_summary, last_updated_at').eq('organization_id', actor.organizationId).order('due_date', { ascending: true, nullsFirst: false });
-    if (['DIRECTOR','OFFICER'].includes(actor.role) && actor.departmentId) query = query.eq('department_id', actor.departmentId);
-    const { data, error } = await query;
-    if (error) { setStatus('โหลดข้อมูลไม่สำเร็จ: สิทธิ RLS หรือการเชื่อมฐานข้อมูลไม่ผ่าน', 'error'); return; }
+      const actor = resolved.actor;
+      let query = supabase.from('projects').select('id, organization_id, department_id, project_code, project_type, name, owner_user_id, location_text, contract_no, contractor_name, budget_amount, spent_amount, planned_progress, actual_progress, start_date, due_date, status, problem_summary, last_updated_at').eq('organization_id', actor.organizationId).order('due_date', { ascending: true, nullsFirst: false });
+      if (['DIRECTOR','OFFICER'].includes(actor.role) && actor.departmentId) query = query.eq('department_id', actor.departmentId);
+      const { data, error } = await query;
+      if (error) { setStatus(`โหลดข้อมูลไม่สำเร็จ: ${error.message}`, 'error'); return; }
 
-    const projects = (data || []).map(mapProject);
-    const view = buildOrganizationDashboard(projects, actor.organizationId, { now: new Date() });
-    render(view);
-    dashboardNode.hidden = false;
-    setStatus(`โหลดข้อมูลจริงสำเร็จ ${projects.length} โครงการ · Role: ${actor.role}`, 'ok');
+      const projects = (data || []).map(mapProject);
+      const view = buildOrganizationDashboard(projects, actor.organizationId, { now: new Date() });
+      render(view);
+      dashboardNode.hidden = false;
+      setStatus(`โหลดข้อมูลจริงสำเร็จ ${projects.length} โครงการ · Role: ${actor.role}`, 'ok');
+    } finally {
+      loading = false;
+    }
   }
 
-  document.getElementById('reloadBtn').addEventListener('click', () => loadLive().catch(() => setStatus('เกิดข้อผิดพลาดระหว่างโหลดข้อมูล', 'error')));
+  document.getElementById('reloadBtn').addEventListener('click', () => loadLive().catch((e) => setStatus(`เกิดข้อผิดพลาดระหว่างโหลดข้อมูล: ${e.message}`, 'error')));
   document.getElementById('logoutBtn').addEventListener('click', async () => { await supabase.auth.signOut(); location.href = 'work-login-pilot.html'; });
-  loadLive().catch(() => setStatus('เกิดข้อผิดพลาดระหว่างตรวจ Session', 'error'));
+  window.addEventListener('focus', () => loadLive().catch(() => {}));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadLive().catch(() => {}); });
+  loadLive().catch((e) => setStatus(`เกิดข้อผิดพลาดระหว่างตรวจ Session: ${e.message}`, 'error'));
 </script>
 </body>
 </html>
