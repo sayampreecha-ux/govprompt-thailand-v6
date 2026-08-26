@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { ORG_ROLE } from '../src/work-tracking/access-control.mjs';
 import { WORK_STATUS } from '../src/work-tracking/model.mjs';
-import { prepareProjectUpdate } from '../src/work-tracking/project-service.mjs';
+import { prepareProjectAssignment, prepareProjectUpdate } from '../src/work-tracking/project-service.mjs';
 
 const project = {
   id: 'P-1', organizationId: 'ORG-A', departmentId: 'DEP-ENG', department: 'กองช่าง',
@@ -25,6 +25,42 @@ test('prepares allowed officer update and emits audit event', () => {
   assert.equal(result.code, 'READY_TO_PERSIST');
   assert.equal(result.project.actualProgress, 55);
   assert.ok(result.auditEvent.metadata.changedFields.includes('actualProgress'));
+});
+
+test('generic project update cannot change owner assignment', () => {
+  const result = prepareProjectUpdate({
+    actor: { userId: 'U-1', organizationId: 'ORG-A', departmentId: 'DEP-ENG', role: ORG_ROLE.OFFICER, active: true },
+    existingProject: project,
+    patch: { ownerUserId: 'U-2', name: 'ชื่อใหม่' },
+    audit,
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.project.ownerUserId, 'U-1');
+  assert.equal(result.auditEvent.metadata.changedFields.includes('ownerUserId'), false);
+});
+
+test('director can reassign a project within department', () => {
+  const result = prepareProjectAssignment({
+    actor: { userId: 'D-1', organizationId: 'ORG-A', departmentId: 'DEP-ENG', role: ORG_ROLE.DIRECTOR, active: true },
+    existingProject: project,
+    ownerUserId: 'U-2',
+    owner: 'เจ้าหน้าที่คนใหม่',
+    audit,
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.project.ownerUserId, 'U-2');
+  assert.equal(result.auditEvent.action, 'PROJECT_ASSIGNED');
+});
+
+test('officer cannot reassign project', () => {
+  const result = prepareProjectAssignment({
+    actor: { userId: 'U-1', organizationId: 'ORG-A', departmentId: 'DEP-ENG', role: ORG_ROLE.OFFICER, active: true },
+    existingProject: project,
+    ownerUserId: 'U-2',
+    audit,
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'ROLE_FORBIDDEN');
 });
 
 test('denies cross-tenant update even when caller changes patch organization id', () => {
