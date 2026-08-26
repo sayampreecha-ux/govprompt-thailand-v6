@@ -20,6 +20,7 @@
 .tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.tool-card{min-height:255px;padding:18px;border:1px solid var(--line);border-radius:19px;background:#fff;display:flex;flex-direction:column;transition:.2s}.tool-card:hover{transform:translateY(-4px);box-shadow:0 15px 35px rgba(16,59,112,.1)}.tool-top{display:flex;justify-content:space-between;align-items:center}.tool-icon{font-size:30px}.tool-code{font-size:11px;font-weight:800;color:var(--blue);background:#eaf4ff;padding:5px 8px;border-radius:999px}.tool-card h3{font-size:18px;line-height:1.4;margin:12px 0 7px}.tool-card p{font-size:13px;color:var(--muted);flex:1}.tool-card button{border:0;border-radius:11px;padding:10px;background:var(--navy);color:#fff;font-weight:800}.empty{text-align:center;padding:45px;background:var(--soft);border:1px dashed #b9c9dc;border-radius:18px}
 .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.how-grid article,.plans article{padding:25px;border:1px solid var(--line);border-radius:21px;background:#fff}.how-grid b{color:var(--blue)}.how-grid h3{font-size:22px;margin:10px 0 5px}.how-grid p{color:var(--muted);margin:0}.plans{max-width:900px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}.plans label{font-size:12px;font-weight:800;color:var(--blue)}.plans h3{font-size:24px}.plans .featured{background:linear-gradient(155deg,var(--navy),#17508e);color:#fff;box-shadow:var(--shadow)}.plans .featured label{color:#9bddff}.plans ul{padding-left:21px}.community{margin-bottom:65px;border-radius:26px;background:linear-gradient(120deg,#edf7ff,#fff);display:flex;align-items:center;justify-content:space-between;gap:35px}.community p{color:var(--muted);max-width:730px}footer{background:#071f40;color:#d8e5f2;padding:35px max(22px,calc((100vw - 1132px)/2));display:flex;justify-content:space-between;gap:30px}
 .modal{position:fixed;inset:0;z-index:100;background:rgba(5,20,42,.72);backdrop-filter:blur(6px);padding:24px;overflow:auto}.modal-card{max-width:1240px;margin:auto;background:var(--soft);border-radius:27px;overflow:hidden}.modal-card>header{display:flex;justify-content:space-between;gap:20px;padding:24px 27px;background:#fff;border-bottom:1px solid var(--line)}.modal-card header h2{margin:5px 0}.modal-card header p{margin:0;color:var(--muted)}#closeModal{width:42px;height:42px;border:0;border-radius:13px;background:#edf3f8;color:var(--navy);font-size:26px}.modal-body{display:grid;grid-template-columns:.85fr 1.15fr;gap:18px;padding:18px}#promptForm,.result{background:#fff;border:1px solid var(--line);border-radius:20px;padding:21px}#promptForm label{display:block;font-weight:700;margin-bottom:14px}#promptForm input,#promptForm select,#promptForm textarea{width:100%;margin-top:6px;padding:11px 12px;border:1px solid #c7d6e5;border-radius:11px}#promptForm textarea{min-height:105px;resize:vertical}.confirm{display:flex!important;gap:9px;font-weight:500!important}.confirm input{width:auto!important;margin-top:4px!important}.result-head{display:flex;justify-content:space-between;align-items:center}.result-head button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 9px}.result-head button:disabled{opacity:.4}.result pre{min-height:500px;max-height:65vh;overflow:auto;white-space:pre-wrap;background:#0d2545;color:#e8f1fc;padding:17px;border-radius:14px;line-height:1.8}.empty-result{display:grid;place-items:center;color:#9eb2ca}.toast{position:fixed;right:20px;bottom:20px;z-index:150;background:#102e55;color:#fff;padding:11px 15px;border-radius:11px;opacity:0;transform:translateY(20px);transition:.2s}.toast.show{opacity:1;transform:none}
+.format-help{display:block;margin:-7px 0 14px;color:var(--muted);font-size:12px;font-weight:500;line-height:1.55}
 @media(max-width:980px){.hero,.modal-body{grid-template-columns:1fr}.tool-grid{grid-template-columns:repeat(2,1fr)}.how-grid{grid-template-columns:1fr}.result pre{min-height:350px}}
 @media(max-width:720px){.topbar{height:68px;padding:0 17px}.menu-btn{display:block}nav{display:none;position:absolute;top:68px;left:12px;right:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--shadow);flex-direction:column}nav.open{display:flex}nav a{padding:9px}.hero{padding:40px 17px}.hero h1{font-size:43px}.hero-copy>p{font-size:17px}.hero-search{grid-template-columns:auto 1fr}.hero-search button{grid-column:1/-1}.actions,.toolbar,.section-head,.community,footer{display:block}.actions .btn{width:100%;margin-bottom:8px}.tool-grid,.plans{grid-template-columns:1fr}.section{padding:50px 17px}.toolbar span{display:block;margin-top:9px}.community{margin-left:16px;margin-right:16px}.community .btn{width:100%;margin-top:12px}.modal{padding:0}.modal-card{min-height:100vh;border-radius:0}.modal-body{padding:11px}.result-head{display:block}.result-head div{margin-top:8px}.result pre{max-height:none}}
 
@@ -142,13 +143,17 @@
     <div class="modal-body">
       <form id="promptForm">
         <div id="fields"></div>
-        <label>รูปแบบผลลัพธ์
+        <label>สำนวนภาษา
           <select id="tone">
             <option>ภาษาราชการ กระชับ ชัดเจน</option>
             <option>สรุปสำหรับผู้บริหาร</option>
             <option>ภาษาง่ายสำหรับประชาชน</option>
           </select>
         </label>
+        <label>รูปแบบการนำเสนอ
+          <select id="outputFormat" aria-describedby="formatHelp"></select>
+        </label>
+        <small id="formatHelp" class="format-help">เลือกได้ 10 แบบ โดยระบบจะแนะนำแบบที่เหมาะกับงานให้ก่อน</small>
         <label class="confirm"><input id="confirm" type="checkbox" required> ยืนยันว่าข้อมูลเป็นข้อเท็จจริงและจะตรวจทานก่อนใช้จริง</label>
         <button class="btn primary full" type="submit">สร้าง Prompt</button>
       </form>
@@ -167,6 +172,7 @@
 <script>
 window.GOVPROMPT_TOOLS=[{"id":"GP001","icon":"📄","category":"หนังสือราชการ","name":"ร่างหนังสือราชการ","desc":"ร่างหนังสือภายนอก หนังสือภายใน หรือบันทึกข้อความ","fields":["หน่วยงาน","ประเภทหนังสือ","เรื่อง","ผู้รับ","ข้อเท็จจริง","วัตถุประสงค์","เอกสารอ้างอิง"]},{"id":"GP002","icon":"📝","category":"หนังสือราชการ","name":"บันทึกข้อความเสนอผู้บริหาร","desc":"จัดทำเรื่องเดิม ข้อเท็จจริง ข้อพิจารณา และข้อเสนอ","fields":["ส่วนราชการ","เรื่อง","ข้อเท็จจริง","ข้อพิจารณา","ข้อเสนอ"]},{"id":"GP003","icon":"📨","category":"หนังสือราชการ","name":"หนังสือเชิญประชุม","desc":"ร่างหนังสือเชิญพร้อมวัน เวลา สถานที่ และวาระ","fields":["หน่วยงาน","เรื่องประชุม","ผู้รับ","วันเวลา","สถานที่","วาระ","เอกสารแนบ"]},{"id":"GP004","icon":"📋","category":"หนังสือราชการ","name":"สรุปรายงานการประชุม","desc":"สรุปสาระ มติ ผู้รับผิดชอบ และกำหนดเวลา","fields":["ชื่อประชุม","วันเวลา","ผู้เข้าร่วม","บันทึกประชุม","รูปแบบผลลัพธ์"]},{"id":"GP005","icon":"⚖️","category":"กฎหมาย","name":"วิเคราะห์ข้อกฎหมาย อปท.","desc":"วิเคราะห์ข้อเท็จจริง ฐานอำนาจ ความเสี่ยง และข้อเสนอ","fields":["หน่วยงาน","เรื่อง","ข้อเท็จจริง","ข้อหารือ","เอกสารหรือกฎหมายที่มี"]},{"id":"GP006","icon":"🏛️","category":"กฎหมาย","name":"วิเคราะห์อำนาจหน้าที่","desc":"ตรวจสอบว่าเรื่องอยู่ในอำนาจหน้าที่และมีเงื่อนไขอย่างไร","fields":["หน่วยงาน","กิจกรรม","ข้อเท็จจริง","กลุ่มเป้าหมาย","ข้อกังวล"]},{"id":"GP007","icon":"📜","category":"กฎหมาย","name":"ร่างหนังสือหารือราชการ","desc":"จัดทำหนังสือหารืออย่างเป็นระบบและไม่ชี้นำคำตอบ","fields":["ผู้หารือ","ผู้รับหารือ","เรื่อง","ข้อเท็จจริง","ข้อกฎหมาย","ประเด็นหารือ"]},{"id":"GP008","icon":"🛡️","category":"กฎหมาย","name":"ตรวจความเสี่ยงทางกฎหมาย","desc":"ชี้จุดเสี่ยง ข้อมูลที่ขาด และเงื่อนไขก่อนดำเนินการ","fields":["เรื่อง","ข้อเท็จจริง","แนวทางดำเนินการ","เอกสาร","ประเด็นเสี่ยง"]},{"id":"GP009","icon":"📦","category":"พัสดุ","name":"ตรวจร่าง TOR","desc":"ตรวจล็อกสเปก การแข่งขัน คุณสมบัติ ตรวจรับ และค่าปรับ","fields":["รายการพัสดุ","ความต้องการใช้งาน","ข้อความ TOR","วงเงิน","จุดกังวล"]},{"id":"GP010","icon":"🔍","category":"พัสดุ","name":"ตรวจการล็อกสเปก","desc":"วิเคราะห์ถ้อยคำที่อาจจำกัดการแข่งขันและเสนอข้อความแก้","fields":["รายการพัสดุ","สเปก","ความจำเป็นใช้งาน","ข้อมูลตลาด"]},{"id":"GP011","icon":"✅","category":"พัสดุ","name":"ตรวจรับพัสดุและงานจ้าง","desc":"เปรียบเทียบ TOR สัญญา แบบ BOQ และผลงานจริง","fields":["ชื่องาน","ข้อกำหนด","ผลงานจริง","หลักฐาน","ข้อบกพร่อง"]},{"id":"GP012","icon":"🧾","category":"พัสดุ","name":"ร่างขอบเขตงานและคุณลักษณะ","desc":"จัดทำ TOR จากความต้องการใช้งานโดยไม่ผูกยี่ห้อ","fields":["ชื่อพัสดุ","วัตถุประสงค์","สภาพใช้งาน","คุณสมบัติจำเป็น","รับประกัน"]},{"id":"GP013","icon":"📊","category":"โครงการ","name":"ตรวจสอบโครงการก่อนอนุมัติ","desc":"วิเคราะห์ความจำเป็น อำนาจหน้าที่ งบ ความคุ้มค่า และความเสี่ยง","fields":["หน่วยงาน","ชื่อโครงการ","ปัญหา","กลุ่มเป้าหมาย","กิจกรรม","งบประมาณ","ผลลัพธ์"]},{"id":"GP014","icon":"🧭","category":"โครงการ","name":"จัดทำโครงร่างโครงการ","desc":"เชื่อมโยงปัญหา วัตถุประสงค์ กิจกรรม ผลผลิต และตัวชี้วัด","fields":["หน่วยงาน","ชื่อโครงการ","ปัญหา","กลุ่มเป้าหมาย","ระยะเวลา","งบประมาณ"]},{"id":"GP015","icon":"🎯","category":"โครงการ","name":"ออกแบบตัวชี้วัดโครงการ","desc":"กำหนดผลผลิต ผลลัพธ์ ค่าเป้าหมาย และวิธีเก็บข้อมูล","fields":["ชื่อโครงการ","วัตถุประสงค์","กิจกรรม","กลุ่มเป้าหมาย","ข้อมูลที่มี"]},{"id":"GP016","icon":"📣","category":"ประชาสัมพันธ์","name":"เขียนข่าวประชาสัมพันธ์","desc":"เขียนข่าวภาครัฐที่ถูกต้อง เป็นกลาง และอ่านง่าย","fields":["หน่วยงาน","กิจกรรม","วันเวลา","สถานที่","ผู้เกี่ยวข้อง","ข้อเท็จจริง","ผลลัพธ์"]},{"id":"GP017","icon":"📱","category":"ประชาสัมพันธ์","name":"ร่างโพสต์ Facebook","desc":"สร้างโพสต์สั้น อ่านง่าย พร้อมข้อความเชิญชวน","fields":["หัวเรื่อง","ข้อเท็จจริง","กลุ่มเป้าหมาย","น้ำเสียง","ลิงก์"]},{"id":"GP018","icon":"🖼️","category":"ประชาสัมพันธ์","name":"วางโครง One Page","desc":"จัดพาดหัว ประเด็นสำคัญ ขั้นตอน และช่องทางติดต่อ","fields":["หัวเรื่อง","กลุ่มเป้าหมาย","สาระสำคัญ","ขั้นตอน","ช่องทางติดต่อ","ภาพลักษณ์"]},{"id":"GP019","icon":"👔","category":"ผู้บริหาร","name":"สรุปผู้บริหารหนึ่งหน้า","desc":"สรุปเรื่องสำคัญ ทางเลือก ความเสี่ยง และข้อเสนอ","fields":["เรื่อง","ข้อเท็จจริง","ประเด็นตัดสินใจ","ข้อจำกัด","ระดับความละเอียด"]},{"id":"GP020","icon":"🎤","category":"ผู้บริหาร","name":"ร่างคำกล่าวเปิด–ปิดงาน","desc":"ร่างคำกล่าวให้เหมาะกับบทบาทผู้กล่าวและวัตถุประสงค์","fields":["ผู้กล่าว","ชื่องาน","ผู้เข้าร่วม","ความสำคัญ","นโยบาย","ประเภทคำกล่าว"]}];
 </script>
+<script src="output-formats.js"></script>
 <script src="shared-context.js"></script>
 <script src="core-engine.js"></script>
 <script src="quality-gate.js"></script>
@@ -186,7 +192,14 @@ const coreEngine=window.GOVPROMPT_CORE_ENGINE;
 const qualityGate=window.GOVPROMPT_QUALITY_GATE;
 const workflowPilot=window.GOVPROMPT_WORKFLOW_PILOT;
 const workflowExpansion=window.GOVPROMPT_WORKFLOW_EXPANSION;
+const outputFormats=window.GOVPROMPT_OUTPUT_FORMATS;
+const outputFormatSelect=document.getElementById('outputFormat'),formatHelp=document.getElementById('formatHelp');
 let category='ทั้งหมด',active=null,prompt='';
+
+if(outputFormats&&outputFormatSelect){
+ outputFormatSelect.innerHTML=outputFormats.formats.map(format=>`<option value="${format.id}">${format.icon} ${format.label}</option>`).join('');
+ outputFormatSelect.onchange=()=>{formatHelp.textContent=outputFormats.resolve(outputFormatSelect.value).description};
+}
 
 const norm=v=>String(v||'').toLowerCase().trim();
 function render(){
@@ -205,6 +218,7 @@ function openTool(id){
  document.getElementById('toolCode').textContent=active.id; document.getElementById('toolName').textContent=active.name; document.getElementById('toolDesc').textContent=active.desc;
  fields.innerHTML=active.fields.map((f,i)=>`<label>${f}<textarea name="f${i}" ${i<2?'required':''} placeholder="ระบุข้อมูลจริง หากไม่ทราบให้เว้นว่าง"></textarea></label>`).join('');
  form.reset(); output.textContent='Prompt จะแสดงที่นี่'; output.classList.add('empty-result'); document.getElementById('copyBtn').disabled=true; document.getElementById('downloadBtn').disabled=true;
+ if(outputFormats&&outputFormatSelect){outputFormatSelect.value=outputFormats.suggestForTool(active);formatHelp.textContent=outputFormats.resolve(outputFormatSelect.value).description}
  modal.classList.remove('hidden'); document.body.classList.add('lock');
 }
 function close(){sharedContext?.clearUserInputs();modal.classList.add('hidden');document.body.classList.remove('lock')}
@@ -214,6 +228,7 @@ form.onsubmit=e=>{
  sharedContext?.setUserInputs(inputValues); sharedContext?.setWorkflowState('generated');
  const execution=coreEngine?.prepare(sharedContext?.get()); const quality=qualityGate?.evaluate(execution); workflowPilot?.plan(execution,quality); const workflowPlan=workflowExpansion?.plan(execution,quality); window.GOVPROMPT_WORKFLOW_PLAN=workflowPlan||null;
  const info=active.fields.map((f,i)=>`- ${f}: ${String(fd.get('f'+i)||'').trim()||'[ยังไม่ได้ระบุ]'}`).join('\n');
+ const formatBlock=outputFormats?.buildPromptBlock(outputFormatSelect?.value)||'จัดหัวข้อและลำดับเนื้อหาให้เหมาะสม';
  prompt=`บทบาท
 คุณเป็น Government AI Copilot ผู้เชี่ยวชาญงานราชการไทย
 
@@ -225,7 +240,7 @@ ${info}
 
 รูปแบบผลลัพธ์
 - ใช้${document.getElementById('tone').value}
-- จัดหัวข้อและลำดับเนื้อหาให้เหมาะสม
+${formatBlock}
 - แยกข้อเท็จจริง การวิเคราะห์ ความเสี่ยง และข้อเสนอแนะเมื่อเกี่ยวข้อง
 - ระบุข้อมูลที่ยังขาดก่อนนำไปใช้จริง
 
