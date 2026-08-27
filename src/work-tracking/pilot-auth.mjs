@@ -1,4 +1,22 @@
 const cleanEmail = (value) => String(value || '').trim().toLowerCase();
+const WORKSPACE_LOGIN_DOMAIN = 'workspace.govprompt.local';
+const WORKSPACE_USERNAME_RE = /^[a-z0-9][a-z0-9._-]{2,31}$/;
+
+export function resolvePilotLoginEmail(value) {
+  const normalized = cleanEmail(value);
+  if (!normalized) {
+    const error = new Error('LOGIN_REQUIRED');
+    error.code = 'LOGIN_REQUIRED';
+    throw error;
+  }
+  if (normalized.includes('@')) return normalized;
+  if (!WORKSPACE_USERNAME_RE.test(normalized)) {
+    const error = new Error('VALID_USERNAME_REQUIRED');
+    error.code = 'VALID_USERNAME_REQUIRED';
+    throw error;
+  }
+  return `${normalized}@${WORKSPACE_LOGIN_DOMAIN}`;
+}
 
 export function getMagicLinkRetrySeconds(error) {
   const message = String(error?.message || error || '');
@@ -15,7 +33,7 @@ export function describeMagicLinkError(error) {
   if (retryAfterSeconds > 0) {
     return {
       retryAfterSeconds,
-      message: `ระบบส่งอีเมลถึงขีดจำกัดชั่วคราว กรุณารออีก ${retryAfterSeconds} วินาที หรือใช้ “เข้าสู่ระบบด้วยรหัสผ่าน (สำรอง)” ด้านล่าง`,
+      message: `ระบบส่งอีเมลถึงขีดจำกัดชั่วคราว กรุณารออีก ${retryAfterSeconds} วินาที หรือใช้ชื่อผู้ใช้และรหัสผ่าน`,
     };
   }
 
@@ -26,7 +44,7 @@ export function describeMagicLinkError(error) {
 
   return {
     retryAfterSeconds: 0,
-    message: 'ส่งลิงก์เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่ หรือใช้การเข้าสู่ระบบด้วยรหัสผ่านสำหรับบัญชีเดิม',
+    message: 'ส่งลิงก์เข้าสู่ระบบไม่สำเร็จ กรุณาใช้ชื่อผู้ใช้และรหัสผ่าน',
   };
 }
 
@@ -39,25 +57,17 @@ export async function requestPilotMagicLink({ client, email, redirectTo } = {}) 
     throw error;
   }
 
-  const options = { shouldCreateUser: true };
+  const options = { shouldCreateUser: false };
   if (redirectTo) options.emailRedirectTo = String(redirectTo);
 
-  const { data, error } = await client.auth.signInWithOtp({
-    email: normalizedEmail,
-    options,
-  });
+  const { data, error } = await client.auth.signInWithOtp({ email: normalizedEmail, options });
   if (error) throw error;
   return { ok: true, email: normalizedEmail, data };
 }
 
-export async function signInPilotWithPassword({ client, email, password } = {}) {
-  const normalizedEmail = cleanEmail(email);
+export async function signInPilotWithPassword({ client, email, login, password } = {}) {
+  const normalizedEmail = resolvePilotLoginEmail(login ?? email);
   if (!client?.auth?.signInWithPassword) throw new Error('SUPABASE_CLIENT_REQUIRED');
-  if (!normalizedEmail || !normalizedEmail.includes('@')) {
-    const error = new Error('VALID_EMAIL_REQUIRED');
-    error.code = 'VALID_EMAIL_REQUIRED';
-    throw error;
-  }
   if (!String(password || '')) {
     const error = new Error('PASSWORD_REQUIRED');
     error.code = 'PASSWORD_REQUIRED';
