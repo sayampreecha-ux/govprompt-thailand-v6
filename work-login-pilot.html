@@ -3,22 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="GP Work Tracking Pilot sign in">
+  <meta name="description" content="GovPrompt Organization Workspace Pilot sign in">
   <meta name="robots" content="noindex,nofollow">
-  <title>GP Work Tracking · เข้าสู่ระบบ Pilot</title>
+  <title>GovPrompt · Workspace องค์กร · Pilot</title>
   <style>
     :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--yellow:#9a6700}
     *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 900px)/2));display:flex;justify-content:space-between;gap:12px}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:900px;margin:auto;padding:42px 16px 70px}.hero{text-align:center;max-width:690px;margin:auto}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p{color:var(--muted)}.card{max-width:620px;margin:28px auto 0;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.field{display:block;margin:12px 0;font-weight:700}.field input{width:100%;padding:12px;border:1px solid #c8d5e3;border-radius:10px;margin-top:6px;font:inherit;min-height:46px}.btn{width:100%;border:0;border-radius:11px;padding:12px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer;min-height:46px}.btn:disabled{opacity:.62;cursor:not-allowed}.btn.secondary{background:#eef4fa;color:var(--navy);margin-top:8px}.status{margin-top:13px;padding:11px;border-radius:10px;background:#f1f5f9;color:#465970}.status.error{background:#feeceb;color:var(--red)}.status.ok{background:#e9f8f1;color:var(--green)}.context{margin-top:20px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}.go{display:inline-flex;text-decoration:none;border-radius:10px;padding:9px 12px;background:var(--blue);color:#fff;font-weight:800;margin-right:6px;margin-top:7px}.privacy{background:#eef6ff;border:1px solid #cfe3fa;border-radius:11px;padding:11px 12px;margin:12px 0;color:#35536f}.notice{background:#fff8e5;border:1px solid #f0d28a;border-radius:11px;padding:11px 12px;color:#76530b;line-height:1.55}.secondary-login{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}.secondary-login summary{cursor:pointer;font-weight:800;color:var(--navy);padding:5px 0}.secondary-login p{color:var(--muted);font-size:13px;line-height:1.55}@media(max-width:640px){.wrap{padding:28px 12px 48px}.card{padding:18px}.top{padding:12px 14px}.hero h1{font-size:34px}}
   </style>
 </head>
 <body>
-<header class="top"><strong>GovPrompt · Organization Pilot</strong><a href="../">GP หลัก</a></header>
+<header class="top"><strong>GovPrompt · Workspace องค์กร</strong><a href="https://sayampreecha-ux.github.io/-ai-local-government-assistant/">GP หลัก</a></header>
 <main class="wrap">
-  <section class="hero"><div class="muted">INTERNAL PILOT · AUTH + RLS</div><h1>เข้าสู่ระบบ Work Tracking</h1><p>ช่วงทดลองใช้ ให้เข้าสู่ระบบด้วยรหัสผ่านของบัญชี Pilot ก่อน เพื่อหลีกเลี่ยงปัญหา Magic Link ที่ยังชี้กลับ localhost</p></section>
+  <section class="hero"><div class="muted">INTERNAL PILOT · AUTH + RLS</div><h1>เข้าสู่ระบบ Workspace องค์กร</h1><p>พื้นที่เดียวสำหรับ Work Tracking ศูนย์สั่งการ และงานอัตโนมัติขององค์กร · ช่วงทดลองใช้ให้เข้าสู่ระบบด้วยรหัสผ่านของบัญชี Pilot</p></section>
 
   <section class="card">
     <h2>เข้าสู่ระบบด้วยรหัสผ่าน</h2>
-    <div class="privacy">บัญชีที่ไม่มี Membership จะไม่เห็นข้อมูล Work Tracking แม้จะยืนยันตัวตนสำเร็จ</div>
+    <div class="privacy">บัญชีที่ไม่มี Membership จะไม่เห็นข้อมูล Workspace องค์กร แม้จะยืนยันตัวตนสำเร็จ</div>
     <label class="field">อีเมล<input id="passwordEmail" type="email" autocomplete="email" inputmode="email"></label>
     <label class="field">รหัสผ่าน<input id="passwordValue" type="password" autocomplete="current-password"></label>
     <button id="passwordBtn" class="btn" type="button">เข้าสู่ระบบ</button>
@@ -35,7 +35,7 @@
   </section>
 
   <section id="contextCard" class="context hidden">
-    <h2>สิทธิ Work Tracking</h2>
+    <h2>Workspace องค์กร</h2>
     <div id="contextText"></div>
     <div id="links" class="hidden">
       <a class="go" href="work-dashboard-live-pilot.html">Dashboard ฐานข้อมูลจริง</a>
@@ -47,6 +47,7 @@
       <a class="go" href="work-tracking-import-preview.html">Preview CSV local-only</a>
       <a class="go" href="work-export-live-pilot.html">ส่งออก Snapshot</a>
       <a class="go" href="work-command-center-pilot.html">Command Center</a>
+      <a class="go" href="https://sayampreecha-ux.github.io/-ai-local-government-assistant/automation-pilot.html">งานอัตโนมัติ</a>
       <a class="go" href="work-uat-pilot.html">Internal Pilot UAT</a>
       <a class="go" href="work-role-test-accounts.html">บัญชีทดสอบ 4 Role</a>
     </div>
