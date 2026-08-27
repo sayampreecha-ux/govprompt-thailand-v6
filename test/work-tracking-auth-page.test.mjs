@@ -5,24 +5,22 @@ import fs from 'node:fs';
 const html = fs.readFileSync(new URL('../work-login-pilot.html', import.meta.url), 'utf8');
 const client = fs.readFileSync(new URL('../src/work-tracking/supabase-browser.mjs', import.meta.url), 'utf8');
 
-test('pilot auth page uses password as primary while magic link redirect is not configured', () => {
+test('workspace login is username and password only for new accounts', () => {
   assert.match(html, /signInPilotWithPassword/);
-  assert.match(html, /<h2>เข้าสู่ระบบด้วยรหัสผ่าน<\/h2>/);
-  assert.match(html, /Magic Link \(พักใช้งานชั่วคราว\)/);
-  assert.match(html, /id="magicBtn"[^>]*disabled/);
-  assert.match(html, /localhost/);
-  assert.match(html, /PILOT_REDIRECT_URL='https:\/\/sayampreecha-ux\.github\.io\/govprompt-thailand-v6\/pilot\/'/);
+  assert.match(html, /ชื่อผู้ใช้ \+ รหัสผ่าน/);
+  assert.match(html, /id="loginName" type="text"/);
+  assert.match(html, /id="passwordValue" type="password"/);
+  assert.match(html, /signInPilotWithPassword\(\{client:supabase,login,password\}\)/);
   assert.match(html, /resolveWorkSession/);
-  assert.match(html, /claim_work_pilot_invite/);
   assert.match(client, /organization_memberships/);
-  assert.doesNotMatch(html, /auth\.signUp/);
+  assert.doesNotMatch(html, /Magic Link|signInWithOtp|requestPilotMagicLink|claim_work_pilot_invite|auth\.signUp/i);
+  assert.doesNotMatch(html, /type="email"/);
 });
 
-test('password primary flow does not send email or create a new account', () => {
-  assert.match(html, /type="password"/);
-  assert.match(html, /signInPilotWithPassword\(\{client:supabase,email,password\}\)/);
-  assert.doesNotMatch(html, /requestPilotMagicLink/);
-  assert.doesNotMatch(html, /signInWithOtp/);
+test('login page tells users they do not need to register or wait for email', () => {
+  assert.match(html, /ไม่ต้องสมัครสมาชิก/);
+  assert.match(html, /ไม่ต้องรออีเมล/);
+  assert.match(html, /ไม่ต้องใส่อีเมลสำหรับบัญชีที่ผู้ดูแลสร้างใหม่/);
 });
 
 test('browser client contains only publishable credential class, never server secret', () => {
@@ -34,11 +32,18 @@ test('browser client contains only publishable credential class, never server se
 
 test('membership is required before organization links are shown', () => {
   assert.match(html, /ยังไม่มีสิทธิองค์กร/);
+  assert.match(html, /โปรดติดต่อผู้ดูแลระบบ/);
   assert.match(html, /classList\.toggle\('hidden',!resolved\.ok\)/);
   assert.match(html, /resolveWorkSession/);
 });
 
-test('pilot login safely renders session context and links Workspace back to production GP', () => {
+test('ORG_ADMIN alone receives the account management entry', () => {
+  assert.match(html, /id="adminUsersLink"/);
+  assert.match(html, /resolved\.actor\.role==='ORG_ADMIN'/);
+  assert.match(html, /href="work-members-live-pilot\.html">จัดการผู้ใช้/);
+});
+
+test('pilot login safely renders context and links Workspace back to production GP', () => {
   assert.match(html, /box\.replaceChildren\(\)/);
   assert.match(html, /textContent=/);
   assert.doesNotMatch(html, /innerHTML\s*=/);
@@ -46,10 +51,4 @@ test('pilot login safely renders session context and links Workspace back to pro
   assert.match(html, /href="https:\/\/sayampreecha-ux\.github\.io\/-ai-local-government-assistant\/">GP หลัก/);
   assert.match(html, /href="https:\/\/sayampreecha-ux\.github\.io\/-ai-local-government-assistant\/automation-pilot\.html">งานอัตโนมัติ/);
   assert.match(html, /noindex,nofollow/);
-});
-
-test('workspace clearly separates live CSV commit, local-only preview and audited export', () => {
-  assert.match(html, /href="work-import-live-pilot\.html">นำเข้า CSV จริง/);
-  assert.match(html, /href="work-tracking-import-preview\.html">Preview CSV local-only/);
-  assert.match(html, /href="work-export-live-pilot\.html">ส่งออก Snapshot/);
 });
