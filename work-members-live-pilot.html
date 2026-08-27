@@ -3,62 +3,69 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="GP Work Tracking member and invite pilot">
+  <meta name="description" content="GovPrompt Workspace user administration">
   <meta name="robots" content="noindex,nofollow">
-  <title>GP Work Tracking · สมาชิกองค์กร</title>
+  <title>GovPrompt · จัดการผู้ใช้ Workspace</title>
   <style>
-    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--yellow:#9a6700}
-    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1120px)/2));display:flex;justify-content:space-between;gap:12px;align-items:center}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1120px;margin:auto;padding:28px 16px 70px}.hero h1{margin:4px 0;font-size:clamp(28px,5vw,44px)}.hero p,.muted{color:var(--muted)}.status{margin:14px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}.status.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.status.warn{background:#fff9e8;color:var(--yellow);border-color:#edd9a5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.card h2{margin:0 0 12px}.field{display:block;font-weight:700;margin:10px 0}.field input,.field select{display:block;width:100%;margin-top:5px;border:1px solid #c8d5e3;border-radius:10px;padding:10px 11px;background:#fff;font:inherit}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.btn.secondary{background:#eef4fa;color:var(--navy)}.btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap}.member-list{display:grid;gap:8px}.member{border:1px solid var(--line);border-radius:11px;padding:11px}.member strong{display:block}.tag{display:inline-block;border-radius:999px;padding:3px 8px;background:#eef4fa;color:var(--navy);font-size:11px;font-weight:800;margin-top:5px}.role-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.role{border:1px solid var(--line);border-radius:10px;padding:10px}.role strong{display:block}.hidden{display:none!important}.share{word-break:break-all;background:#f1f5f9;border-radius:9px;padding:9px;font-size:13px}@media(max-width:800px){.grid,.two,.role-grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--yellow:#9a6700}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1120px)/2));display:flex;justify-content:space-between;gap:12px;align-items:center}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1120px;margin:auto;padding:28px 16px 70px}.hero h1{margin:4px 0;font-size:clamp(28px,5vw,44px)}.hero p,.muted{color:var(--muted);line-height:1.55}.status{margin:14px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}.status.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.status.warn{background:#fff9e8;color:var(--yellow);border-color:#edd9a5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.card h2{margin:0 0 12px}.field{display:block;font-weight:700;margin:10px 0}.field input,.field select{display:block;width:100%;margin-top:5px;border:1px solid #c8d5e3;border-radius:10px;padding:10px 11px;background:#fff;font:inherit;min-height:44px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.btn.secondary{background:#eef4fa;color:var(--navy)}.btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap}.member-list{display:grid;gap:8px}.member{border:1px solid var(--line);border-radius:11px;padding:11px}.member strong{display:block}.tag{display:inline-block;border-radius:999px;padding:3px 8px;background:#eef4fa;color:var(--navy);font-size:11px;font-weight:800;margin-top:5px}.role-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.role{border:1px solid var(--line);border-radius:10px;padding:10px}.role strong{display:block}.hidden{display:none!important}.credential{background:#eef6ff;border:1px solid #cfe3fa;border-radius:11px;padding:11px 12px;white-space:pre-wrap;word-break:break-word}.password-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.password-row .btn{margin-bottom:0}@media(max-width:800px){.grid,.two,.role-grid,.password-row{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
 <body>
-<header class="top"><strong>GovPrompt · Organization Members</strong><div><a href="work-login-pilot.html">Workspace</a> · <a href="work-dashboard-live-pilot.html">Dashboard</a> · <a href="../">GP หลัก</a></div></header>
+<header class="top"><strong>GovPrompt · Workspace องค์กร</strong><div><a href="work-login-pilot.html">Workspace</a> · <a href="work-dashboard-live-pilot.html">Dashboard</a> · <a href="https://sayampreecha-ux.github.io/-ai-local-government-assistant/">GP หลัก</a></div></header>
 <main class="wrap">
-  <section class="hero"><div class="muted">PRIVACY-MINIMAL DIRECTORY · ROLE-BASED INVITES · AUDIT</div><h1>สมาชิกและสิทธิ Work Tracking</h1><p>จัดการชื่อที่ใช้ในระบบและคำเชิญ Pilot โดยไม่เปิดรายชื่ออีเมลจากระบบ Auth ให้ Browser อ่านเป็น Directory</p></section>
+  <section class="hero"><div class="muted">ADMIN-CREATED ACCOUNTS · ROLE-BASED ACCESS · AUDIT</div><h1>จัดการผู้ใช้</h1><p>เจ้าหน้าที่ไม่ต้องสมัครสมาชิกและไม่ต้องมีอีเมลจริง ผู้ดูแลสร้าง <strong>ชื่อผู้ใช้ + รหัสผ่าน</strong> พร้อมกำหนด Role และกอง/หน่วยให้เสร็จจากหน้านี้</p></section>
   <div id="status" class="status">กำลังตรวจสิทธิ...</div>
   <div class="actions"><button id="reloadBtn" class="btn secondary" type="button">โหลดใหม่</button><button id="logoutBtn" class="btn secondary" type="button">ออกจากระบบ</button></div>
 
   <section id="workspace" class="hidden">
     <div class="grid">
       <article class="card">
-        <h2>👤 ชื่อที่ใช้ในระบบ</h2>
-        <p class="muted">ชื่อนี้ใช้แสดงใน Member Directory และหน้ามอบหมายงาน ไม่ใช้แทนอีเมลสำหรับเข้าสู่ระบบ</p>
+        <h2>👤 ชื่อที่ใช้ในระบบของฉัน</h2>
+        <p class="muted">ใช้แสดงในรายชื่อและหน้ามอบหมายงาน</p>
         <label class="field">ชื่อแสดงผล<input id="displayName" maxlength="120" placeholder="เช่น สมชาย ใจดี · กองช่าง"></label>
-        <button id="saveNameBtn" class="btn" type="button">บันทึกชื่อผ่าน RPC</button>
+        <button id="saveNameBtn" class="btn" type="button">บันทึกชื่อ</button>
         <div id="nameStatus" class="status">ยังไม่ได้แก้ไข</div>
       </article>
 
-      <article id="inviteCard" class="card hidden">
-        <h2>✉️ เชิญสมาชิก Pilot</h2>
-        <p class="muted">เฉพาะ ORG_ADMIN · คำเชิญมีอายุ 7 วันเป็นค่าเริ่มต้น และไม่สามารถเชิญ ORG_ADMIN เพิ่มจากหน้านี้</p>
-        <label class="field">อีเมลผู้รับคำเชิญ<input id="inviteEmail" type="email" autocomplete="off"></label>
+      <article id="accountCard" class="card hidden">
+        <h2>➕ สร้างบัญชีให้เจ้าหน้าที่</h2>
+        <p class="muted">เฉพาะ ORG_ADMIN · บัญชีใหม่ไม่ส่งอีเมลและไม่ต้องยืนยันอีเมล</p>
         <div class="two">
-          <label class="field">Role<select id="inviteRole"><option value="OFFICER">OFFICER · เจ้าหน้าที่</option><option value="DIRECTOR">DIRECTOR · ผอ./หัวหน้าหน่วย</option><option value="EXECUTIVE">EXECUTIVE · ผู้บริหาร</option><option value="AUDITOR">AUDITOR · ผู้ตรวจสอบ</option></select></label>
-          <label id="inviteDepartmentField" class="field">กอง/หน่วย<select id="inviteDepartment"></select></label>
+          <label class="field">ชื่อผู้ใช้<input id="accountUsername" maxlength="32" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="เช่น somchai"></label>
+          <label class="field">ชื่อ-สกุล / ชื่อแสดงผล<input id="accountDisplayName" maxlength="120" autocomplete="off" placeholder="เช่น นายสมชาย ใจดี"></label>
         </div>
-        <button id="inviteBtn" class="btn" type="button">สร้างคำเชิญ</button>
-        <div id="inviteStatus" class="status warn">ระบบ Pilot ยังไม่ส่งอีเมลอัตโนมัติ หลังสร้างคำเชิญให้ส่งลิงก์ Pilot แก่ผู้รับด้วยช่องทางขององค์กร</div>
-        <div><strong>ลิงก์สำหรับผู้รับ</strong><div id="pilotLink" class="share"></div></div>
+        <div class="password-row">
+          <label class="field">รหัสผ่านเริ่มต้น<input id="accountPassword" type="text" minlength="8" autocomplete="new-password"></label>
+          <button id="generatePasswordBtn" class="btn secondary" type="button">สุ่มรหัส</button>
+        </div>
+        <div class="two">
+          <label class="field">สิทธิ์<select id="accountRole"><option value="OFFICER">เจ้าหน้าที่</option><option value="DIRECTOR">ผอ./หัวหน้าหน่วย</option><option value="EXECUTIVE">ผู้บริหาร</option><option value="AUDITOR">ผู้ตรวจสอบ</option></select></label>
+          <label id="accountDepartmentField" class="field">กอง/หน่วย<select id="accountDepartment"></select></label>
+        </div>
+        <button id="createAccountBtn" class="btn" type="button">สร้างบัญชี</button>
+        <div id="accountStatus" class="status">กรอกข้อมูลแล้วกด “สร้างบัญชี”</div>
+        <div id="credentialBox" class="credential hidden"></div>
       </article>
     </div>
 
     <div class="grid">
       <article id="directoryCard" class="card hidden">
         <h2>👥 รายชื่อสำหรับมอบหมายงาน</h2>
-        <p class="muted">Directory นี้ตั้งใจไม่คืนอีเมล แสดงเฉพาะสมาชิก ACTIVE ที่เป็น DIRECTOR/OFFICER ภายในกองที่เลือก</p>
+        <p class="muted">แสดงเฉพาะสมาชิก ACTIVE ที่เป็นผอ./หัวหน้าหน่วยหรือเจ้าหน้าที่ โดยไม่เปิดข้อมูลล็อกอิน</p>
         <label class="field">กอง/หน่วย<select id="directoryDepartment"></select></label>
         <button id="loadDirectoryBtn" class="btn secondary" type="button">ดูรายชื่อ</button>
-        <div id="directoryStatus" class="status">ยังไม่ได้โหลด Directory</div>
+        <div id="directoryStatus" class="status">ยังไม่ได้โหลดรายชื่อ</div>
         <div id="memberList" class="member-list"></div>
       </article>
 
       <article class="card">
-        <h2>🛡️ ขอบเขต Role</h2>
+        <h2>🛡️ ขอบเขตสิทธิ์</h2>
         <div class="role-grid">
-          <div class="role"><strong>ORG_ADMIN</strong><span class="muted">ข้ามกอง, ตั้งค่าพื้นฐาน, เชิญสมาชิก</span></div>
+          <div class="role"><strong>ORG_ADMIN</strong><span class="muted">จัดการบัญชีและดูข้ามกอง</span></div>
           <div class="role"><strong>EXECUTIVE</strong><span class="muted">ดูภาพรวมองค์กร ไม่แก้งานปฏิบัติการ</span></div>
-          <div class="role"><strong>DIRECTOR</strong><span class="muted">ดู/มอบหมาย/อัปเดตภายในกองของตน</span></div>
-          <div class="role"><strong>OFFICER</strong><span class="muted">อัปเดตงานที่อยู่ในกองและรับผิดชอบ</span></div>
+          <div class="role"><strong>DIRECTOR</strong><span class="muted">ดู/มอบหมาย/อัปเดตภายในกอง</span></div>
+          <div class="role"><strong>OFFICER</strong><span class="muted">อัปเดตงานที่รับผิดชอบ</span></div>
           <div class="role"><strong>AUDITOR</strong><span class="muted">อ่านข้อมูลและ Audit ตามสิทธิ</span></div>
         </div>
       </article>
@@ -74,13 +81,12 @@
   let actor=null;
   let departments=[];
   const setStatus=(id,message,kind='')=>{const node=$(id);node.textContent=message;node.className=`status ${kind}`.trim();};
-  const pilotUrl=()=>new URL('./',location.href).href;
 
   async function requireActor(){
     const {session,memberships}=await getPilotSessionContext();
     if(!session){location.href='work-login-pilot.html';return null;}
     const resolved=resolveWorkSession({session,memberships});
-    if(!resolved.ok){setStatus('status','บัญชีนี้ยังไม่มี Membership สำหรับ Work Tracking','error');return null;}
+    if(!resolved.ok){setStatus('status','บัญชีนี้ยังไม่มีสิทธิ Workspace','error');return null;}
     return resolved.actor;
   }
 
@@ -94,7 +100,7 @@
     const {data,error}=await supabase.from('departments').select('id,name').eq('organization_id',actor.organizationId).eq('active',true).order('name');
     if(error)throw error;
     departments=data||[];
-    for(const id of ['inviteDepartment','directoryDepartment']){
+    for(const id of ['accountDepartment','directoryDepartment']){
       const select=$(id);select.replaceChildren();
       for(const dep of departments){
         if(actor.role==='DIRECTOR'&&actor.departmentId&&dep.id!==actor.departmentId)continue;
@@ -105,10 +111,17 @@
     $('directoryDepartment').disabled=actor.role==='DIRECTOR';
   }
 
-  function syncInviteDepartment(){
-    const scoped=['DIRECTOR','OFFICER'].includes($('inviteRole').value);
-    $('inviteDepartmentField').classList.toggle('hidden',!scoped);
-    $('inviteDepartment').disabled=!scoped;
+  function syncAccountDepartment(){
+    const scoped=['DIRECTOR','OFFICER'].includes($('accountRole').value);
+    $('accountDepartmentField').classList.toggle('hidden',!scoped);
+    $('accountDepartment').disabled=!scoped;
+  }
+
+  function generatePassword(){
+    const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+    const bytes=new Uint32Array(14);crypto.getRandomValues(bytes);
+    const password=Array.from(bytes,(value)=>chars[value%chars.length]).join('');
+    $('accountPassword').value=password;
   }
 
   async function saveDisplayName(){
@@ -118,22 +131,35 @@
     const {error}=await supabase.rpc('set_my_work_display_name',{p_organization_id:actor.organizationId,p_display_name:name});
     $('saveNameBtn').disabled=false;
     if(error){setStatus('nameStatus',`บันทึกไม่สำเร็จ: ${error.message}`,'error');return;}
-    setStatus('nameStatus','บันทึกชื่อสำเร็จและสร้าง Audit เมื่อมีการเปลี่ยนแปลง','ok');
+    setStatus('nameStatus','บันทึกชื่อสำเร็จ','ok');
   }
 
-  async function createInvite(){
-    const email=$('inviteEmail').value.trim();
-    const role=$('inviteRole').value;
-    const departmentId=['DIRECTOR','OFFICER'].includes(role)?$('inviteDepartment').value:null;
-    if(!email){setStatus('inviteStatus','กรอกอีเมลผู้รับคำเชิญ','error');return;}
-    if(['DIRECTOR','OFFICER'].includes(role)&&!departmentId){setStatus('inviteStatus','Role นี้ต้องระบุกอง/หน่วย','error');return;}
-    $('inviteBtn').disabled=true;setStatus('inviteStatus','กำลังสร้างคำเชิญ...');
-    const {data,error}=await supabase.rpc('create_work_pilot_invite',{p_organization_id:actor.organizationId,p_email:email,p_role:role,p_department_id:departmentId,p_expires_at:null});
-    $('inviteBtn').disabled=false;
-    if(error){setStatus('inviteStatus',`สร้างคำเชิญไม่สำเร็จ: ${error.message}`,'error');return;}
-    $('inviteEmail').value='';
-    const expiry=data?.expires_at?new Intl.DateTimeFormat('th-TH',{dateStyle:'medium',timeStyle:'short'}).format(new Date(data.expires_at)):'ตามค่าเริ่มต้น';
-    setStatus('inviteStatus',`สร้างคำเชิญ ${role} สำเร็จ · หมดอายุ ${expiry} · ให้ผู้รับสมัคร/เข้าสู่ระบบด้วยอีเมลที่เชิญ`,'ok');
+  async function createAccount(){
+    if(actor.role!=='ORG_ADMIN'){setStatus('accountStatus','เฉพาะผู้ดูแลระบบเท่านั้น','error');return;}
+    const username=$('accountUsername').value.trim().toLowerCase();
+    const displayName=$('accountDisplayName').value.trim();
+    const password=$('accountPassword').value;
+    const role=$('accountRole').value;
+    const departmentId=['DIRECTOR','OFFICER'].includes(role)?$('accountDepartment').value:null;
+    if(!/^[a-z0-9][a-z0-9._-]{2,31}$/.test(username)){setStatus('accountStatus','ชื่อผู้ใช้ใช้ a-z, 0-9, จุด, - หรือ _ และยาว 3-32 ตัว','error');return;}
+    if(!displayName){setStatus('accountStatus','กรอกชื่อแสดงผลก่อน','error');return;}
+    if(password.length<8){setStatus('accountStatus','รหัสผ่านอย่างน้อย 8 ตัวอักษร','error');return;}
+    if(['DIRECTOR','OFFICER'].includes(role)&&!departmentId){setStatus('accountStatus','Role นี้ต้องระบุกอง/หน่วย','error');return;}
+
+    $('createAccountBtn').disabled=true;setStatus('accountStatus','กำลังสร้างบัญชี...');$('credentialBox').classList.add('hidden');
+    const {data,error}=await supabase.functions.invoke('work-admin-users',{body:{organizationId:actor.organizationId,username,displayName,password,role,departmentId}});
+    $('createAccountBtn').disabled=false;
+    if(error){
+      let detail='สร้างบัญชีไม่สำเร็จ';
+      try{const payload=await error.context?.json?.();if(payload?.message)detail=payload.message;else if(payload?.code==='ORG_ADMIN_REQUIRED')detail='บัญชีนี้ไม่มีสิทธิผู้ดูแลระบบ';}catch{}
+      setStatus('accountStatus',detail,'error');return;
+    }
+    if(!data?.ok){setStatus('accountStatus',data?.message||'สร้างบัญชีไม่สำเร็จ','error');return;}
+    setStatus('accountStatus','สร้างบัญชีและกำหนดสิทธิสำเร็จ · มี Audit บันทึกการสร้างบัญชี','ok');
+    $('credentialBox').textContent=`ส่งข้อมูลนี้ให้ผู้ใช้โดยตรง\nชื่อผู้ใช้: ${username}\nรหัสผ่านเริ่มต้น: ${password}\nสิทธิ์: ${role}`;
+    $('credentialBox').classList.remove('hidden');
+    $('accountUsername').value='';$('accountDisplayName').value='';generatePassword();
+    if(['ORG_ADMIN','DIRECTOR'].includes(actor.role)&&$('directoryDepartment').value)await loadDirectory();
   }
 
   async function loadDirectory(){
@@ -142,8 +168,8 @@
     if(!departmentId){setStatus('directoryStatus','ยังไม่มีกอง/หน่วยให้เลือก','error');return;}
     setStatus('directoryStatus','กำลังโหลดรายชื่อ...');
     const {data,error}=await supabase.rpc('list_assignable_work_members',{p_organization_id:actor.organizationId,p_department_id:departmentId});
-    if(error){setStatus('directoryStatus',`โหลด Directory ไม่สำเร็จ: ${error.message}`,'error');return;}
-    if(!(data||[]).length){setStatus('directoryStatus','ยังไม่มี DIRECTOR/OFFICER ที่ ACTIVE ในกองนี้','warn');return;}
+    if(error){setStatus('directoryStatus',`โหลดรายชื่อไม่สำเร็จ: ${error.message}`,'error');return;}
+    if(!(data||[]).length){setStatus('directoryStatus','ยังไม่มีผอ./เจ้าหน้าที่ ACTIVE ในกองนี้','warn');return;}
     for(const member of data){
       const card=document.createElement('div');card.className='member';
       const name=document.createElement('strong');name.textContent=member.display_name;
@@ -156,22 +182,22 @@
   async function init(){
     actor=await requireActor();if(!actor)return;
     $('workspace').classList.remove('hidden');
-    $('inviteCard').classList.toggle('hidden',actor.role!=='ORG_ADMIN');
+    $('accountCard').classList.toggle('hidden',actor.role!=='ORG_ADMIN');
     $('directoryCard').classList.toggle('hidden',!['ORG_ADMIN','DIRECTOR'].includes(actor.role));
-    $('pilotLink').textContent=pilotUrl();
     setStatus('status',`พร้อมใช้งาน · Role: ${actor.role}`,'ok');
     await Promise.all([loadOwnMembership(),loadDepartments()]);
-    syncInviteDepartment();
+    syncAccountDepartment();generatePassword();
     if(['ORG_ADMIN','DIRECTOR'].includes(actor.role)&&$('directoryDepartment').value)await loadDirectory();
   }
 
-  $('inviteRole').addEventListener('change',syncInviteDepartment);
+  $('accountRole').addEventListener('change',syncAccountDepartment);
+  $('generatePasswordBtn').addEventListener('click',generatePassword);
   $('saveNameBtn').addEventListener('click',()=>saveDisplayName().catch((e)=>{$('saveNameBtn').disabled=false;setStatus('nameStatus',`เกิดข้อผิดพลาด: ${e.message}`,'error');}));
-  $('inviteBtn').addEventListener('click',()=>createInvite().catch((e)=>{$('inviteBtn').disabled=false;setStatus('inviteStatus',`เกิดข้อผิดพลาด: ${e.message}`,'error');}));
+  $('createAccountBtn').addEventListener('click',()=>createAccount().catch((e)=>{$('createAccountBtn').disabled=false;setStatus('accountStatus',`เกิดข้อผิดพลาด: ${e.message}`,'error');}));
   $('loadDirectoryBtn').addEventListener('click',()=>loadDirectory().catch((e)=>setStatus('directoryStatus',`เกิดข้อผิดพลาด: ${e.message}`,'error')));
-  $('reloadBtn').addEventListener('click',()=>Promise.all([loadOwnMembership(),loadDepartments()]).then(()=>loadDirectory()).catch((e)=>setStatus('status',`โหลดใหม่ไม่สำเร็จ: ${e.message}`,'error')));
+  $('reloadBtn').addEventListener('click',()=>Promise.all([loadOwnMembership(),loadDepartments()]).then(()=>['ORG_ADMIN','DIRECTOR'].includes(actor.role)?loadDirectory():null).catch((e)=>setStatus('status',`โหลดใหม่ไม่สำเร็จ: ${e.message}`,'error')));
   $('logoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.href='work-login-pilot.html';});
-  init().catch((e)=>setStatus('status',`เริ่มระบบสมาชิกไม่สำเร็จ: ${e.message}`,'error'));
+  init().catch((e)=>setStatus('status',`เริ่มระบบผู้ใช้ไม่สำเร็จ: ${e.message}`,'error'));
 </script>
 </body>
 </html>
