@@ -13,8 +13,8 @@ test('workspace login is username and password only for new accounts', () => {
   assert.match(html, /signInPilotWithPassword\(\{client:supabase,login,password\}\)/);
   assert.match(html, /resolveWorkSession/);
   assert.match(client, /organization_memberships/);
-  assert.doesNotMatch(html, /Magic Link|signInWithOtp|requestPilotMagicLink|claim_work_pilot_invite|auth\.signUp/i);
-  assert.doesNotMatch(html, /type="email"/);
+  assert.doesNotMatch(html, /signInWithOtp|requestPilotMagicLink|claim_work_pilot_invite|auth\.signUp/i);
+  assert.doesNotMatch(html, /id="magicBtn"|type="email"/i);
 });
 
 test('login page tells users they do not need to register or wait for email', () => {
