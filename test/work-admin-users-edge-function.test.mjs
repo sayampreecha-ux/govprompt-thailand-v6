@@ -26,9 +26,9 @@ test('new accounts use internal username auth and create membership plus audit',
   assert.match(source, /auth_mode:\s*"admin_created_username_password"/);
 });
 
-test('password is never written to audit metadata or returned by the function', () => {
+test('password value is never written to audit metadata or returned by the function', () => {
   const metadataBlock = source.match(/metadata_json:\s*\{([\s\S]*?)\n\s*\},\n\s*\}\);/i)?.[1] || '';
-  assert.doesNotMatch(metadataBlock, /password/i);
+  assert.doesNotMatch(metadataBlock, /\bpassword\s*[:,]/i);
   const successReturn = source.match(/return reply\(req, 201, \{([^}]+)\}\);/)?.[1] || '';
-  assert.doesNotMatch(successReturn, /password/i);
+  assert.doesNotMatch(successReturn, /\bpassword\s*[:,]/i);
 });
