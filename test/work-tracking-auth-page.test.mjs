@@ -38,11 +38,13 @@ test('membership is required before organization links are shown', () => {
   assert.match(html, /resolveWorkSession/);
 });
 
-test('pilot login safely renders session context and links back to production GP root', () => {
+test('pilot login safely renders session context and links Workspace back to production GP', () => {
   assert.match(html, /box\.replaceChildren\(\)/);
   assert.match(html, /textContent=/);
   assert.doesNotMatch(html, /innerHTML\s*=/);
-  assert.match(html, /href="\.\.\/">GP หลัก/);
+  assert.match(html, /Workspace องค์กร/);
+  assert.match(html, /href="https:\/\/sayampreecha-ux\.github\.io\/-ai-local-government-assistant\/">GP หลัก/);
+  assert.match(html, /href="https:\/\/sayampreecha-ux\.github\.io\/-ai-local-government-assistant\/automation-pilot\.html">งานอัตโนมัติ/);
   assert.match(html, /noindex,nofollow/);
 });
 
