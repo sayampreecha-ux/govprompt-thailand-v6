@@ -3,107 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="GP Work Tracking Pilot Login">
-  <title>GP Work Tracking · Pilot Login</title>
-  <style>
-    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c}
-    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 900px)/2));display:flex;justify-content:space-between;gap:12px;align-items:center}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:900px;margin:auto;padding:34px 16px 60px}.hero h1{font-size:clamp(30px,5vw,48px);margin:4px 0}.hero p{color:var(--muted);margin:0}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:18px;box-shadow:0 10px 30px rgba(16,59,112,.06)}label{font-weight:800;display:block;margin-bottom:7px}input{width:100%;padding:13px 14px;border:1px solid #bdcbd9;border-radius:12px;font:inherit}button{border:0;border-radius:12px;padding:12px 16px;font:inherit;font-weight:800;cursor:pointer;background:var(--navy);color:white}button.secondary{background:#edf3f9;color:var(--navy)}button:disabled{opacity:.55;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.status{margin-top:14px;padding:12px 14px;border-radius:12px;background:#edf4fb;color:#27496d}.status.ok{background:#eaf8f1;color:var(--green)}.status.error{background:#fff0ef;color:var(--red)}.hidden{display:none}.membership{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px}.membership strong,.membership span{display:block}.membership span{color:var(--muted);font-size:13px;margin-top:3px}.note{font-size:13px;color:var(--muted);margin-top:10px}.eyebrow{font-size:12px;font-weight:900;color:var(--blue);letter-spacing:.08em}@media(max-width:560px){.top{align-items:flex-start;flex-direction:column}.row button{width:100%}}
-  </style>
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="refresh" content="0;url=work-login-pilot.html">
+  <title>กำลังไป Workspace องค์กร…</title>
 </head>
 <body>
-<header class="top"><strong>GovPrompt · Work Tracking Pilot</strong><nav><a href="work-command-center-pilot.html">Command Center</a> · <a href="index.html">GP หลัก</a></nav></header>
-<main class="wrap">
-  <section class="hero"><div class="eyebrow">AUTHENTICATED PILOT</div><h1>เข้าสู่ Workspace ทดสอบ</h1><p>ลงชื่อเข้าใช้ด้วยอีเมล จากนั้นระบบจะตรวจคำเชิญและกำหนดสิทธิจากฐานข้อมูล ไม่เชื่อ role หรือ organization ที่ส่งมาจาก browser</p></section>
-
-  <section class="card" id="loginCard">
-    <label for="email">อีเมล</label>
-    <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com">
-    <div class="row"><button id="sendLink">ส่ง Magic Link</button></div>
-    <p class="note">ใช้เฉพาะ Publishable Key ฝั่ง browser; ไม่มี service role หรือ secret key อยู่ในหน้าเว็บ</p>
-    <div id="loginStatus" class="status hidden"></div>
-  </section>
-
-  <section class="card hidden" id="sessionCard">
-    <strong>ลงชื่อเข้าใช้แล้ว</strong>
-    <div id="userEmail" class="note"></div>
-    <div class="row">
-      <button id="claimInvite">ตรวจและรับสิทธิ Pilot</button>
-      <button id="signOut" class="secondary">ออกจากระบบ</button>
-    </div>
-    <div id="sessionStatus" class="status hidden"></div>
-    <div id="membershipList"></div>
-  </section>
-</main>
-
-<script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-  import { PILOT_SUPABASE_URL, PILOT_SUPABASE_PUBLISHABLE_KEY, assertPilotSupabaseConfig } from './src/work-tracking/pilot-supabase-config.mjs';
-  import { claimPilotInvite, getPilotSession, loadOwnMemberships, requestPilotMagicLink, signOutPilot } from './src/work-tracking/pilot-auth.mjs';
-
-  assertPilotSupabaseConfig();
-  const supabase = createClient(PILOT_SUPABASE_URL, PILOT_SUPABASE_PUBLISHABLE_KEY);
-  const $ = (id) => document.getElementById(id);
-
-  function showStatus(node, message, kind = '') {
-    node.textContent = message;
-    node.className = `status ${kind}`.trim();
-  }
-
-  function renderMemberships(items) {
-    const root = $('membershipList'); root.replaceChildren();
-    if (!items.length) {
-      const p = document.createElement('p'); p.className = 'note'; p.textContent = 'ยังไม่พบสิทธิ Workspace กรุณากด “ตรวจและรับสิทธิ Pilot”'; root.append(p); return;
-    }
-    items.forEach((item) => {
-      const box = document.createElement('div'); box.className = 'membership';
-      const org = document.createElement('strong'); org.textContent = item.organizations?.name || item.organization_id;
-      const detail = document.createElement('span'); detail.textContent = `${item.role}${item.departments?.name ? ` · ${item.departments.name}` : ''}`;
-      box.append(org, detail); root.append(box);
-    });
-  }
-
-  async function refreshSession() {
-    const session = await getPilotSession(supabase);
-    $('loginCard').classList.toggle('hidden', Boolean(session));
-    $('sessionCard').classList.toggle('hidden', !session);
-    if (!session) return;
-    $('userEmail').textContent = session.user?.email || 'Authenticated user';
-    const memberships = await loadOwnMemberships(supabase);
-    renderMemberships(memberships);
-  }
-
-  $('sendLink').addEventListener('click', async () => {
-    const button = $('sendLink'); button.disabled = true;
-    try {
-      const redirectTo = `${location.origin}${location.pathname}`;
-      const result = await requestPilotMagicLink({ client: supabase, email: $('email').value, redirectTo });
-      showStatus($('loginStatus'), `ส่งลิงก์เข้าสู่ระบบไปที่ ${result.email} แล้ว กรุณาเปิดอีเมลบนอุปกรณ์นี้`, 'ok');
-    } catch (error) {
-      showStatus($('loginStatus'), error?.message || 'ส่งลิงก์ไม่สำเร็จ', 'error');
-    } finally { button.disabled = false; }
-  });
-
-  $('claimInvite').addEventListener('click', async () => {
-    const button = $('claimInvite'); button.disabled = true;
-    try {
-      const claim = await claimPilotInvite(supabase);
-      if (!claim?.ok) {
-        showStatus($('sessionStatus'), claim?.code === 'NO_ACTIVE_INVITE' ? 'ไม่พบคำเชิญ Pilot ที่ใช้งานได้สำหรับอีเมลนี้' : 'ยังไม่สามารถรับสิทธิได้', 'error');
-      } else {
-        showStatus($('sessionStatus'), `รับสิทธิ ${claim.role} สำเร็จ`, 'ok');
-      }
-      renderMemberships(await loadOwnMemberships(supabase));
-    } catch (error) {
-      showStatus($('sessionStatus'), error?.message || 'รับสิทธิไม่สำเร็จ', 'error');
-    } finally { button.disabled = false; }
-  });
-
-  $('signOut').addEventListener('click', async () => {
-    await signOutPilot(supabase); location.reload();
-  });
-
-  supabase.auth.onAuthStateChange(() => { setTimeout(refreshSession, 0); });
-  refreshSession().catch((error) => showStatus($('loginStatus'), error?.message || 'ตรวจ session ไม่สำเร็จ', 'error'));
-</script>
+  <p>กำลังไป <a href="work-login-pilot.html">Workspace องค์กร</a>…</p>
+  <script>location.replace('work-login-pilot.html');</script>
 </body>
 </html>
