@@ -13,5 +13,9 @@ GovPrompt มี Smart Actions 10 ภารกิจทำงานอยู่�
 ## Organization Automation Pilot
 หน้า `automation-pilot.html` เป็นพื้นที่ภายในที่ใช้ Auth, tenant scope, RLS และ Audit ชุดเดียวกับ Work Tracking Pilot รองรับรายงานโครงการประจำวัน การเฝ้าระวังงานใกล้กำหนด และสรุปงานค้างรายสัปดาห์ รายงานทุกฉบับอยู่ในสถานะรอตรวจจนกว่าผู้มีสิทธิจะอนุมัติ ระบบไม่ส่งอีเมลหรือเผยแพร่โดยอัตโนมัติ
 
+รายงานรุ่น 2 แยกเนื้อหาตามงานจริง: สรุปประจำวันเน้นภาพรวมโครงการและงบประมาณ, เฝ้าระวังกำหนดเวลาเป็น Checklist รายการเกิน/ใกล้กำหนด และสรุปรายสัปดาห์เน้นสถานะงานค้างกับหนึ่งการปรับสำหรับสัปดาห์ถัดไป โดย `source_snapshot` เก็บตัวเลขต้นทางและขอบเขตหน่วยงานเพื่อให้ตรวจสอบย้อนกลับได้
+
+Production E2E ครอบคลุมทั้ง 3 workflow, tenant isolation, source scope, Human Approval gate และ approval audit path โดยรันทดสอบแบบ transaction rollback เพื่อไม่ทิ้งข้อมูลทดสอบในระบบจริง
+
 ## Test
 GitHub Actions รัน syntax checks และ Node test suite อัตโนมัติบน main และ v7 branches
