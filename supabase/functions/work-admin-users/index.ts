@@ -96,6 +96,11 @@ Deno.serve(async (req: Request) => {
     password,
     email_confirm: true,
     user_metadata: { workspace_username: username, display_name: displayName, organization_id: organizationId },
+    app_metadata: {
+      workspace_username: username,
+      account_source: "ORG_ADMIN",
+      must_change_password: true,
+    },
   });
 
   if (createError || !created?.user?.id) {
@@ -135,6 +140,7 @@ Deno.serve(async (req: Request) => {
       role,
       department_id: departmentId,
       auth_mode: "admin_created_username_password",
+      initial_password_change_required: true,
     },
   });
   if (auditError) {
@@ -143,5 +149,5 @@ Deno.serve(async (req: Request) => {
     return reply(req, 500, { ok: false, code: "AUDIT_CREATE_FAILED" });
   }
 
-  return reply(req, 201, { ok: true, username, userId: newUserId, displayName, role, departmentId });
+  return reply(req, 201, { ok: true, username, userId: newUserId, displayName, role, departmentId, mustChangePassword: true });
 });
