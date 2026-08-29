@@ -8,6 +8,13 @@ export function resolveWorkSession({ session = {}, memberships = [], requestedOr
     return { ok: false, code: 'AUTH_REQUIRED', actor: null, availableOrganizations: [] };
   }
 
+  const mustChangePassword = session.mustChangePassword === true
+    || session.must_change_password === true
+    || session.user?.app_metadata?.must_change_password === true;
+  if (mustChangePassword) {
+    return { ok: false, code: 'PASSWORD_CHANGE_REQUIRED', actor: null, availableOrganizations: [] };
+  }
+
   const active = memberships
     .filter((item) => item && item.active !== false)
     .filter((item) => normalize(item.userId || item.user_id) === userId)
