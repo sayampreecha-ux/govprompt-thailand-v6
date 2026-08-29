@@ -10,6 +10,16 @@ test('requires authenticated user', () => {
   assert.equal(result.code, 'AUTH_REQUIRED');
 });
 
+test('blocks organization workspace until initial password is changed', () => {
+  const result = resolveWorkSession({
+    session: { userId: 'U-1', mustChangePassword: true },
+    memberships: [{ userId: 'U-1', organizationId: 'ORG-A', role: ORG_ROLE.OFFICER, active: true }],
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'PASSWORD_CHANGE_REQUIRED');
+  assert.equal(result.actor, null);
+});
+
 test('resolves a single active membership without trusting browser role fields', () => {
   const result = resolveWorkSession({
     session: { user: { id: 'U-1' }, role: 'ORG_ADMIN', organizationId: 'ORG-FAKE' },
