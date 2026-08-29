@@ -17,13 +17,15 @@ test('only authenticated ORG_ADMIN can provision workspace users', () => {
   assert.doesNotMatch(source, /ALLOWED_ROLES[^\n]*ORG_ADMIN/);
 });
 
-test('new accounts use internal username auth and create membership plus audit', () => {
+test('new accounts use internal username auth and require first-login password change', () => {
   assert.match(source, /workspace\.govprompt\.local/);
   assert.match(source, /auth\.admin\.createUser/);
   assert.match(source, /email_confirm:\s*true/);
+  assert.match(source, /app_metadata:[\s\S]*must_change_password:\s*true/);
   assert.match(source, /organization_memberships/);
   assert.match(source, /WORKSPACE_USER_CREATED/);
   assert.match(source, /auth_mode:\s*"admin_created_username_password"/);
+  assert.match(source, /initial_password_change_required:\s*true/);
 });
 
 test('password value is never written to audit metadata or returned by the function', () => {
