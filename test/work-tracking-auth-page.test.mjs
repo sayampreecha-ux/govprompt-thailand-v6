@@ -23,6 +23,18 @@ test('login page tells users they do not need to register or wait for email', ()
   assert.match(html, /ไม่ต้องใส่อีเมลสำหรับบัญชีที่ผู้ดูแลสร้างใหม่/);
 });
 
+test('first login requires one password change before organization links are shown', () => {
+  assert.match(html, /id="passwordChangeCard"/);
+  assert.match(html, /เข้าใช้ครั้งแรก กรุณาตั้งรหัสผ่านของคุณเองเพียงครั้งเดียว/);
+  assert.match(html, /id="newPassword" type="password" minlength="10"/);
+  assert.match(html, /id="confirmPassword" type="password" minlength="10"/);
+  assert.match(html, /PASSWORD_CHANGE_REQUIRED/);
+  assert.match(html, /supabase\.functions\.invoke\('work-change-password'/);
+  assert.match(html, /supabase\.auth\.refreshSession\(\)/);
+  assert.doesNotMatch(html, /localStorage|sessionStorage/);
+  assert.match(client, /mustChangePassword:\s*appMetadata\.must_change_password === true/);
+});
+
 test('visible navigation uses plain Thai terms', () => {
   assert.match(html, />พื้นที่ทำงานองค์กร</);
   assert.match(html, />ภาพรวมงาน</);
