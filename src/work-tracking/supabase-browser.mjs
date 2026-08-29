@@ -19,6 +19,7 @@ export async function getPilotSessionContext() {
   const session = sessionData.session;
   if (!session?.user?.id) return { session: null, memberships: [] };
 
+  const appMetadata = session.user.app_metadata || {};
   const { data: memberships, error } = await supabase
     .from('organization_memberships')
     .select('organization_id, department_id, role, active')
@@ -27,7 +28,11 @@ export async function getPilotSessionContext() {
   if (error) throw error;
 
   return {
-    session: { userId: session.user.id, user: { id: session.user.id } },
+    session: {
+      userId: session.user.id,
+      mustChangePassword: appMetadata.must_change_password === true,
+      user: { id: session.user.id, app_metadata: appMetadata },
+    },
     memberships: (memberships || []).map((item) => ({
       userId: session.user.id,
       organizationId: item.organization_id,
