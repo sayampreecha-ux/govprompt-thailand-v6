@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GP Work Tracking Pilot - ตรวจคุณภาพไฟล์ CSV ก่อนนำเข้า">
+  <title>GP Work Tracking · Import Preview</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--line:#dce6f1;--muted:#64748b;--red:#b42318;--yellow:#98600c;--green:#16865c}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1160px)/2));display:flex;justify-content:space-between;align-items:center;gap:14px}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1160px;margin:auto;padding:28px 16px 60px}h1{font-size:clamp(28px,4vw,44px);margin:0 0 7px}.lead{color:var(--muted);margin-top:0}.notice{border:1px solid #f0cf8f;background:#fff8e8;border-radius:12px;padding:12px 14px;margin:18px 0}.upload{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.upload input{width:100%}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}.card small{display:block;color:var(--muted)}.card strong{font-size:26px}.card.error strong{color:var(--red)}.card.warning strong{color:var(--yellow)}.card.valid strong{color:var(--green)}.gate{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:14px}.gate.ok{border-left:5px solid var(--green)}.gate.warn{border-left:5px solid #e39a20}.gate.error{border-left:5px solid var(--red)}.table{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}table{width:100%;border-collapse:collapse;min-width:840px}th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e8eef5;font-size:13px;vertical-align:top}th{background:#eef4fa}.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}.VALID{background:#e9f8f1;color:var(--green)}.WARNING{background:#fff4dc;color:var(--yellow)}.ERROR{background:#feeceb;color:var(--red)}ul{margin:5px 0;padding-left:18px}.empty{text-align:center;padding:34px;color:var(--muted)}.foot{font-size:12px;color:var(--muted);margin-top:14px}@media(max-width:700px){.cards{grid-template-columns:1fr 1fr}.upload{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Work Tracking Pilot</strong><nav><a href="work-tracking-pilot.html">Dashboard</a> · <a href="index.html">GP หลัก</a></nav></header>
+<main class="wrap">
+  <h1>ตรวจข้อมูลก่อนนำเข้า</h1>
+  <p class="lead">CSV → ตรวจแถว → แยก ผ่าน / เตือน / ไม่ผ่าน ก่อนส่งไปขั้นยืนยันบันทึกข้อมูลจริง</p>
+  <div class="notice"><strong>Privacy:</strong> หน้านี้อ่านไฟล์ใน Browser เท่านั้น ไม่มีคำสั่งส่งไฟล์ขึ้น Server และยังไม่มีการเขียนฐานข้อมูล</div>
+
+  <section class="upload">
+    <div><strong>เลือกไฟล์ CSV กองช่าง</strong><div class="lead">ใช้หัวตารางตามไฟล์ตัวอย่างของ Pilot</div></div>
+    <input id="csvFile" type="file" accept=".csv,text/csv">
+  </section>
+
+  <section class="cards">
+    <article class="card"><small>แถวทั้งหมด</small><strong id="total">0</strong></article>
+    <article class="card valid"><small>ผ่าน</small><strong id="valid">0</strong></article>
+    <article class="card warning"><small>เตือน</small><strong id="warnings">0</strong></article>
+    <article class="card error"><small>ไม่ผ่าน</small><strong id="errors">0</strong></article>
+  </section>
+
+  <div id="gate" class="gate">ยังไม่ได้เลือกไฟล์</div>
+  <div class="table">
+    <table>
+      <thead><tr><th>แถว CSV</th><th>สถานะ</th><th>โครงการ</th><th>ประเด็นตรวจพบ</th></tr></thead>
+      <tbody id="rows"><tr><td colspan="4" class="empty">เลือกไฟล์ CSV เพื่อเริ่มตรวจ</td></tr></tbody>
+    </table>
+  </div>
+  <p class="foot">Pilot rule: ERROR = ห้าม commit · WARNING = ต้องยืนยันรับทราบก่อน commit · VALID = พร้อมเข้าสู่ขั้นยืนยัน โดย backend ต้องตรวจซ้ำอีกครั้งก่อนบันทึกจริง</p>
+</main>
+
+<script type="module">
+  import { buildProjectImportPreview } from './src/work-tracking/import-preview.mjs';
+  import { PILOT_ORGANIZATION_ID } from './src/work-tracking/pilot-data.mjs';
+
+  const input = document.getElementById('csvFile');
+  const body = document.getElementById('rows');
+  const gate = document.getElementById('gate');
+  const set = (id, value) => { document.getElementById(id).textContent = String(value); };
+
+  function render(preview) {
+    set('total', preview.summary.totalRows);
+    set('valid', preview.summary.valid);
+    set('warnings', preview.summary.warnings);
+    set('errors', preview.summary.errors);
+
+    if (preview.summary.errors > 0) {
+      gate.className = 'gate error';
+      gate.textContent = `⛔ ยังนำเข้าไม่ได้: พบ ${preview.summary.errors} แถวที่ต้องแก้ก่อน`;
+    } else if (preview.summary.warnings > 0) {
+      gate.className = 'gate warn';
+      gate.textContent = `⚠️ ผ่านแบบมีข้อสังเกต: ต้องยืนยันคำเตือน ${preview.summary.warnings} แถวก่อน commit`;
+    } else if (preview.summary.totalRows > 0) {
+      gate.className = 'gate ok';
+      gate.textContent = '✅ ข้อมูลผ่านด่านตรวจเบื้องต้น พร้อมเข้าสู่ขั้นยืนยัน';
+    } else {
+      gate.className = 'gate error';
+      gate.textContent = 'ไม่พบข้อมูลที่นำเข้าได้';
+    }
+
+    body.replaceChildren();
+    if (!preview.rows.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4; td.className = 'empty'; td.textContent = 'ไม่พบข้อมูล'; tr.append(td); body.append(tr); return;
+    }
+
+    preview.rows.forEach((row) => {
+      const tr = document.createElement('tr');
+      const rowNo = document.createElement('td'); rowNo.textContent = row.row;
+      const status = document.createElement('td'); const badge = document.createElement('span'); badge.className = `badge ${row.status}`; badge.textContent = row.status; status.append(badge);
+      const project = document.createElement('td'); project.textContent = row.project ? `${row.project.id} · ${row.project.name}` : '-';
+      const issues = document.createElement('td');
+      if (!row.issues.length) issues.textContent = 'ไม่พบประเด็น';
+      else { const ul = document.createElement('ul'); row.issues.forEach((item) => { const li = document.createElement('li'); li.textContent = `${item.code}: ${item.message || item.code}`; ul.append(li); }); issues.append(ul); }
+      tr.append(rowNo, status, project, issues); body.append(tr);
+    });
+  }
+
+  input.addEventListener('change', async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      render(buildProjectImportPreview(text, PILOT_ORGANIZATION_ID));
+    } catch (error) {
+      gate.className = 'gate error';
+      gate.textContent = `อ่านไฟล์ไม่สำเร็จ: ${error.message}`;
+    }
+  });
+</script>
+</body>
+</html>

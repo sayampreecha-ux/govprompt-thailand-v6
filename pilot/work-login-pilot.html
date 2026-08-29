@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GovPrompt พื้นที่ทำงานองค์กร">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GovPrompt · พื้นที่ทำงานองค์กร</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 900px)/2));display:flex;justify-content:space-between;gap:12px}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:900px;margin:auto;padding:42px 16px 70px}.hero{text-align:center;max-width:690px;margin:auto}.hero h1{font-size:clamp(30px,5vw,48px);margin:5px 0}.hero p{color:var(--muted);line-height:1.65}.card{max-width:620px;margin:28px auto 0;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.field{display:block;margin:12px 0;font-weight:700}.field input{width:100%;padding:12px;border:1px solid #c8d5e3;border-radius:10px;margin-top:6px;font:inherit;min-height:46px}.hint{font-size:12px;color:var(--muted);font-weight:500;margin-top:5px}.btn{width:100%;border:0;border-radius:11px;padding:12px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer;min-height:46px}.btn:disabled{opacity:.62;cursor:not-allowed}.btn.secondary{background:#eef4fa;color:var(--navy);margin-top:8px}.status{margin-top:13px;padding:11px;border-radius:10px;background:#f1f5f9;color:#465970}.status.error{background:#feeceb;color:var(--red)}.status.ok{background:#e9f8f1;color:var(--green)}.context{margin-top:20px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}.go{display:inline-flex;text-decoration:none;border-radius:10px;padding:9px 12px;background:var(--blue);color:#fff;font-weight:800;margin-right:6px;margin-top:7px}.notice{background:#eef6ff;border:1px solid #cfe3fa;border-radius:11px;padding:11px 12px;margin:12px 0;color:#35536f;line-height:1.55}@media(max-width:640px){.wrap{padding:28px 12px 48px}.card{padding:18px}.top{padding:12px 14px}.hero h1{font-size:34px}.go{display:flex;margin-right:0}}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · พื้นที่ทำงานองค์กร</strong><a href="https://sayampreecha-ux.github.io/-ai-local-government-assistant/">GP หลัก</a></header>
+<main class="wrap">
+  <section class="hero">
+    <div class="muted">รุ่นทดลองภายในองค์กร · ระบบตรวจสอบสิทธิอัตโนมัติ</div>
+    <h1>เข้าสู่พื้นที่ทำงานองค์กร</h1>
+    <p>ผู้ดูแลระบบสร้างบัญชีให้ล่วงหน้า เจ้าหน้าที่ใช้เพียง <strong>ชื่อผู้ใช้ + รหัสผ่าน</strong> ไม่ต้องสมัครสมาชิก ไม่ต้องรออีเมล และไม่ต้องตั้งค่าระบบเอง</p>
+  </section>
+
+  <section class="card">
+    <h2>เข้าสู่ระบบ</h2>
+    <div class="notice">ใช้ชื่อผู้ใช้ที่ผู้ดูแลระบบกำหนด เช่น <strong>somchai</strong> · บัญชีเดิมยังใช้งานต่อได้ตามปกติ</div>
+    <label class="field">ชื่อผู้ใช้
+      <input id="loginName" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="เช่น somchai">
+      <div class="hint">ไม่ต้องใส่อีเมลสำหรับบัญชีที่ผู้ดูแลสร้างใหม่</div>
+    </label>
+    <label class="field">รหัสผ่าน<input id="passwordValue" type="password" autocomplete="current-password"></label>
+    <button id="passwordBtn" class="btn" type="button">เข้าสู่ระบบ</button>
+    <button id="logoutBtn" class="btn secondary hidden" type="button">ออกจากระบบ</button>
+    <div id="passwordStatus" class="status" aria-live="polite">ยังไม่ได้เข้าสู่ระบบ</div>
+  </section>
+
+  <section id="passwordChangeCard" class="card hidden">
+    <h2>ตั้งรหัสผ่านใหม่</h2>
+    <div class="notice">เข้าใช้ครั้งแรก กรุณาตั้งรหัสผ่านของคุณเองเพียงครั้งเดียว หลังจากนี้ใช้รหัสใหม่นี้เข้าสู่ระบบได้ตามปกติ</div>
+    <label class="field">รหัสผ่านใหม่
+      <input id="newPassword" type="password" minlength="10" maxlength="128" autocomplete="new-password">
+      <div class="hint">อย่างน้อย 10 ตัวอักษร และไม่ควรใช้รหัสเดียวกับระบบอื่น</div>
+    </label>
+    <label class="field">ยืนยันรหัสผ่านใหม่<input id="confirmPassword" type="password" minlength="10" maxlength="128" autocomplete="new-password"></label>
+    <button id="changePasswordBtn" class="btn" type="button">บันทึกรหัสผ่านใหม่</button>
+    <div id="changePasswordStatus" class="status" aria-live="polite">ต้องเปลี่ยนรหัสผ่านก่อนเข้าใช้งาน</div>
+  </section>
+
+  <section id="contextCard" class="context hidden">
+    <h2>พื้นที่ทำงานองค์กร</h2>
+    <div id="contextText"></div>
+    <div id="links" class="hidden">
+      <a class="go" href="work-dashboard-live-pilot.html">ภาพรวมงาน</a>
+      <a class="go" href="work-operations-live-pilot.html">โครงการ</a>
+      <a class="go" href="work-tasks-live-pilot.html">งานย่อย</a>
+      <a id="adminUsersLink" class="go hidden" href="work-members-live-pilot.html">จัดการผู้ใช้</a>
+      <a class="go" href="work-assign-live-pilot.html">มอบหมายงาน</a>
+      <a class="go" href="work-import-live-pilot.html">นำเข้าตารางข้อมูล</a>
+      <a class="go" href="work-export-live-pilot.html">ส่งออกสำเนาข้อมูล</a>
+      <a class="go" href="work-command-center-pilot.html">ศูนย์ติดตามและสั่งการ</a>
+      <a class="go" href="https://sayampreecha-ux.github.io/-ai-local-government-assistant/automation-pilot.html">งานอัตโนมัติ</a>
+      <a class="go" href="work-uat-pilot.html">ทดลองใช้งาน</a>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+  import { signInPilotWithPassword } from './src/work-tracking/pilot-auth.mjs';
+
+  const $=(id)=>document.getElementById(id);
+  const setPasswordStatus=(message,kind='')=>{const node=$('passwordStatus');node.textContent=message;node.className=`status ${kind}`.trim();};
+  const setChangeStatus=(message,kind='')=>{const node=$('changePasswordStatus');node.textContent=message;node.className=`status ${kind}`.trim();};
+  const roleLabel=(role)=>({ORG_ADMIN:'ผู้ดูแลระบบ',EXECUTIVE:'ผู้บริหาร',DIRECTOR:'ผอ./หัวหน้าหน่วย',OFFICER:'เจ้าหน้าที่',AUDITOR:'ผู้ตรวจสอบ'}[role]||'ผู้ใช้งาน');
+
+  function renderContext(resolved){
+    const box=$('contextText');box.replaceChildren();
+    if(resolved.ok){
+      const ready=document.createElement('p');ready.append('สิทธิการใช้งาน: ');
+      const role=document.createElement('strong');role.textContent=roleLabel(resolved.actor.role);ready.appendChild(role);
+      const scope=document.createElement('p');scope.className='muted';scope.textContent=resolved.actor.departmentId?'ระบบแสดงเฉพาะข้อมูลงานตามหน่วยงานที่ได้รับสิทธิ':'ระบบแสดงข้อมูลตามขอบเขตสิทธิของบัญชีนี้';
+      box.append(ready,scope);return;
+    }
+    if(resolved.code==='ORGANIZATION_SELECTION_REQUIRED'){
+      const p=document.createElement('p');p.textContent='บัญชีนี้เชื่อมกับหลายองค์กร กรุณาเลือกองค์กรก่อนใช้งาน';box.appendChild(p);return;
+    }
+    const title=document.createElement('p');const strong=document.createElement('strong');strong.textContent='บัญชีนี้ยังไม่มีสิทธิองค์กร';title.appendChild(strong);
+    const detail=document.createElement('p');detail.className='muted';detail.textContent='โปรดติดต่อผู้ดูแลระบบเพื่อกำหนดสิทธิและกอง/หน่วย';
+    box.append(title,detail);
+  }
+
+  async function refreshContext(){
+    const {session,memberships}=await getPilotSessionContext();
+    $('logoutBtn').classList.toggle('hidden',!session);
+    if(!session){
+      $('contextCard').classList.add('hidden');
+      $('passwordChangeCard').classList.add('hidden');
+      setPasswordStatus('ยังไม่ได้เข้าสู่ระบบ');
+      return;
+    }
+
+    const resolved=resolveWorkSession({session,memberships});
+    if(resolved.code==='PASSWORD_CHANGE_REQUIRED'){
+      $('contextCard').classList.add('hidden');
+      $('passwordChangeCard').classList.remove('hidden');
+      setPasswordStatus('เข้าสู่ระบบแล้ว · กรุณาตั้งรหัสผ่านใหม่','ok');
+      return;
+    }
+
+    $('passwordChangeCard').classList.add('hidden');
+    $('contextCard').classList.remove('hidden');
+    setPasswordStatus('เข้าสู่ระบบแล้ว','ok');
+    renderContext(resolved);
+    $('links').classList.toggle('hidden',!resolved.ok);
+    $('adminUsersLink').classList.toggle('hidden',!(resolved.ok&&resolved.actor.role==='ORG_ADMIN'));
+  }
+
+  $('passwordBtn').addEventListener('click',async()=>{
+    const login=$('loginName').value.trim();
+    const password=$('passwordValue').value;
+    if(!login||!password)return setPasswordStatus('กรอกชื่อผู้ใช้และรหัสผ่านก่อน','error');
+    $('passwordBtn').disabled=true;setPasswordStatus('กำลังเข้าสู่ระบบ...');
+    try{
+      await signInPilotWithPassword({client:supabase,login,password});
+      setPasswordStatus('เข้าสู่ระบบสำเร็จ','ok');
+      $('passwordValue').value='';
+      await refreshContext();
+    }catch(error){
+      const message=String(error?.message||'');
+      if(/VALID_USERNAME_REQUIRED|LOGIN_REQUIRED/.test(message))setPasswordStatus('รูปแบบชื่อผู้ใช้ไม่ถูกต้อง','error');
+      else setPasswordStatus(/invalid login credentials/i.test(message)?'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง':'เข้าสู่ระบบไม่สำเร็จ','error');
+    }finally{$('passwordBtn').disabled=false;}
+  });
+
+  $('changePasswordBtn').addEventListener('click',async()=>{
+    const newPassword=$('newPassword').value;
+    const confirmPassword=$('confirmPassword').value;
+    if(newPassword.length<10)return setChangeStatus('รหัสผ่านใหม่ต้องอย่างน้อย 10 ตัวอักษร','error');
+    if(newPassword!==confirmPassword)return setChangeStatus('รหัสผ่านทั้งสองช่องไม่ตรงกัน','error');
+    $('changePasswordBtn').disabled=true;setChangeStatus('กำลังบันทึกรหัสผ่านใหม่...');
+    try{
+      const {data,error}=await supabase.functions.invoke('work-change-password',{body:{newPassword}});
+      if(error){
+        let detail='เปลี่ยนรหัสผ่านไม่สำเร็จ';
+        try{const payload=await error.context?.json?.();if(payload?.message)detail=payload.message;}catch{}
+        throw new Error(detail);
+      }
+      if(data?.ok!==true)throw new Error(data?.message||'เปลี่ยนรหัสผ่านไม่สำเร็จ');
+      $('newPassword').value='';$('confirmPassword').value='';
+      setChangeStatus('เปลี่ยนรหัสผ่านเรียบร้อย กำลังเปิดพื้นที่ทำงาน...','ok');
+      const {error:refreshError}=await supabase.auth.refreshSession();
+      if(refreshError){
+        await supabase.auth.signOut();
+        $('passwordChangeCard').classList.add('hidden');
+        setPasswordStatus('เปลี่ยนรหัสผ่านแล้ว กรุณาเข้าสู่ระบบอีกครั้งด้วยรหัสใหม่','ok');
+        return;
+      }
+      await refreshContext();
+    }catch(error){setChangeStatus(error?.message||'เปลี่ยนรหัสผ่านไม่สำเร็จ','error');}
+    finally{$('changePasswordBtn').disabled=false;}
+  });
+
+  $('passwordValue').addEventListener('keydown',(event)=>{if(event.key==='Enter')$('passwordBtn').click();});
+  $('confirmPassword').addEventListener('keydown',(event)=>{if(event.key==='Enter')$('changePasswordBtn').click();});
+  $('logoutBtn').addEventListener('click',async()=>{
+    await supabase.auth.signOut();
+    $('contextCard').classList.add('hidden');$('passwordChangeCard').classList.add('hidden');$('logoutBtn').classList.add('hidden');
+    setPasswordStatus('ออกจากระบบแล้ว');
+  });
+  supabase.auth.onAuthStateChange(()=>{setTimeout(()=>refreshContext().catch(()=>{}),0);});
+  refreshContext().catch(()=>setPasswordStatus('เชื่อมระบบบัญชีไม่สำเร็จ','error'));
+</script>
+</body>
+</html>
