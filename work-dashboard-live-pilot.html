@@ -1,193 +1,37 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="GP Work Tracking live Supabase dashboard pilot">
-  <meta name="robots" content="noindex,nofollow">
-  <title>GP Work Tracking · Live Dashboard Pilot</title>
-  <style>
-    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--muted:#64748b;--line:#dce6f1;--red:#b42318;--yellow:#9a6700;--green:#16865c}
-    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;gap:12px;align-items:center}.top strong{font-size:17px}.top nav{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1180px;margin:auto;padding:28px 16px 64px}.eyebrow{font-size:12px;font-weight:800;color:#176fd1;letter-spacing:.06em}.hero h1{margin:6px 0;font-size:clamp(28px,5vw,46px);line-height:1.2}.hero p{color:var(--muted);margin:5px 0;max-width:760px}.status{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}.status.error{border-color:#f3c5bf;background:#fff0ee;color:var(--red)}.status.ok{border-color:#b9e5d2;background:#edfaf4;color:var(--green)}.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}.kpi,.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px}.kpi small{display:block;color:var(--muted)}.kpi strong{display:block;font-size:26px;margin-top:5px}.grid{display:grid;grid-template-columns:1fr 2fr;gap:16px}.panel h2{margin:0 0 12px}.queue{display:grid;gap:9px}.item{border:1px solid var(--line);border-left-width:5px;border-radius:11px;padding:11px}.item.RED{border-left-color:var(--red)}.item.YELLOW{border-left-color:#d99a23}.item.GREEN{border-left-color:var(--green)}.item strong{display:block}.muted{color:var(--muted);font-size:13px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:10px 11px;border-bottom:1px solid #e7edf4;text-align:left;font-size:13px;vertical-align:top}th{background:#f3f7fb}.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:800;font-size:11px}.badge.RED{background:#feeceb;color:var(--red)}.badge.YELLOW{background:#fff4dc;color:var(--yellow)}.badge.GREEN{background:#e9f8f1;color:var(--green)}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:10px 13px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer;text-decoration:none;text-align:center}.btn.secondary{background:#eef4fa;color:var(--navy)}
-    @media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
-    @media(max-width:700px){
-      .top{padding:12px 14px;align-items:flex-start}.top strong{font-size:15px}.top nav{justify-content:flex-end;gap:10px;font-size:14px}.wrap{padding:20px 12px 44px}.eyebrow{letter-spacing:.03em}.hero h1{font-size:32px}.hero p{font-size:15px}.status{margin:13px 0}.actions{display:grid;grid-template-columns:1fr 1fr}.actions .btn{min-height:44px;display:grid;place-items:center}.kpis{gap:9px}.kpi{padding:14px}.kpi:last-child{grid-column:1/-1}.panel{padding:14px}.table-wrap{border:0;overflow:visible}table{min-width:0;border-collapse:separate}thead{display:none}tbody,tr,td{display:block;width:100%}tr{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:#fff}td{border:0;padding:5px 0;font-size:14px}td:first-child{padding-bottom:8px}td:first-child strong{font-size:16px}td:nth-child(2)::before{content:"งบประมาณ: ";font-weight:800;color:#42546c}td:nth-child(3)::before{content:"แผน / ผลจริง: ";font-weight:800;color:#42546c}td:nth-child(4)::before{content:"กำหนดเสร็จ: ";font-weight:800;color:#42546c}td:nth-child(5)::before{content:"สถานะ: ";font-weight:800;color:#42546c}td:nth-child(6)::before{content:"ความเสี่ยง: ";font-weight:800;color:#42546c}.badge{margin-right:5px}
-    }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GovPrompt · ติดตามงาน</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--muted:#64748b;--line:#dce6f1;--red:#b42318;--yellow:#9a6700;--green:#16865c;--blue:#176fd1}
+*{box-sizing:border-box}body{margin:0}.top{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);padding:12px max(14px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;gap:10px;align-items:center}.top a{text-decoration:none;color:var(--navy);font-weight:800;margin-left:12px}.wrap{max-width:1180px;margin:auto;padding:22px 14px 56px}.hero h1{margin:2px 0 4px;font-size:clamp(28px,5vw,42px)}.hero p,.muted{color:var(--muted)}.status{margin:12px 0;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:#fff}.status.ok{background:#edfaf4;color:var(--green)}.status.error{background:#fff0ee;color:var(--red)}.actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}.btn{border:0;border-radius:10px;padding:11px 12px;background:var(--navy);color:#fff;font-weight:800;text-decoration:none;text-align:center;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy)}.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}.kpi,.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}.kpi small{display:block;color:var(--muted)}.kpi strong{display:block;font-size:27px;margin-top:4px}.grid{display:grid;grid-template-columns:.9fr 1.6fr;gap:14px}.panel h2{margin:0 0 10px}.queue{display:grid;gap:8px}.item{border:1px solid var(--line);border-left:5px solid var(--line);border-radius:11px;padding:10px}.item.RED{border-left-color:var(--red)}.item.YELLOW{border-left-color:#d99a23}.item.GREEN{border-left-color:var(--green)}.item strong{display:block}.search{width:100%;padding:11px;border:1px solid #c8d5e3;border-radius:10px;margin-bottom:10px;font:inherit}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:10px;border-bottom:1px solid #e8eef5;text-align:left;font-size:13px;vertical-align:top}th{background:#f3f7fb}.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800}.badge.RED{background:#feeceb;color:var(--red)}.badge.YELLOW{background:#fff4dc;color:var(--yellow)}.badge.GREEN{background:#e9f8f1;color:var(--green)}
+@media(max-width:850px){.actions{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr 1fr}.kpi:last-child{grid-column:1/-1}.grid{grid-template-columns:1fr}.top{align-items:flex-start}.top nav{display:flex;flex-wrap:wrap;justify-content:flex-end}.table-wrap{overflow:visible}table{min-width:0}thead{display:none}tbody,tr,td{display:block;width:100%}tr{border:1px solid var(--line);border-radius:12px;padding:11px;margin-bottom:9px;background:#fff}td{border:0;padding:4px 0}td:first-child strong{font-size:16px}td:nth-child(2)::before{content:"พื้นที่: ";font-weight:800}td:nth-child(3)::before{content:"งบ: ";font-weight:800}td:nth-child(4)::before{content:"แผน/จริง: ";font-weight:800}td:nth-child(5)::before{content:"กำหนด: ";font-weight:800}td:nth-child(6)::before{content:"สถานะ: ";font-weight:800}}
+</style>
 </head>
 <body>
-<header class="top"><strong>GovPrompt · ติดตามงาน</strong><nav><a href="work-login-pilot.html">สิทธิผู้ใช้</a><a href="../">GP หลัก</a></nav></header>
+<header class="top"><strong>GovPrompt · งานช่าง</strong><nav><a href="work-dashboard-live-pilot.html">ภาพรวม</a><a href="work-operations-live-pilot.html">งานทั้งหมด</a><a id="usersLink" href="work-members-live-pilot.html" hidden>ผู้ใช้</a><a href="work-login-pilot.html">บัญชี</a></nav></header>
 <main class="wrap">
-  <section class="hero"><div class="eyebrow">ฐานข้อมูลจริง · ควบคุมสิทธิด้วย RLS</div><h1>แดชบอร์ดโครงการ</h1><p>แสดงเฉพาะโครงการที่บัญชีนี้มีสิทธิเห็น พร้อมสรุปงานเร่งด่วน ความก้าวหน้า และวงเงินจากฐานข้อมูลจริง</p></section>
-  <div id="status" class="status">กำลังตรวจสิทธิและโหลดข้อมูล...</div>
-  <div class="actions">
-    <button id="reloadBtn" class="btn" type="button">โหลดใหม่</button>
-    <a class="btn secondary" href="work-operations-live-pilot.html">เพิ่ม/อัปเดตโครงการ</a>
-    <a class="btn secondary" href="work-command-center-pilot.html">ศูนย์สั่งการ</a>
-    <button id="logoutBtn" class="btn secondary" type="button">ออกจากระบบ</button>
-  </div>
-
-  <section id="dashboard" hidden>
-    <section class="kpis">
-      <article class="kpi"><small>โครงการทั้งหมด</small><strong id="kpiTotal">0</strong></article>
-      <article class="kpi"><small>🔴 เร่งด่วน</small><strong id="kpiRed">0</strong></article>
-      <article class="kpi"><small>🟡 ต้องติดตาม</small><strong id="kpiYellow">0</strong></article>
-      <article class="kpi"><small>เสร็จสิ้น</small><strong id="kpiCompleted">0</strong></article>
-      <article class="kpi"><small>วงเงินรวม</small><strong id="kpiBudget">฿0</strong></article>
-    </section>
-    <section class="grid">
-      <article class="panel"><h2>เรื่องที่ควรติดตามก่อน</h2><div id="priority" class="queue"></div></article>
-      <article class="panel"><h2>รายการโครงการ</h2><div class="table-wrap"><table><thead><tr><th>โครงการ</th><th>งบประมาณ</th><th>แผน/ผลจริง</th><th>กำหนดเสร็จ</th><th>สถานะ</th><th>ความเสี่ยง</th></tr></thead><tbody id="rows"></tbody></table></div></article>
-    </section>
-  </section>
+<section class="hero"><h1>วันนี้ต้องตามอะไร</h1><p>เปิดแล้วเห็นงานเร่งด่วน งานใกล้กำหนด และงานทั้งหมดตามสิทธิของบัญชีทันที</p></section>
+<div id="status" class="status">กำลังโหลดข้อมูล...</div>
+<div class="actions"><a class="btn" href="work-operations-live-pilot.html">＋ เพิ่ม / อัปเดตงาน</a><a class="btn secondary" href="work-tasks-live-pilot.html">งานของฉัน</a><a class="btn secondary" href="work-command-center-pilot.html">🔔 ต้องติดตาม</a><button id="logoutBtn" class="btn secondary">ออกจากระบบ</button></div>
+<section id="dashboard" hidden>
+<section class="kpis"><article class="kpi"><small>ทั้งหมด</small><strong id="kpiTotal">0</strong></article><article class="kpi"><small>🔴 เร่งด่วน</small><strong id="kpiRed">0</strong></article><article class="kpi"><small>🟡 ต้องติดตาม</small><strong id="kpiYellow">0</strong></article><article class="kpi"><small>✅ เสร็จแล้ว</small><strong id="kpiCompleted">0</strong></article><article class="kpi"><small>วงเงินรวม</small><strong id="kpiBudget">฿0</strong></article></section>
+<section class="grid"><article class="panel"><h2>🚨 ควรติดตามก่อน</h2><div id="priority" class="queue"></div></article><article class="panel"><h2>📋 งานทั้งหมด</h2><input id="search" class="search" placeholder="ค้นหาชื่องาน พื้นที่ หรือเลขสัญญา"><div class="table-wrap"><table><thead><tr><th>โครงการ</th><th>พื้นที่</th><th>งบประมาณ</th><th>แผน/จริง</th><th>กำหนดเสร็จ</th><th>สถานะ</th></tr></thead><tbody id="rows"></tbody></table></div></article></section>
+</section>
 </main>
 <script type="module">
-  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
-  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
-  import { buildOrganizationDashboard, formatBaht } from './src/work-tracking/dashboard.mjs';
-
-  const statusNode = document.getElementById('status');
-  const dashboardNode = document.getElementById('dashboard');
-  const priorityNode = document.getElementById('priority');
-  const rowsNode = document.getElementById('rows');
-  const setText = (id, value) => { document.getElementById(id).textContent = String(value); };
-  const setStatus = (message, kind = '') => { statusNode.textContent = message; statusNode.className = `status ${kind}`.trim(); };
-  const fmtDate = (v) => v ? new Intl.DateTimeFormat('th-TH',{dateStyle:'medium'}).format(new Date(v)) : '-';
-  let loading = false;
-
-  function mapProject(row) {
-    return {
-      id: row.id,
-      organizationId: row.organization_id,
-      departmentId: row.department_id,
-      projectType: row.project_type,
-      name: row.name,
-      projectCode: row.project_code,
-      ownerUserId: row.owner_user_id,
-      location: row.location_text,
-      contractNo: row.contract_no,
-      contractor: row.contractor_name,
-      budget: Number(row.budget_amount || 0),
-      spent: Number(row.spent_amount || 0),
-      plannedProgress: Number(row.planned_progress || 0),
-      actualProgress: Number(row.actual_progress || 0),
-      startDate: row.start_date,
-      dueDate: row.due_date,
-      status: row.status,
-      problem: row.problem_summary,
-      lastUpdatedAt: row.last_updated_at,
-    };
-  }
-
-  function addMuted(parent, text) {
-    const node = document.createElement('div');
-    node.className = 'muted';
-    node.textContent = text;
-    parent.appendChild(node);
-  }
-
-  function render(view) {
-    setText('kpiTotal', view.summary.counts.total);
-    setText('kpiRed', view.summary.counts.red);
-    setText('kpiYellow', view.summary.counts.yellow);
-    setText('kpiCompleted', view.summary.counts.completed);
-    setText('kpiBudget', formatBaht(view.summary.finance.totalBudget));
-
-    priorityNode.replaceChildren();
-    if (!view.priorityRows.length) addMuted(priorityNode, 'ยังไม่มีงานเร่งด่วน');
-    for (const row of view.priorityRows.slice(0,10)) {
-      const el = document.createElement('div');
-      el.className = `item ${row.riskLevel}`;
-      const title = document.createElement('strong');
-      title.textContent = row.name || '-';
-      const reason = document.createElement('span');
-      reason.className = 'muted';
-      reason.textContent = row.riskReasons.join(' · ') || 'ปกติ';
-      el.append(title, reason);
-      priorityNode.appendChild(el);
-    }
-
-    rowsNode.replaceChildren();
-    if (!view.rows.length) {
-      const tr = document.createElement('tr');
-      const td = document.createElement('td');
-      td.colSpan = 6;
-      td.className = 'muted';
-      td.textContent = 'ยังไม่มีโครงการในฐานข้อมูลสำหรับสิทธินี้';
-      tr.appendChild(td);
-      rowsNode.appendChild(tr);
-      return;
-    }
-
-    for (const row of view.rows) {
-      const tr = document.createElement('tr');
-
-      const projectTd = document.createElement('td');
-      const name = document.createElement('strong');
-      name.textContent = row.name || '-';
-      const projectMeta = document.createElement('div');
-      projectMeta.className = 'muted';
-      projectMeta.textContent = row.contractNo || '-';
-      projectTd.append(name, projectMeta);
-
-      const budgetTd = document.createElement('td');
-      budgetTd.textContent = row.budgetText;
-
-      const progressTd = document.createElement('td');
-      progressTd.textContent = `${row.plannedProgress}% / ${row.actualProgress}%`;
-
-      const dueTd = document.createElement('td');
-      dueTd.textContent = fmtDate(row.dueDate);
-
-      const statusTd = document.createElement('td');
-      statusTd.textContent = row.statusLabel;
-
-      const riskTd = document.createElement('td');
-      const badge = document.createElement('span');
-      badge.className = `badge ${row.riskLevel}`;
-      badge.textContent = row.riskLabel;
-      const reasons = document.createElement('div');
-      reasons.className = 'muted';
-      reasons.textContent = row.riskReasons.join(' · ');
-      riskTd.append(badge, reasons);
-
-      tr.append(projectTd, budgetTd, progressTd, dueTd, statusTd, riskTd);
-      rowsNode.appendChild(tr);
-    }
-  }
-
-  async function loadLive() {
-    if (loading) return;
-    loading = true;
-    dashboardNode.hidden = true;
-    setStatus('กำลังตรวจสิทธิและโหลดข้อมูล...');
-    try {
-      const { session, memberships } = await getPilotSessionContext();
-      if (!session) { location.href = 'work-login-pilot.html'; return; }
-      const resolved = resolveWorkSession({ session, memberships });
-      if (!resolved.ok) { setStatus('บัญชีนี้ยังไม่มีสิทธิใช้งาน Work Tracking', 'error'); return; }
-
-      const actor = resolved.actor;
-      let query = supabase.from('projects').select('id, organization_id, department_id, project_code, project_type, name, owner_user_id, location_text, contract_no, contractor_name, budget_amount, spent_amount, planned_progress, actual_progress, start_date, due_date, status, problem_summary, last_updated_at').eq('organization_id', actor.organizationId).order('due_date', { ascending: true, nullsFirst: false });
-      if (['DIRECTOR','OFFICER'].includes(actor.role) && actor.departmentId) query = query.eq('department_id', actor.departmentId);
-      const { data, error } = await query;
-      if (error) { setStatus(`โหลดข้อมูลไม่สำเร็จ: ${error.message}`, 'error'); return; }
-
-      const projects = (data || []).map(mapProject);
-      const view = buildOrganizationDashboard(projects, actor.organizationId, { now: new Date() });
-      render(view);
-      dashboardNode.hidden = false;
-      setStatus(`โหลดข้อมูลจริงสำเร็จ ${projects.length} โครงการ · สิทธิ: ${actor.role}`, 'ok');
-    } finally {
-      loading = false;
-    }
-  }
-
-  document.getElementById('reloadBtn').addEventListener('click', () => loadLive().catch((e) => setStatus(`เกิดข้อผิดพลาดระหว่างโหลดข้อมูล: ${e.message}`, 'error')));
-  document.getElementById('logoutBtn').addEventListener('click', async () => { await supabase.auth.signOut(); location.href = 'work-login-pilot.html'; });
-  window.addEventListener('focus', () => loadLive().catch(() => {}));
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadLive().catch(() => {}); });
-  loadLive().catch((e) => setStatus(`เกิดข้อผิดพลาดระหว่างตรวจสิทธิ: ${e.message}`, 'error'));
+import { supabase,getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+import { buildOrganizationDashboard,formatBaht } from './src/work-tracking/dashboard.mjs';
+const $=id=>document.getElementById(id);let currentView=null;
+const fmtDate=v=>v?new Intl.DateTimeFormat('th-TH',{dateStyle:'medium'}).format(new Date(v)):'-';
+const setStatus=(m,k='')=>{const n=$('status');n.textContent=m;n.className=`status ${k}`.trim()};
+function mapProject(r){return{id:r.id,organizationId:r.organization_id,departmentId:r.department_id,projectType:r.project_type,name:r.name,projectCode:r.project_code,ownerUserId:r.owner_user_id,location:r.location_text,contractNo:r.contract_no,contractor:r.contractor_name,budget:Number(r.budget_amount||0),spent:Number(r.spent_amount||0),plannedProgress:Number(r.planned_progress||0),actualProgress:Number(r.actual_progress||0),startDate:r.start_date,dueDate:r.due_date,status:r.status,problem:r.problem_summary,lastUpdatedAt:r.last_updated_at}}
+function renderRows(rows){const body=$('rows');body.replaceChildren();if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=6;td.className='muted';td.textContent='ไม่พบรายการ';tr.appendChild(td);body.appendChild(tr);return}for(const row of rows){const tr=document.createElement('tr');const a=document.createElement('td');a.innerHTML=`<strong></strong><div class="muted"></div>`;a.querySelector('strong').textContent=row.name||'-';a.querySelector('.muted').textContent=row.contractNo||'-';const b=document.createElement('td');b.textContent=row.location||'-';const c=document.createElement('td');c.textContent=row.budgetText;const d=document.createElement('td');d.textContent=`${row.plannedProgress}% / ${row.actualProgress}%`;const e=document.createElement('td');e.textContent=fmtDate(row.dueDate);const f=document.createElement('td');const badge=document.createElement('span');badge.className=`badge ${row.riskLevel}`;badge.textContent=row.riskLabel;f.appendChild(badge);tr.append(a,b,c,d,e,f);body.appendChild(tr)}}
+function render(view){currentView=view;$('kpiTotal').textContent=view.summary.counts.total;$('kpiRed').textContent=view.summary.counts.red;$('kpiYellow').textContent=view.summary.counts.yellow;$('kpiCompleted').textContent=view.summary.counts.completed;$('kpiBudget').textContent=formatBaht(view.summary.finance.totalBudget);const q=$('priority');q.replaceChildren();if(!view.priorityRows.length){q.innerHTML='<div class="muted">วันนี้ยังไม่มีงานเร่งด่วน</div>'}for(const row of view.priorityRows.slice(0,8)){const el=document.createElement('div');el.className=`item ${row.riskLevel}`;const s=document.createElement('strong');s.textContent=row.name||'-';const m=document.createElement('div');m.className='muted';m.textContent=row.riskReasons.join(' · ')||'ปกติ';el.append(s,m);q.appendChild(el)}renderRows(view.rows)}
+$('search').addEventListener('input',()=>{if(!currentView)return;const q=$('search').value.trim().toLowerCase();renderRows(currentView.rows.filter(r=>[r.name,r.location,r.contractNo].some(v=>String(v||'').toLowerCase().includes(q))))});
+async function load(){try{const {session,memberships}=await getPilotSessionContext();if(!session){location.href='work-login-pilot.html';return}const resolved=resolveWorkSession({session,memberships});if(!resolved.ok){setStatus('บัญชีนี้ยังไม่มีสิทธิใช้งาน','error');return}const actor=resolved.actor;$('usersLink').hidden=actor.role!=='ORG_ADMIN';let query=supabase.from('projects').select('id,organization_id,department_id,project_code,project_type,name,owner_user_id,location_text,contract_no,contractor_name,budget_amount,spent_amount,planned_progress,actual_progress,start_date,due_date,status,problem_summary,last_updated_at').eq('organization_id',actor.organizationId).order('due_date',{ascending:true,nullsFirst:false});if(['DIRECTOR','OFFICER'].includes(actor.role)&&actor.departmentId)query=query.eq('department_id',actor.departmentId);const {data,error}=await query;if(error)throw error;const projects=(data||[]).map(mapProject);render(buildOrganizationDashboard(projects,actor.organizationId,{now:new Date()}));$('dashboard').hidden=false;setStatus(`พร้อมใช้งาน · ${projects.length} โครงการ · สิทธิ ${actor.role}`,'ok')}catch(e){setStatus(`โหลดข้อมูลไม่สำเร็จ: ${e.message}`,'error')}}
+$('logoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.href='work-login-pilot.html'});load();
 </script>
-</body>
-</html>
+</body></html>
