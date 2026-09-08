@@ -3,10 +3,7 @@
 
   const WORKFLOW_STATES = new Set(['idle', 'searching', 'selected', 'collecting-input', 'generated']);
 
-  function clone(value) {
-    return JSON.parse(JSON.stringify(value));
-  }
-
+  function clone(value) { return JSON.parse(JSON.stringify(value)); }
   function freeze(value) {
     if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
     Object.values(value).forEach(freeze);
@@ -15,13 +12,22 @@
 
   function initialState() {
     return freeze({
-      version: 1,
+      version: 7,
       query: '',
       selectedGpId: null,
       category: null,
       userInputs: {},
       routing: { score: 0, confidence: 0, matchedReason: '', fallback: true },
       evidence: { provided: false, types: [], count: 0 },
+      legalTransition: {
+        precedentReliedOn: false,
+        precedentFactDate: null,
+        currentFactDate: null,
+        laterAuthoritySearchCompleted: false,
+        ruleVersionCheckCompleted: false,
+        contraryEvidenceCheckCompleted: false,
+        laterAuthorities: []
+      },
       riskFlags: [],
       workflowState: 'idle'
     });
@@ -29,9 +35,7 @@
 
   let state = initialState();
 
-  function get() {
-    return freeze(clone(state));
-  }
+  function get() { return freeze(clone(state)); }
 
   function update(partial = {}) {
     const next = clone(state);
@@ -41,6 +45,7 @@
     if ('userInputs' in partial) next.userInputs = clone(partial.userInputs || {});
     if ('routing' in partial) next.routing = { ...next.routing, ...clone(partial.routing || {}) };
     if ('evidence' in partial) next.evidence = { ...next.evidence, ...clone(partial.evidence || {}) };
+    if ('legalTransition' in partial) next.legalTransition = { ...next.legalTransition, ...clone(partial.legalTransition || {}) };
     if ('riskFlags' in partial) next.riskFlags = [...new Set((partial.riskFlags || []).map(String))];
     if ('workflowState' in partial && WORKFLOW_STATES.has(partial.workflowState)) next.workflowState = partial.workflowState;
     state = freeze(next);
@@ -62,30 +67,30 @@
   }
 
   function selectTool(tool) {
+    const category = tool?.category || null;
+    const highRisk = /กฎหมาย|การเงิน|คลัง|พัสดุ|งบประมาณ|บุคคล|สิทธิ|อำนาจ/i.test(String(category || ''));
     return update({
       selectedGpId: tool?.id || null,
-      category: tool?.category || null,
+      category,
       userInputs: {},
+      legalTransition: {
+        precedentReliedOn: false,
+        precedentFactDate: null,
+        currentFactDate: null,
+        laterAuthoritySearchCompleted: !highRisk,
+        ruleVersionCheckCompleted: !highRisk,
+        contraryEvidenceCheckCompleted: !highRisk,
+        laterAuthorities: []
+      },
       workflowState: tool ? 'selected' : 'idle'
     });
   }
 
-  function setUserInputs(values) {
-    return update({ userInputs: values, workflowState: 'collecting-input' });
-  }
-
-  function clearUserInputs() {
-    return update({ userInputs: {}, workflowState: state.selectedGpId ? 'selected' : 'idle' });
-  }
-
-  function setWorkflowState(workflowState) {
-    return update({ workflowState });
-  }
-
-  function reset() {
-    state = initialState();
-    return get();
-  }
+  function setUserInputs(values) { return update({ userInputs: values, workflowState: 'collecting-input' }); }
+  function setLegalTransition(values) { return update({ legalTransition: values }); }
+  function clearUserInputs() { return update({ userInputs: {}, workflowState: state.selectedGpId ? 'selected' : 'idle' }); }
+  function setWorkflowState(workflowState) { return update({ workflowState }); }
+  function reset() { state = initialState(); return get(); }
 
   window.GOVPROMPT_CONTEXT = Object.freeze({
     get,
@@ -93,6 +98,7 @@
     setRouting,
     selectTool,
     setUserInputs,
+    setLegalTransition,
     clearUserInputs,
     setWorkflowState,
     reset
