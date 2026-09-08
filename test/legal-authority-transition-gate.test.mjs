@@ -40,6 +40,8 @@ test('allows decision only after relevant later authority effect is resolved', (
     precedentFactDate: '2017-01-01',
     currentFactDate: '2026-09-08',
     laterAuthoritySearchCompleted: true,
+    ruleVersionCheckCompleted: true,
+    contraryEvidenceCheckCompleted: true,
     laterAuthorities: [{
       id: 'มท 0808.2/ว 0679',
       date: '2018-02-06',
