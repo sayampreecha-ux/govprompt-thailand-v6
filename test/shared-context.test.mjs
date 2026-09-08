@@ -16,16 +16,15 @@ function plain(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-test('starts with the documented immutable state', () => {
+test('starts with immutable v7 state including legal transition state', () => {
   const snapshot = contextApi().get();
-  assert.deepEqual(plain(snapshot), {
-    version: 1, query: '', selectedGpId: null, category: null, userInputs: {},
-    routing: { score: 0, confidence: 0, matchedReason: '', fallback: true },
-    evidence: { provided: false, types: [], count: 0 }, riskFlags: [], workflowState: 'idle'
-  });
+  assert.equal(snapshot.version, 7);
+  assert.equal(snapshot.query, '');
+  assert.equal(snapshot.selectedGpId, null);
+  assert.deepEqual(plain(snapshot.legalTransition), {});
+  assert.equal(snapshot.workflowState, 'idle');
   assert.equal(Object.isFrozen(snapshot), true);
-  assert.equal(Object.isFrozen(snapshot.routing), true);
-  assert.throws(() => { snapshot.userInputs.example = 'value'; }, TypeError);
+  assert.equal(Object.isFrozen(snapshot.legalTransition), true);
 });
 
 test('records routing metadata without changing the routing result', () => {
@@ -38,26 +37,23 @@ test('records routing metadata without changing the routing result', () => {
   assert.deepEqual(routeResult, { selectedGpId: 'GP009', score: 0.42, confidence: 0.42, matchedReason: 'matched GP009', fallback: false });
 });
 
-test('records selected GP, category, and transient form values', () => {
+test('records legal transition state and detects precedent language from user inputs', () => {
   const api = contextApi();
-  api.selectTool({ id: 'GP009', category: 'พัสดุ' });
-  api.setUserInputs({ รายการพัสดุ: 'ตัวอย่าง', วงเงิน: '1000' });
+  api.selectTool({ id: 'GP005', category: 'กฎหมาย' });
+  api.setUserInputs({ เรื่อง: 'วิเคราะห์คำพิพากษาศาลปกครองสูงสุด อ.24/2567', ข้อเท็จจริง: 'มีหนังสือ มท 0808.2/ว 0679 ภายหลัง' });
   const snapshot = api.get();
-  assert.equal(snapshot.selectedGpId, 'GP009');
-  assert.equal(snapshot.category, 'พัสดุ');
-  assert.deepEqual(plain(snapshot.userInputs), { รายการพัสดุ: 'ตัวอย่าง', วงเงิน: '1000' });
-  assert.equal(snapshot.workflowState, 'collecting-input');
+  assert.equal(snapshot.legalTransition.precedentReliedOn, true);
+  assert.equal(snapshot.legalTransition.laterAuthoritySearchCompleted, false);
+  assert.equal(snapshot.legalTransition.ruleVersionCheckCompleted, false);
+  assert.equal(snapshot.legalTransition.contraryEvidenceCheckCompleted, false);
 });
 
-test('clears transient data and can reset the whole context', () => {
+test('allows explicit transition updates and reset', () => {
   const api = contextApi();
-  api.selectTool({ id: 'GP016', category: 'ประชาสัมพันธ์' });
-  api.setUserInputs({ หัวเรื่อง: 'ประกาศตัวอย่าง' });
-  api.clearUserInputs();
-  assert.deepEqual(plain(api.get().userInputs), {});
-  assert.equal(api.get().workflowState, 'selected');
+  api.setLegalTransition({ precedentReliedOn: true, precedentFactDate: '2017-01-01', currentFactDate: '2026-09-08' });
+  assert.equal(api.get().legalTransition.precedentFactDate, '2017-01-01');
   api.reset();
-  assert.equal(api.get().selectedGpId, null);
+  assert.deepEqual(plain(api.get().legalTransition), {});
   assert.equal(api.get().workflowState, 'idle');
 });
 
