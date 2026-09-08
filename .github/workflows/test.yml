@@ -26,6 +26,7 @@ jobs:
           node --check core-engine.js
           node --check shared-context.js
           node --check quality-gate.js
+          node --check legal-authority-transition-gate.js
           node --check gp-router.js
           node --check workflow-expansion.js
           node --check workflow-orchestration.js
