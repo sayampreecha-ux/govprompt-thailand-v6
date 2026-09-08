@@ -2,6 +2,7 @@
   'use strict';
 
   const WORKFLOW_STATES = new Set(['idle', 'searching', 'selected', 'collecting-input', 'generated']);
+  const PRECEDENT_PATTERN = /คำพิพากษา|คำวินิจฉัย|หนังสือหารือ|ข้อหารือ|แนววินิจฉัย|แนวปฏิบัติ|บรรทัดฐาน|precedent|ศาลปกครอง|\bอ\.\s*\d+\/\d+/i;
 
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
   function freeze(value) {
@@ -34,7 +35,6 @@
   }
 
   let state = initialState();
-
   function get() { return freeze(clone(state)); }
 
   function update(partial = {}) {
@@ -86,7 +86,24 @@
     });
   }
 
-  function setUserInputs(values) { return update({ userInputs: values, workflowState: 'collecting-input' }); }
+  function setUserInputs(values) {
+    const userInputs = clone(values || {});
+    const combined = Object.values(userInputs).map(String).join(' ');
+    const precedentReliedOn = PRECEDENT_PATTERN.test(combined);
+    const legalTransition = precedentReliedOn
+      ? {
+          precedentReliedOn: true,
+          precedentFactDate: null,
+          currentFactDate: null,
+          laterAuthoritySearchCompleted: false,
+          ruleVersionCheckCompleted: false,
+          contraryEvidenceCheckCompleted: false,
+          laterAuthorities: []
+        }
+      : state.legalTransition;
+    return update({ userInputs, legalTransition, workflowState: 'collecting-input' });
+  }
+
   function setLegalTransition(values) { return update({ legalTransition: values }); }
   function clearUserInputs() { return update({ userInputs: {}, workflowState: state.selectedGpId ? 'selected' : 'idle' }); }
   function setWorkflowState(workflowState) { return update({ workflowState }); }
