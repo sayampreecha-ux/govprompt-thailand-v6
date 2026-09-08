@@ -18,6 +18,7 @@
     'legal', 'finance', 'procurement', 'personnel', 'budget', 'council'
   ]));
   const AUTHORITY_GATE_ID = 'global-high-risk-authority-transition';
+  const PRECEDENT_PATTERN = /(คำพิพากษา|ศาลปกครอง|ฎีกา|คำวินิจฉัย|หนังสือหารือ|ตอบข้อหารือ|แนววินิจฉัย|แนวปฏิบัติเดิม|precedent|case law|ruling|opinion)/i;
 
   const DEFINITIONS = Object.freeze([
     Object.freeze({
@@ -89,8 +90,34 @@
     if (unresolved.length) blockers.push('later-authority-effect-unresolved');
     return freeze({ pass: blockers.length === 0, status: blockers.length ? 'BLOCKED_LATER_AUTHORITY_CHECK' : 'PASS', decisionLock: blockers.length > 0, blockers });
   }
-  function authorityTransitionInput(envelope = {}) { return envelope.authorityTransition || envelope.transitionGateInput || envelope.transition || {}; }
+
   function categoryOf(envelope = {}) { return text(envelope?.task?.category || envelope?.category || envelope?.domain); }
+  function joinedEnvelopeText(envelope = {}) {
+    return [
+      envelope?.task?.query,
+      envelope?.query,
+      ...Object.entries(envelope?.userInputs || {}).flatMap(([key, value]) => [key, value])
+    ].filter(Boolean).join(' ');
+  }
+  function explicitAuthorityTransition(envelope = {}) {
+    return envelope.authorityTransition || envelope.transitionGateInput || envelope.transition || null;
+  }
+  function authorityTransitionInput(envelope = {}) {
+    const explicit = explicitAuthorityTransition(envelope);
+    if (explicit && Object.keys(explicit).length) return explicit;
+    if (!HIGH_RISK_CATEGORIES.has(categoryOf(envelope))) return {};
+    if (!PRECEDENT_PATTERN.test(joinedEnvelopeText(envelope))) return {};
+    return {
+      precedentReliedOn: true,
+      precedentFactDate: null,
+      currentFactDate: null,
+      laterAuthoritySearchCompleted: false,
+      ruleVersionCheckCompleted: false,
+      contraryEvidenceCheckCompleted: false,
+      laterAuthorities: [],
+      inferredFromUserInput: true
+    };
+  }
   function isHighRiskAuthorityCase(envelope = {}) {
     const input = authorityTransitionInput(envelope);
     return input.precedentReliedOn === true && HIGH_RISK_CATEGORIES.has(categoryOf(envelope));
@@ -182,7 +209,69 @@
     });
   }
 
-  const api = Object.freeze({ plan, definitions: DEFINITIONS, states: WORKFLOW_STATES, transitions: TRANSITIONS, highRiskCategories: HIGH_RISK_CATEGORIES, evaluateAuthorityTransition, authorityGateId: AUTHORITY_GATE_ID });
+  function blockerThai(blocker) {
+    return ({
+      'missing-precedent-fact-date': 'ระบุวันที่ข้อเท็จจริงของคำพิพากษา/แนวเดิม',
+      'missing-current-fact-date': 'ระบุวันที่ข้อเท็จจริงของเรื่องปัจจุบัน',
+      'later-authority-search-not-completed': 'ค้นกฎหมาย ระเบียบ หนังสือสั่งการ/หารือ และแนววินิจฉัยที่ออกภายหลัง',
+      'rule-version-check-not-completed': 'ตรวจฉบับกฎหมาย/ระเบียบที่ใช้บังคับ ณ วันที่เกิดเหตุและฉบับปัจจุบัน',
+      'contrary-evidence-check-not-completed': 'ตรวจหลักฐานหรือแนวทางที่อาจให้ผลตรงข้าม',
+      'timeline-not-resolved': 'แก้ลำดับเวลาให้ชัดเจน',
+      'later-authority-effect-unresolved': 'วิเคราะห์ผลของหลักเกณฑ์ภายหลังต่อ precedent เดิม'
+    })[blocker] || blocker;
+  }
+
+  function installAuthorityGateRuntime() {
+    if (typeof document === 'undefined') return false;
+    const form = document.getElementById('promptForm');
+    const output = document.getElementById('output');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (!form || !output || form.dataset.authorityGateRuntimeInstalled === 'true') return false;
+    form.dataset.authorityGateRuntimeInstalled = 'true';
+
+    form.addEventListener('submit', () => {
+      queueMicrotask(() => {
+        const gatePlan = typeof window !== 'undefined' ? window.GOVPROMPT_WORKFLOW_PLAN : null;
+        if (!gatePlan?.decisionLock || gatePlan?.workflowStatus !== 'BLOCKED_LATER_AUTHORITY_CHECK') return;
+        const blockers = gatePlan?.authorityTransition?.blockers || [];
+        const currentPrompt = String(output.textContent || '').trim();
+        const guard = `\n\nGLOBAL HIGH-RISK AUTHORITY GATE — บังคับใช้ก่อนฟันธง\nสถานะ: BLOCKED_LATER_AUTHORITY_CHECK\nห้ามสรุปสิทธิ อำนาจ ความชอบด้วยกฎหมาย หรืออนุมัติ/ไม่อนุมัติจาก precedent เดิมเพียงอย่างเดียว\n\nต้องดำเนินการต่อให้ครบ:\n${blockers.map((item, index) => `${index + 1}. ${blockerThai(item)}`).join('\n')}\n\nวิธีทำงานที่บังคับ:\n- ค้นและเปิดหลักฐานราชการ/ต้นฉบับที่เกี่ยวข้องเอง หาก AI มี Web Search หรือเครื่องมือค้นข้อมูล\n- SEARCH FOR THE CASE, NOT JUST THE WORDS; ค้นไม่พบข้อความตรงตัวไม่เท่ากับไม่มีเอกสาร\n- แยกวันที่ข้อเท็จจริงของ precedent ออกจากวันที่มีคำพิพากษาหรือหนังสือ\n- ตรวจหลักเกณฑ์ที่ออกภายหลังทั้งหมดจนถึงวันที่เกิดกรณีปัจจุบัน และตรวจสถานะปัจจุบันอีกครั้ง\n- วิเคราะห์ผลของหลักเกณฑ์ภายหลังต่อ precedent เดิมทีละฉบับ\n- ตรวจ contrary evidence ก่อนสรุป\n- หากยังตรวจไม่ครบ ให้รายงานว่า UNVERIFIED และห้ามฟันธง\n- เมื่อครบแล้วจึง Answer First พร้อมฐานอำนาจ แหล่งอ้างอิง และเหตุผลการปรับใช้`;
+        const guardedPrompt = `${currentPrompt}${guard}`.trim();
+        output.textContent = guardedPrompt;
+        output.classList.remove('empty-result');
+        window.GOVPROMPT_ACTIVE_PROMPT = guardedPrompt;
+        if (copyBtn) copyBtn.disabled = false;
+        if (downloadBtn) downloadBtn.disabled = false;
+      });
+    });
+
+    copyBtn?.addEventListener('click', async event => {
+      const gatePlan = window.GOVPROMPT_WORKFLOW_PLAN;
+      if (!gatePlan?.decisionLock || gatePlan?.workflowStatus !== 'BLOCKED_LATER_AUTHORITY_CHECK') return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      try { await navigator.clipboard.writeText(String(output.textContent || '')); } catch {}
+    }, true);
+
+    downloadBtn?.addEventListener('click', event => {
+      const gatePlan = window.GOVPROMPT_WORKFLOW_PLAN;
+      if (!gatePlan?.decisionLock || gatePlan?.workflowStatus !== 'BLOCKED_LATER_AUTHORITY_CHECK') return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const blob = new Blob([String(output.textContent || '')], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'GovPrompt-authority-gate.txt';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    }, true);
+    return true;
+  }
+
+  const api = Object.freeze({ plan, definitions: DEFINITIONS, states: WORKFLOW_STATES, transitions: TRANSITIONS, highRiskCategories: HIGH_RISK_CATEGORIES, evaluateAuthorityTransition, authorityGateId: AUTHORITY_GATE_ID, authorityTransitionInput, installAuthorityGateRuntime });
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof window !== 'undefined') window.GOVPROMPT_WORKFLOW_EXPANSION = api;
+  installAuthorityGateRuntime();
 })();
