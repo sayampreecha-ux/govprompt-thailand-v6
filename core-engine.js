@@ -1,24 +1,18 @@
 (() => {
   'use strict';
 
-  function clone(value) {
-    return JSON.parse(JSON.stringify(value));
-  }
-
+  function clone(value) { return JSON.parse(JSON.stringify(value)); }
   function freeze(value) {
     if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
     Object.values(value).forEach(freeze);
     return Object.freeze(value);
   }
-
-  function valueOr(value, fallback) {
-    return value === undefined || value === null ? fallback : value;
-  }
+  function valueOr(value, fallback) { return value === undefined || value === null ? fallback : value; }
 
   function prepare(context) {
     const source = context || {};
     return freeze({
-      version: 1,
+      version: 7,
       task: {
         query: String(valueOr(source.query, '')),
         selectedGpId: source.selectedGpId || null,
@@ -38,10 +32,13 @@
         records: clone(source.evidence?.records || []),
         requiredTypes: clone(source.evidence?.requiredTypes || [])
       },
+      legalTransition: clone(source.legalTransition || {}),
       riskFlags: clone(source.riskFlags || []),
       workflowState: String(valueOr(source.workflowState, 'idle'))
     });
   }
 
-  window.GOVPROMPT_CORE_ENGINE = Object.freeze({ prepare });
+  const api = Object.freeze({ prepare });
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  if (typeof window !== 'undefined') window.GOVPROMPT_CORE_ENGINE = api;
 })();
