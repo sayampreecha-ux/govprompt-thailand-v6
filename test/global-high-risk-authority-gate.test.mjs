@@ -76,3 +76,40 @@ test('non-high-risk categories are not blocked by the authority transition gate'
   }, qualityPass);
   assert.notEqual(result.workflowStatus, 'BLOCKED_LATER_AUTHORITY_CHECK');
 });
+
+test('infers precedent reliance from a real high-risk user question and blocks before conclusion', () => {
+  const result = workflow.plan({
+    task: { selectedGpId: 'GP005', category: 'กฎหมาย' },
+    userInputs: {
+      เรื่อง: 'สิทธิเบิกค่าเช่าซื้อบ้าน',
+      ข้อเท็จจริง: 'มีคำพิพากษาศาลปกครองสูงสุดเดิม และต่อมามีหนังสือกระทรวงมหาดไทยออกภายหลัง',
+      ข้อหารือ: 'ยังเบิกได้หรือไม่'
+    },
+    evidence: { types: ['facts', 'authority-or-source-provided', 'question-for-review'] }
+  }, qualityPass);
+  assert.equal(result.status, 'BLOCKED');
+  assert.equal(result.decisionLock, true);
+  assert.equal(result.workflowStatus, 'BLOCKED_LATER_AUTHORITY_CHECK');
+  assert.ok(result.authorityTransition.blockers.includes('later-authority-search-not-completed'));
+  assert.ok(result.authorityTransition.blockers.includes('rule-version-check-not-completed'));
+  assert.ok(result.authorityTransition.blockers.includes('contrary-evidence-check-not-completed'));
+});
+
+test('infers official-consultation precedent in finance and blocks even without explicit transition object', () => {
+  const result = workflow.plan({
+    task: { selectedGpId: 'GP019', category: 'การเงิน' },
+    userInputs: { ข้อหารือ: 'มีหนังสือหารือเดิมให้เบิกได้ ต้องใช้แนวเดิมหรือไม่' },
+    evidence: { types: ['payment-request', 'supporting-documents', 'approval-reference'] }
+  }, qualityPass);
+  assert.equal(result.decisionLock, true);
+  assert.equal(result.workflowStatus, 'BLOCKED_LATER_AUTHORITY_CHECK');
+});
+
+test('ordinary high-risk question without precedent signal is not falsely transition-blocked', () => {
+  const result = workflow.plan({
+    task: { selectedGpId: 'GP005', category: 'กฎหมาย' },
+    userInputs: { เรื่อง: 'ตรวจอำนาจตามระเบียบปัจจุบัน', ข้อหารือ: 'หน่วยงานมีอำนาจหรือไม่' },
+    evidence: { types: ['facts', 'authority-or-source-provided', 'question-for-review'] }
+  }, qualityPass);
+  assert.notEqual(result.workflowStatus, 'BLOCKED_LATER_AUTHORITY_CHECK');
+});
