@@ -1,0 +1,17 @@
+{
+  "version": "7.1",
+  "enabled": true,
+  "mode": "hard-gate",
+  "appliesTo": ["legal", "finance", "procurement", "budget", "human-resources", "benefits", "authority"],
+  "blockedStatus": "BLOCKED_LATER_AUTHORITY_CHECK",
+  "requirements": [
+    "precedent-fact-date",
+    "current-fact-date",
+    "intervening-authority-search",
+    "event-time-rule-version",
+    "current-rule-version",
+    "transition-effect-resolution",
+    "contrary-evidence-check"
+  ],
+  "forbidDecisiveStatesWhileBlocked": ["VERIFIED", "HIGH_MATCH", "PASS"]
+}
