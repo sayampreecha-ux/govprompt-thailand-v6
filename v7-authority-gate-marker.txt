@@ -1,0 +1,1 @@
+GovPrompt v7 authority transition gate integration marker.
