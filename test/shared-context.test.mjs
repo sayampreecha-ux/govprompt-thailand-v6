@@ -16,12 +16,22 @@ function plain(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+const defaultLegalTransition = {
+  precedentReliedOn: false,
+  precedentFactDate: null,
+  currentFactDate: null,
+  laterAuthoritySearchCompleted: false,
+  ruleVersionCheckCompleted: false,
+  contraryEvidenceCheckCompleted: false,
+  laterAuthorities: []
+};
+
 test('starts with immutable v7 state including legal transition state', () => {
   const snapshot = contextApi().get();
   assert.equal(snapshot.version, 7);
   assert.equal(snapshot.query, '');
   assert.equal(snapshot.selectedGpId, null);
-  assert.deepEqual(plain(snapshot.legalTransition), {});
+  assert.deepEqual(plain(snapshot.legalTransition), defaultLegalTransition);
   assert.equal(snapshot.workflowState, 'idle');
   assert.equal(Object.isFrozen(snapshot), true);
   assert.equal(Object.isFrozen(snapshot.legalTransition), true);
@@ -53,7 +63,7 @@ test('allows explicit transition updates and reset', () => {
   api.setLegalTransition({ precedentReliedOn: true, precedentFactDate: '2017-01-01', currentFactDate: '2026-09-08' });
   assert.equal(api.get().legalTransition.precedentFactDate, '2017-01-01');
   api.reset();
-  assert.deepEqual(plain(api.get().legalTransition), {});
+  assert.deepEqual(plain(api.get().legalTransition), defaultLegalTransition);
   assert.equal(api.get().workflowState, 'idle');
 });
 
