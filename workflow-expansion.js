@@ -15,10 +15,18 @@
 
   const HIGH_RISK_CATEGORIES = Object.freeze(new Set([
     'กฎหมาย', 'การเงิน', 'การคลัง', 'พัสดุ', 'บุคคล', 'งบประมาณ', 'สภาท้องถิ่น',
-    'legal', 'finance', 'procurement', 'personnel', 'budget', 'council'
+    'legal', 'finance', 'treasury', 'procurement', 'personnel', 'budget', 'council'
   ]));
   const AUTHORITY_GATE_ID = 'global-high-risk-authority-transition';
-  const PRECEDENT_PATTERN = /(คำพิพากษา|ศาลปกครอง|ฎีกา|คำวินิจฉัย|หนังสือหารือ|ตอบข้อหารือ|แนววินิจฉัย|แนวปฏิบัติเดิม|precedent|case law|ruling|opinion)/i;
+  const ACCURACY_GATE_ID = 'global-high-risk-accuracy';
+  const PRECEDENT_PATTERN = /(คำพิพากษา|ศาลปกครอง|ฎีกา|คำวินิจฉัย|หนังสือหารือ|ตอบข้อหารือ|แนววินิจฉัย|แนวปฏิบัติเดิม|บรรทัดฐาน|แนวเดิม|แนวคำตอบเดิม|เคสเดิม|กรณีเดิม|เคยตอบ|เคยวินิจฉัย|เคยมีหนังสือ|เคยเบิกได้|เคยอนุมัติ|เมื่อก่อน.*(?:ได้|ไม่ได้|ให้|ไม่ให้)|แต่เดิม.*(?:ได้|ไม่ได้|ให้|ไม่ให้)|เดิม.*(?:ให้|ไม่ให้|เบิก|อนุมัติ)|ยังใช้.*(?:แนว|หลัก|คำตอบ).*เดิม|precedent|case law|prior case|prior ruling|previous guidance|ruling|opinion)/i;
+  const HIGH_RISK_ACCURACY_RULES = Object.freeze([
+    'ห้ามสร้างหรือเดาเลขหนังสือ วันที่ เลขคำพิพากษา เลขข้อกฎหมาย ชื่อเอกสาร หรือข้อความอ้างอิงที่ตรวจยืนยันไม่ได้',
+    'ใช้หลักฐานราชการ/แหล่งต้นฉบับที่มีอำนาจสูงสุดก่อนแหล่งสรุปหรือบทความ และเปิดตรวจเนื้อหาจริงเมื่อเครื่องมือรองรับ',
+    'ตรวจว่ากฎหมาย ระเบียบ หนังสือ หรือแนววินิจฉัยฉบับที่อ้างใช้บังคับกับวันที่เกิดเหตุและประเภทบุคคล/หน่วยงานของเคสจริง',
+    'ก่อนฟันธงให้ค้นและพิจารณาหลักฐานที่อาจให้ผลตรงข้าม รวมถึงฉบับแก้ไข ยกเลิก หนังสือภายหลัง ข้อยกเว้น และข้อเท็จจริงที่แตกต่าง',
+    'ถ้าหลักฐานสำคัญยังเปิดตรวจหรือยืนยันไม่ได้ ให้ระบุว่ายังยืนยันไม่ได้/UNVERIFIED และห้ามคาดเดาหรือฟันธง'
+  ]);
 
   const DEFINITIONS = Object.freeze([
     Object.freeze({
@@ -73,6 +81,23 @@
   }
 
   function text(value) { return String(value ?? '').trim(); }
+  function list(value) {
+    if (Array.isArray(value)) return value.flatMap(list);
+    if (value == null || value === '') return [];
+    if (typeof value === 'object') return Object.values(value).flatMap(list);
+    return [text(value)].filter(Boolean);
+  }
+  function categoryValues(envelope = {}) {
+    return [...new Set([
+      ...list(envelope?.task?.category), ...list(envelope?.task?.categories),
+      ...list(envelope?.task?.domain), ...list(envelope?.task?.domains),
+      ...list(envelope?.category), ...list(envelope?.categories),
+      ...list(envelope?.domain), ...list(envelope?.domains)
+    ].map(value => value.toLowerCase()))];
+  }
+  function isHighRiskEnvelope(envelope = {}) {
+    return categoryValues(envelope).some(category => HIGH_RISK_CATEGORIES.has(category));
+  }
   function dateValue(value) { const s = text(value); if (!s) return null; const d = new Date(s); return Number.isNaN(d.getTime()) ? null : d; }
   function localTransitionEvaluate(input = {}) {
     if (input.precedentReliedOn !== true) return freeze({ pass: true, status: 'NOT_APPLICABLE', decisionLock: false, blockers: [] });
@@ -91,7 +116,6 @@
     return freeze({ pass: blockers.length === 0, status: blockers.length ? 'BLOCKED_LATER_AUTHORITY_CHECK' : 'PASS', decisionLock: blockers.length > 0, blockers });
   }
 
-  function categoryOf(envelope = {}) { return text(envelope?.task?.category || envelope?.category || envelope?.domain); }
   function joinedEnvelopeText(envelope = {}) {
     return [
       envelope?.task?.query,
@@ -105,7 +129,7 @@
   function authorityTransitionInput(envelope = {}) {
     const explicit = explicitAuthorityTransition(envelope);
     if (explicit && Object.keys(explicit).length) return explicit;
-    if (!HIGH_RISK_CATEGORIES.has(categoryOf(envelope))) return {};
+    if (!isHighRiskEnvelope(envelope)) return {};
     if (!PRECEDENT_PATTERN.test(joinedEnvelopeText(envelope))) return {};
     return {
       precedentReliedOn: true,
@@ -120,13 +144,17 @@
   }
   function isHighRiskAuthorityCase(envelope = {}) {
     const input = authorityTransitionInput(envelope);
-    return input.precedentReliedOn === true && HIGH_RISK_CATEGORIES.has(categoryOf(envelope));
+    return input.precedentReliedOn === true && isHighRiskEnvelope(envelope);
   }
   function evaluateAuthorityTransition(envelope = {}) {
     if (!isHighRiskAuthorityCase(envelope)) return freeze({ applicable: false, pass: true, status: 'NOT_APPLICABLE', blockers: [] });
     const evaluator = typeof window !== 'undefined' && window.GOVPROMPT_LEGAL_TRANSITION_GATE?.evaluate;
     const result = typeof evaluator === 'function' ? evaluator(authorityTransitionInput(envelope)) : localTransitionEvaluate(authorityTransitionInput(envelope));
     return freeze({ applicable: true, ...result });
+  }
+  function accuracyControl(envelope = {}) {
+    const applicable = isHighRiskEnvelope(envelope);
+    return freeze({ applicable, gate: ACCURACY_GATE_ID, rules: applicable ? [...HIGH_RISK_ACCURACY_RULES] : [] });
   }
   function authorityBlockedPlan(envelope, result, definition) {
     const selectedGpId = envelope?.task?.selectedGpId || null;
@@ -140,13 +168,17 @@
       availableTransitions: [],
       requiredEvidence: [],
       missingInformation: blockers.map(item => `authority-transition:${item}`),
-      riskGates: [{ gate: AUTHORITY_GATE_ID, triggered: true, blockers }],
-      riskFlags: [AUTHORITY_GATE_ID],
+      riskGates: [
+        { gate: ACCURACY_GATE_ID, triggered: true, blockers: [] },
+        { gate: AUTHORITY_GATE_ID, triggered: true, blockers }
+      ],
+      riskFlags: [ACCURACY_GATE_ID, AUTHORITY_GATE_ID],
       requiresHumanReview: true,
       decisionLock: true,
       qualityStatus: 'UNVERIFIED',
       workflowStatus: 'BLOCKED_LATER_AUTHORITY_CHECK',
       nextAction: 'EXECUTE_LATER_AUTHORITY_TRANSITION_CHECK',
+      highRiskAccuracy: accuracyControl(envelope),
       authorityTransition: result,
       deliverable: { type: definition?.deliverable || null, state: 'BLOCKED' },
       handoff: { allowedTargets: definition ? [...definition.handoffTargets] : [], requiresHumanDecision: true }
@@ -156,6 +188,7 @@
   function plan(envelope, qualityResult) {
     const selectedGpId = envelope?.task?.selectedGpId || null;
     const definition = definitionFor(selectedGpId);
+    const highRiskAccuracy = accuracyControl(envelope || {});
     const authorityTransition = evaluateAuthorityTransition(envelope || {});
     if (authorityTransition.applicable && !authorityTransition.pass) return authorityBlockedPlan(envelope || {}, authorityTransition, definition);
 
@@ -168,9 +201,13 @@
         states: [...WORKFLOW_STATES],
         requiredEvidence: [],
         missingInformation: [],
-        riskGates: authorityTransition.applicable ? [{ gate: AUTHORITY_GATE_ID, triggered: false, blockers: [] }] : [],
+        riskGates: [
+          ...(highRiskAccuracy.applicable ? [{ gate: ACCURACY_GATE_ID, triggered: true, blockers: [] }] : []),
+          ...(authorityTransition.applicable ? [{ gate: AUTHORITY_GATE_ID, triggered: false, blockers: [] }] : [])
+        ],
         requiresHumanReview: true,
         decisionLock: false,
+        highRiskAccuracy,
         authorityTransition,
         deliverable: { type: null, state: 'NOT_READY' },
         handoff: { allowedTargets: [], requiresHumanDecision: true }
@@ -188,6 +225,7 @@
     const deliverableState = status === 'READY_FOR_REVIEW' ? 'READY_FOR_HUMAN_REVIEW' : status === 'BLOCKED' ? 'BLOCKED' : 'NOT_READY';
     const currentState = stateFor(status);
     const riskGates = definition.riskGates.map(gate => ({ gate, triggered: riskFlags.includes(gate) }));
+    if (highRiskAccuracy.applicable) riskGates.unshift({ gate: ACCURACY_GATE_ID, triggered: true, blockers: [] });
     if (authorityTransition.applicable) riskGates.unshift({ gate: AUTHORITY_GATE_ID, triggered: false, blockers: [] });
 
     return freeze({
@@ -203,6 +241,7 @@
       riskFlags,
       requiresHumanReview: true,
       decisionLock: false,
+      highRiskAccuracy,
       authorityTransition,
       deliverable: { type: definition.deliverable, state: deliverableState },
       handoff: { allowedTargets: [...definition.handoffTargets], requiresHumanDecision: true }
@@ -221,6 +260,14 @@
     })[blocker] || blocker;
   }
 
+  function accuracyGuardText() {
+    return `\n\nGLOBAL HIGH-RISK ACCURACY RULES — บังคับใช้กับงานเสี่ยงสูง\n${HIGH_RISK_ACCURACY_RULES.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n- หาก AI มี Web Search/เครื่องมือค้นข้อมูล ให้ค้นและเปิดหลักฐานเองทันที ห้ามเพียงแนะนำให้ผู้ใช้ไปค้น\n- SEARCH FOR THE CASE, NOT JUST THE WORDS; “ค้นข้อความไม่พบ” ไม่เท่ากับ “ไม่มีเอกสาร”\n- คำตอบต้องแยกให้ชัดว่าอะไรคือข้อเท็จจริง อะไรคือหลักฐาน อะไรคือการวิเคราะห์ และอะไรคือข้อสรุป`;
+  }
+  function transitionGuardText(gatePlan) {
+    const blockers = gatePlan?.authorityTransition?.blockers || [];
+    return `\n\nGLOBAL HIGH-RISK AUTHORITY GATE — บังคับใช้ก่อนฟันธง\nสถานะ: BLOCKED_LATER_AUTHORITY_CHECK\nห้ามสรุปสิทธิ อำนาจ ความชอบด้วยกฎหมาย หรืออนุมัติ/ไม่อนุมัติจาก precedent เดิมเพียงอย่างเดียว\n\nต้องดำเนินการต่อให้ครบ:\n${blockers.map((item, index) => `${index + 1}. ${blockerThai(item)}`).join('\n')}\n\nวิธีทำงานที่บังคับ:\n- แยกวันที่ข้อเท็จจริงของ precedent ออกจากวันที่มีคำพิพากษาหรือหนังสือ\n- ตรวจหลักเกณฑ์ที่ออกภายหลังทั้งหมดจนถึงวันที่เกิดกรณีปัจจุบัน และตรวจสถานะปัจจุบันอีกครั้ง\n- วิเคราะห์ผลของหลักเกณฑ์ภายหลังต่อ precedent เดิมทีละฉบับ\n- ตรวจ contrary evidence ก่อนสรุป\n- หากยังตรวจไม่ครบ ให้รายงานว่า UNVERIFIED และห้ามฟันธง\n- เมื่อครบแล้วจึง Answer First พร้อมฐานอำนาจ แหล่งอ้างอิง และเหตุผลการปรับใช้`;
+  }
+
   function installAuthorityGateRuntime() {
     if (typeof document === 'undefined') return false;
     const form = document.getElementById('promptForm');
@@ -233,10 +280,12 @@
     form.addEventListener('submit', () => {
       queueMicrotask(() => {
         const gatePlan = typeof window !== 'undefined' ? window.GOVPROMPT_WORKFLOW_PLAN : null;
-        if (!gatePlan?.decisionLock || gatePlan?.workflowStatus !== 'BLOCKED_LATER_AUTHORITY_CHECK') return;
-        const blockers = gatePlan?.authorityTransition?.blockers || [];
+        if (!gatePlan?.highRiskAccuracy?.applicable) return;
         const currentPrompt = String(output.textContent || '').trim();
-        const guard = `\n\nGLOBAL HIGH-RISK AUTHORITY GATE — บังคับใช้ก่อนฟันธง\nสถานะ: BLOCKED_LATER_AUTHORITY_CHECK\nห้ามสรุปสิทธิ อำนาจ ความชอบด้วยกฎหมาย หรืออนุมัติ/ไม่อนุมัติจาก precedent เดิมเพียงอย่างเดียว\n\nต้องดำเนินการต่อให้ครบ:\n${blockers.map((item, index) => `${index + 1}. ${blockerThai(item)}`).join('\n')}\n\nวิธีทำงานที่บังคับ:\n- ค้นและเปิดหลักฐานราชการ/ต้นฉบับที่เกี่ยวข้องเอง หาก AI มี Web Search หรือเครื่องมือค้นข้อมูล\n- SEARCH FOR THE CASE, NOT JUST THE WORDS; ค้นไม่พบข้อความตรงตัวไม่เท่ากับไม่มีเอกสาร\n- แยกวันที่ข้อเท็จจริงของ precedent ออกจากวันที่มีคำพิพากษาหรือหนังสือ\n- ตรวจหลักเกณฑ์ที่ออกภายหลังทั้งหมดจนถึงวันที่เกิดกรณีปัจจุบัน และตรวจสถานะปัจจุบันอีกครั้ง\n- วิเคราะห์ผลของหลักเกณฑ์ภายหลังต่อ precedent เดิมทีละฉบับ\n- ตรวจ contrary evidence ก่อนสรุป\n- หากยังตรวจไม่ครบ ให้รายงานว่า UNVERIFIED และห้ามฟันธง\n- เมื่อครบแล้วจึง Answer First พร้อมฐานอำนาจ แหล่งอ้างอิง และเหตุผลการปรับใช้`;
+        let guard = '';
+        if (!currentPrompt.includes('GLOBAL HIGH-RISK ACCURACY RULES —')) guard += accuracyGuardText();
+        if (gatePlan?.decisionLock && gatePlan?.workflowStatus === 'BLOCKED_LATER_AUTHORITY_CHECK' && !currentPrompt.includes('GLOBAL HIGH-RISK AUTHORITY GATE —')) guard += transitionGuardText(gatePlan);
+        if (!guard) return;
         const guardedPrompt = `${currentPrompt}${guard}`.trim();
         output.textContent = guardedPrompt;
         output.classList.remove('empty-result');
@@ -248,7 +297,7 @@
 
     copyBtn?.addEventListener('click', async event => {
       const gatePlan = window.GOVPROMPT_WORKFLOW_PLAN;
-      if (!gatePlan?.decisionLock || gatePlan?.workflowStatus !== 'BLOCKED_LATER_AUTHORITY_CHECK') return;
+      if (!gatePlan?.highRiskAccuracy?.applicable) return;
       event.preventDefault();
       event.stopImmediatePropagation();
       try { await navigator.clipboard.writeText(String(output.textContent || '')); } catch {}
@@ -256,21 +305,26 @@
 
     downloadBtn?.addEventListener('click', event => {
       const gatePlan = window.GOVPROMPT_WORKFLOW_PLAN;
-      if (!gatePlan?.decisionLock || gatePlan?.workflowStatus !== 'BLOCKED_LATER_AUTHORITY_CHECK') return;
+      if (!gatePlan?.highRiskAccuracy?.applicable) return;
       event.preventDefault();
       event.stopImmediatePropagation();
       const blob = new Blob([String(output.textContent || '')], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = 'GovPrompt-authority-gate.txt';
+      anchor.download = gatePlan?.decisionLock ? 'GovPrompt-authority-gate.txt' : 'GovPrompt-high-risk-accuracy.txt';
       anchor.click();
       URL.revokeObjectURL(url);
     }, true);
     return true;
   }
 
-  const api = Object.freeze({ plan, definitions: DEFINITIONS, states: WORKFLOW_STATES, transitions: TRANSITIONS, highRiskCategories: HIGH_RISK_CATEGORIES, evaluateAuthorityTransition, authorityGateId: AUTHORITY_GATE_ID, authorityTransitionInput, installAuthorityGateRuntime });
+  const api = Object.freeze({
+    plan, definitions: DEFINITIONS, states: WORKFLOW_STATES, transitions: TRANSITIONS,
+    highRiskCategories: HIGH_RISK_CATEGORIES, highRiskAccuracyRules: HIGH_RISK_ACCURACY_RULES,
+    evaluateAuthorityTransition, authorityGateId: AUTHORITY_GATE_ID, accuracyGateId: ACCURACY_GATE_ID,
+    authorityTransitionInput, categoryValues, isHighRiskEnvelope, accuracyControl, installAuthorityGateRuntime
+  });
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof window !== 'undefined') window.GOVPROMPT_WORKFLOW_EXPANSION = api;
   installAuthorityGateRuntime();
