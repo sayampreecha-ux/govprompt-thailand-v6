@@ -1,0 +1,1 @@
+GovPrompt v7.1 legal authority transition gate implementation complete on this branch pending merge.
