@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GP Work Tracking live tasks and milestones pilot">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GP Work Tracking · งานย่อยและ Milestone</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--yellow:#9a6700}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;gap:12px;align-items:center}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1180px;margin:auto;padding:28px 16px 70px}.hero h1{margin:4px 0;font-size:clamp(28px,5vw,44px)}.hero p,.muted{color:var(--muted)}.status{margin:14px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}.status.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.card h2{margin:0 0 12px}.field{display:block;font-weight:700;margin:10px 0}.field input,.field select{display:block;width:100%;margin-top:5px;border:1px solid #c8d5e3;border-radius:10px;padding:10px 11px;background:#fff;font:inherit}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.btn.secondary{background:#eef4fa;color:var(--navy)}.btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap}.task-list{display:grid;gap:8px;max-height:520px;overflow:auto}.task{border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff;cursor:pointer}.task.active{outline:2px solid #9ec8f3}.task strong{display:block}.tag{display:inline-block;border-radius:999px;padding:3px 8px;background:#eef4fa;color:var(--navy);font-size:11px;font-weight:800;margin:5px 5px 0 0}.tag.urgent{background:#feeceb;color:var(--red)}.tag.high{background:#fff4dc;color:var(--yellow)}.hidden{display:none!important}@media(max-width:850px){.grid,.two{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Tasks / Milestones</strong><div><a href="work-dashboard-live-pilot.html">Dashboard</a> · <a href="work-operations-live-pilot.html">โครงการ</a> · <a href="work-command-center-pilot.html">Command Center</a> · <a href="../">GP หลัก</a></div></header>
+<main class="wrap">
+  <section class="hero"><div class="muted">LIVE SUPABASE · RPC WRITES · RLS READS · AUDIT</div><h1>งานย่อยและ Milestone</h1><p>แตกโครงการเป็นงานที่ติดตามได้จริง กำหนดวันสำคัญ ความเร่งด่วน และสถานะ โดยใช้สิทธิองค์กร/กองเดียวกับ Work Tracking</p></section>
+  <div id="status" class="status">กำลังตรวจสิทธิ...</div>
+  <div class="actions"><button id="reloadBtn" class="btn secondary" type="button">โหลดใหม่</button><button id="logoutBtn" class="btn secondary" type="button">ออกจากระบบ</button></div>
+
+  <section id="workspace" class="hidden">
+    <div class="grid">
+      <article id="createCard" class="card">
+        <h2>➕ สร้างงานย่อย</h2>
+        <label class="field">โครงการ<select id="projectSelect"></select></label>
+        <label class="field">ชื่องาน / Milestone<input id="taskTitle" placeholder="เช่น ส่งมอบงวดที่ 1 / ตรวจงานชั้นพื้นทาง"></label>
+        <div class="two">
+          <label class="field">ความสำคัญ<select id="taskPriority"><option value="NORMAL">ปกติ</option><option value="LOW">ต่ำ</option><option value="HIGH">สูง</option><option value="URGENT">เร่งด่วน</option></select></label>
+          <label class="field">กำหนดเสร็จ<input id="taskDue" type="datetime-local"></label>
+        </div>
+        <p class="muted">Pilot นี้ยังไม่เปิดรายชื่อบุคลากรใน Browser งานที่สร้างโดย ORG_ADMIN/DIRECTOR จึงเริ่มแบบยังไม่มอบหมาย; OFFICER จะถูกผูกเป็นผู้รับผิดชอบตนเองโดย RPC</p>
+        <button id="createBtn" class="btn" type="button">สร้าง Task ผ่าน RPC</button>
+        <div id="createStatus" class="status">ยังไม่ได้สร้างงาน</div>
+      </article>
+
+      <article class="card">
+        <h2>📋 งานย่อยที่มองเห็นตามสิทธิ</h2>
+        <div id="taskList" class="task-list"><div class="muted">กำลังโหลด...</div></div>
+      </article>
+    </div>
+
+    <div class="grid">
+      <article id="updateCard" class="card">
+        <h2>✏️ อัปเดต Task</h2>
+        <div id="selectedTask" class="muted">เลือกงานจากรายการด้านบนก่อน</div>
+        <div class="two">
+          <label class="field">สถานะ<select id="updateStatusSelect"><option value="NOT_STARTED">ยังไม่เริ่ม</option><option value="IN_PROGRESS">กำลังดำเนินการ</option><option value="WAITING_REVIEW">รอตรวจ/ทบทวน</option><option value="COMPLETED">เสร็จสิ้น</option><option value="BLOCKED">ติดปัญหา</option></select></label>
+          <label class="field">ความสำคัญ<select id="updatePriority"><option value="LOW">ต่ำ</option><option value="NORMAL">ปกติ</option><option value="HIGH">สูง</option><option value="URGENT">เร่งด่วน</option></select></label>
+        </div>
+        <label class="field">กำหนดเสร็จ<input id="updateDue" type="datetime-local"></label>
+        <button id="updateBtn" class="btn" type="button" disabled>บันทึก Task ผ่าน RPC</button>
+        <div id="updateMessage" class="status">ยังไม่ได้เลือกงาน</div>
+      </article>
+
+      <article class="card">
+        <h2>🧭 หลักการใช้งาน</h2>
+        <p>Task ที่เกินกำหนด, ติดปัญหา, หรือกำหนดเป็น <strong>URGENT</strong> จะถูกยกขึ้นใน Command Center ตามกติกา deterministic</p>
+        <p class="muted">สถานะและกำหนดเวลาที่บันทึกจะถูกเก็บในฐานจริงและมี Audit Event เมื่อข้อมูลเปลี่ยนแปลงจริงเท่านั้น</p>
+        <a class="btn secondary" href="work-command-center-pilot.html">เปิด Command Center</a>
+      </article>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+
+  const $ = (id) => document.getElementById(id);
+  let actor = null;
+  let projects = [];
+  let tasks = [];
+  let selected = null;
+
+  const requestId = () => globalThis.crypto?.randomUUID?.() || `req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const setStatus = (id, message, kind = '') => { const node=$(id); node.textContent=message; node.className=`status ${kind}`.trim(); };
+  const projectName = (id) => projects.find((p)=>p.id===id)?.name || 'โครงการ';
+  const toIso = (value) => value ? new Date(value).toISOString() : null;
+  const sameMoment = (a,b) => (a ? new Date(a).getTime() : null) === (b ? new Date(b).getTime() : null);
+  const toLocalInput = (value) => {
+    if (!value) return '';
+    const d=new Date(value);
+    const local=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+    return local.toISOString().slice(0,16);
+  };
+
+  async function requireActor() {
+    const { session, memberships } = await getPilotSessionContext();
+    if (!session) { location.href='work-login-pilot.html'; return null; }
+    const resolved=resolveWorkSession({session,memberships});
+    if(!resolved.ok){setStatus('status','บัญชีนี้ยังไม่มี Membership สำหรับ Work Tracking','error');return null;}
+    return resolved.actor;
+  }
+
+  async function loadProjects() {
+    let q=supabase.from('projects').select('id,organization_id,department_id,project_code,name').eq('organization_id',actor.organizationId).order('name');
+    if(['DIRECTOR','OFFICER'].includes(actor.role)&&actor.departmentId) q=q.eq('department_id',actor.departmentId);
+    const {data,error}=await q; if(error) throw error; projects=data||[];
+    const select=$('projectSelect'); select.replaceChildren();
+    if(!projects.length){const opt=document.createElement('option');opt.value='';opt.textContent='ยังไม่มีโครงการ';select.appendChild(opt);$('createBtn').disabled=true;return;}
+    for(const p of projects){const opt=document.createElement('option');opt.value=p.id;opt.textContent=`${p.project_code} · ${p.name}`;select.appendChild(opt);}
+  }
+
+  async function loadTasks() {
+    let q=supabase.from('tasks').select('id,organization_id,department_id,project_id,title,assigned_user_id,status,priority,due_at,completed_at,updated_at').eq('organization_id',actor.organizationId).order('due_at',{ascending:true,nullsFirst:false});
+    if(['DIRECTOR','OFFICER'].includes(actor.role)&&actor.departmentId) q=q.eq('department_id',actor.departmentId);
+    const {data,error}=await q; if(error) throw error; tasks=data||[]; renderTasks();
+  }
+
+  function renderTasks() {
+    const list=$('taskList'); list.replaceChildren();
+    if(!tasks.length){const e=document.createElement('div');e.className='muted';e.textContent='ยังไม่มีงานย่อยในฐานข้อมูล';list.appendChild(e);return;}
+    for(const task of tasks){
+      const item=document.createElement('div'); item.className=`task${selected?.id===task.id?' active':''}`;
+      const title=document.createElement('strong'); title.textContent=task.title; item.appendChild(title);
+      const meta=document.createElement('div'); meta.className='muted'; meta.textContent=`${projectName(task.project_id)} · ${task.due_at ? new Intl.DateTimeFormat('th-TH',{dateStyle:'medium'}).format(new Date(task.due_at)) : 'ไม่กำหนดวัน'}`; item.appendChild(meta);
+      const status=document.createElement('span');status.className='tag';status.textContent=task.status;item.appendChild(status);
+      const priority=document.createElement('span');priority.className=`tag ${task.priority==='URGENT'?'urgent':task.priority==='HIGH'?'high':''}`.trim();priority.textContent=task.priority;item.appendChild(priority);
+      item.addEventListener('click',()=>selectTask(task.id)); list.appendChild(item);
+    }
+  }
+
+  function selectTask(id) {
+    selected=tasks.find((task)=>task.id===id)||null; renderTasks();
+    if(!selected)return;
+    $('selectedTask').textContent=`${projectName(selected.project_id)} · ${selected.title}`;
+    $('updateStatusSelect').value=selected.status;
+    $('updatePriority').value=selected.priority;
+    $('updateDue').value=toLocalInput(selected.due_at);
+    const canUpdate=actor.role==='ORG_ADMIN'||actor.role==='DIRECTOR'||(actor.role==='OFFICER'&&selected.assigned_user_id===actor.userId);
+    $('updateBtn').disabled=!canUpdate;
+    setStatus('updateMessage',canUpdate?'พร้อมอัปเดต':'Role นี้อ่านได้ แต่ไม่มีสิทธิอัปเดต Task ที่เลือก',canUpdate?'':'error');
+  }
+
+  async function createTask() {
+    const projectId=$('projectSelect').value;
+    const title=$('taskTitle').value.trim();
+    if(!projectId||!title){setStatus('createStatus','เลือกโครงการและกรอกชื่องาน','error');return;}
+    $('createBtn').disabled=true; setStatus('createStatus','กำลังสร้าง Task...');
+    const {error}=await supabase.rpc('create_task',{
+      p_project_id:projectId,
+      p_title:title,
+      p_assigned_user_id:null,
+      p_priority:$('taskPriority').value,
+      p_due_at:toIso($('taskDue').value),
+      p_request_id:requestId()
+    });
+    $('createBtn').disabled=false;
+    if(error){setStatus('createStatus',`สร้าง Task ไม่สำเร็จ: ${error.message}`,'error');return;}
+    $('taskTitle').value=''; $('taskDue').value=''; $('taskPriority').value='NORMAL';
+    setStatus('createStatus','สร้าง Task สำเร็จและบันทึก Audit แล้ว','ok');
+    await loadTasks();
+  }
+
+  async function updateTask() {
+    if(!selected)return;
+    const nextStatus=$('updateStatusSelect').value;
+    const nextPriority=$('updatePriority').value;
+    const nextDue=toIso($('updateDue').value);
+    if(nextStatus===selected.status && nextPriority===selected.priority && sameMoment(nextDue,selected.due_at)){
+      setStatus('updateMessage','ไม่มีข้อมูลเปลี่ยนแปลง จึงไม่บันทึกและไม่สร้าง Audit','ok');
+      return;
+    }
+    $('updateBtn').disabled=true; setStatus('updateMessage','กำลังอัปเดต Task...');
+    const {error}=await supabase.rpc('update_task_state',{
+      p_task_id:selected.id,
+      p_status:nextStatus,
+      p_priority:nextPriority,
+      p_due_at:nextDue,
+      p_completed_at:null,
+      p_expected_updated_at:selected.updated_at,
+      p_request_id:requestId()
+    });
+    if(error){$('updateBtn').disabled=false;setStatus('updateMessage',error.message.includes('CONFLICT_VERSION')?'ข้อมูลถูกแก้จากอีกหน้าจอแล้ว กรุณาโหลดใหม่':`อัปเดตไม่สำเร็จ: ${error.message}`,'error');return;}
+    setStatus('updateMessage','อัปเดต Task สำเร็จและบันทึก Audit แล้ว','ok');
+    const selectedId=selected.id;
+    await loadTasks();
+    selected=tasks.find((task)=>task.id===selectedId)||null;
+    if(selected)selectTask(selectedId);
+  }
+
+  async function reloadAll() {
+    await loadProjects();
+    await loadTasks();
+  }
+
+  async function init() {
+    actor=await requireActor(); if(!actor)return;
+    $('workspace').classList.remove('hidden');
+    const canCreate=['ORG_ADMIN','DIRECTOR','OFFICER'].includes(actor.role);
+    $('createCard').classList.toggle('hidden',!canCreate);
+    $('updateCard').classList.toggle('hidden',!canCreate);
+    setStatus('status',`พร้อมใช้งาน · Role: ${actor.role}`,'ok');
+    await reloadAll();
+  }
+
+  $('createBtn').addEventListener('click',()=>createTask().catch((e)=>{$('createBtn').disabled=false;setStatus('createStatus',`เกิดข้อผิดพลาด: ${e.message}`,'error');}));
+  $('updateBtn').addEventListener('click',()=>updateTask().catch((e)=>{$('updateBtn').disabled=false;setStatus('updateMessage',`เกิดข้อผิดพลาด: ${e.message}`,'error');}));
+  $('reloadBtn').addEventListener('click',()=>reloadAll().catch((e)=>setStatus('status',`โหลดไม่สำเร็จ: ${e.message}`,'error')));
+  $('logoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.href='work-login-pilot.html';});
+  window.addEventListener('focus',()=>loadTasks().catch(()=>{}));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadTasks().catch(()=>{});});
+  init().catch((e)=>setStatus('status',`เริ่มระบบไม่สำเร็จ: ${e.message}`,'error'));
+</script>
+</body>
+</html>

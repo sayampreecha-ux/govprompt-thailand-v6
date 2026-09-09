@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GP Work Tracking assignment workspace pilot">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GP Work Tracking · มอบหมายงาน</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--green:#16865c;--yellow:#9a6700}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1120px)/2));display:flex;justify-content:space-between;gap:12px;align-items:center}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1120px;margin:auto;padding:28px 16px 70px}.hero h1{margin:4px 0;font-size:clamp(28px,5vw,44px)}.hero p,.muted{color:var(--muted)}.status{margin:14px 0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}.status.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.status.warn{background:#fff9e8;color:var(--yellow);border-color:#edd9a5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.card h2{margin:0 0 12px}.field{display:block;font-weight:700;margin:10px 0}.field select{display:block;width:100%;margin-top:5px;border:1px solid #c8d5e3;border-radius:10px;padding:10px 11px;background:#fff;font:inherit}.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.btn.secondary{background:#eef4fa;color:var(--navy)}.btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap}.summary{border:1px solid var(--line);border-radius:11px;padding:11px;margin:10px 0;background:#fbfdff}.summary strong{display:block}.hidden{display:none!important}@media(max-width:800px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · Assignment</strong><div><a href="work-members-live-pilot.html">สมาชิก</a> · <a href="work-operations-live-pilot.html">โครงการ</a> · <a href="work-tasks-live-pilot.html">Tasks</a> · <a href="work-command-center-pilot.html">Command Center</a> · <a href="../">GP หลัก</a></div></header>
+<main class="wrap">
+  <section class="hero"><div class="muted">ROLE-BASED ASSIGNMENT · MINIMAL DIRECTORY · RPC + AUDIT</div><h1>มอบหมายเจ้าของงาน</h1><p>ORG_ADMIN และ DIRECTOR สามารถมอบหมายโครงการ/Task ให้ DIRECTOR หรือ OFFICER ในกองเดียวกัน โดย Browser ไม่ต้องอ่านรายชื่ออีเมลจาก Auth</p></section>
+  <div id="status" class="status">กำลังตรวจสิทธิ...</div>
+  <div class="actions"><button id="reloadBtn" class="btn secondary" type="button">โหลดใหม่</button><a class="btn secondary" href="work-members-live-pilot.html">จัดการสมาชิก/Invite</a><button id="logoutBtn" class="btn secondary" type="button">ออกจากระบบ</button></div>
+
+  <section id="workspace" class="hidden">
+    <div class="grid">
+      <article class="card">
+        <h2>📁 มอบหมายเจ้าของโครงการ</h2>
+        <label class="field">โครงการ<select id="projectSelect"></select></label>
+        <div id="projectSummary" class="summary muted">เลือกโครงการก่อน</div>
+        <label class="field">ผู้รับผิดชอบ<select id="projectOwnerSelect"></select></label>
+        <button id="assignProjectBtn" class="btn" type="button" disabled>มอบหมายโครงการ</button>
+        <div id="projectAssignStatus" class="status">ยังไม่ได้มอบหมาย</div>
+      </article>
+
+      <article class="card">
+        <h2>✅ มอบหมาย Task / Milestone</h2>
+        <label class="field">Task<select id="taskSelect"></select></label>
+        <div id="taskSummary" class="summary muted">เลือก Task ก่อน</div>
+        <label class="field">ผู้รับผิดชอบ<select id="taskAssigneeSelect"></select></label>
+        <button id="assignTaskBtn" class="btn" type="button" disabled>มอบหมาย Task</button>
+        <div id="taskAssignStatus" class="status">ยังไม่ได้มอบหมาย</div>
+      </article>
+    </div>
+
+    <article class="card" style="margin-top:16px">
+      <h2>🔐 หลักการมอบหมาย</h2>
+      <p class="muted">Directory คืนเฉพาะ user id ที่ระบบต้องใช้, ชื่อแสดงผล, Role และกอง/หน่วย ไม่คืนอีเมล การเปลี่ยนผู้รับผิดชอบผ่าน <code>assign_project</code> / <code>assign_task</code> และสร้าง Audit Event ทุกครั้งที่สำเร็จ</p>
+    </article>
+  </section>
+</main>
+
+<script type="module">
+  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+
+  const $=(id)=>document.getElementById(id);
+  let actor=null;
+  let projects=[];
+  let tasks=[];
+  const directoryCache=new Map();
+  const setStatus=(id,message,kind='')=>{const node=$(id);node.textContent=message;node.className=`status ${kind}`.trim();};
+  const requestId=()=>globalThis.crypto?.randomUUID?.()||`req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  async function requireActor(){
+    const {session,memberships}=await getPilotSessionContext();
+    if(!session){location.href='work-login-pilot.html';return null;}
+    const resolved=resolveWorkSession({session,memberships});
+    if(!resolved.ok){setStatus('status','บัญชีนี้ยังไม่มี Membership สำหรับ Work Tracking','error');return null;}
+    if(!['ORG_ADMIN','DIRECTOR'].includes(resolved.actor.role)){
+      setStatus('status','Role นี้ไม่มีสิทธิมอบหมายงาน หน้า Dashboard/Task ยังใช้งานตามสิทธิเดิมได้','error');
+      return null;
+    }
+    return resolved.actor;
+  }
+
+  async function getDirectory(departmentId){
+    if(directoryCache.has(departmentId))return directoryCache.get(departmentId);
+    const {data,error}=await supabase.rpc('list_assignable_work_members',{p_organization_id:actor.organizationId,p_department_id:departmentId});
+    if(error)throw error;
+    const members=data||[];directoryCache.set(departmentId,members);return members;
+  }
+
+  function fillMemberSelect(select,members,currentUserId){
+    select.replaceChildren();
+    if(!members.length){
+      const opt=document.createElement('option');opt.value='';opt.textContent='ยังไม่มี DIRECTOR/OFFICER ในกองนี้';select.appendChild(opt);return false;
+    }
+    const blank=document.createElement('option');blank.value='';blank.textContent='— เลือกผู้รับผิดชอบ —';select.appendChild(blank);
+    for(const member of members){
+      const opt=document.createElement('option');opt.value=member.user_id;opt.textContent=`${member.display_name} · ${member.role}`;select.appendChild(opt);
+    }
+    if(currentUserId&&members.some((m)=>m.user_id===currentUserId))select.value=currentUserId;
+    return true;
+  }
+
+  async function loadProjects(){
+    let q=supabase.from('projects').select('id,organization_id,department_id,project_code,name,owner_user_id,status,updated_at').eq('organization_id',actor.organizationId).order('name');
+    if(actor.role==='DIRECTOR'&&actor.departmentId)q=q.eq('department_id',actor.departmentId);
+    const {data,error}=await q;if(error)throw error;projects=data||[];
+    const select=$('projectSelect');select.replaceChildren();
+    if(!projects.length){const opt=document.createElement('option');opt.value='';opt.textContent='ยังไม่มีโครงการ';select.appendChild(opt);$('assignProjectBtn').disabled=true;return;}
+    for(const p of projects){const opt=document.createElement('option');opt.value=p.id;opt.textContent=`${p.project_code} · ${p.name}`;select.appendChild(opt);}
+    await syncProject();
+  }
+
+  async function syncProject(){
+    const project=projects.find((p)=>p.id===$('projectSelect').value);
+    if(!project){$('projectSummary').textContent='เลือกโครงการก่อน';$('assignProjectBtn').disabled=true;return;}
+    $('projectSummary').replaceChildren();
+    const title=document.createElement('strong');title.textContent=project.name;
+    const meta=document.createElement('span');meta.className='muted';meta.textContent=`${project.project_code} · ${project.status} · ${project.owner_user_id?'มีผู้รับผิดชอบแล้ว':'ยังไม่มอบหมาย'}`;
+    $('projectSummary').append(title,meta);
+    const members=await getDirectory(project.department_id);
+    const available=fillMemberSelect($('projectOwnerSelect'),members,project.owner_user_id);
+    $('assignProjectBtn').disabled=!available||!$('projectOwnerSelect').value;
+    setStatus('projectAssignStatus',available?'เลือกผู้รับผิดชอบแล้วกดมอบหมาย':'ยังไม่มีสมาชิกที่รับมอบหมายได้ กรุณาเชิญ DIRECTOR/OFFICER ก่อน',available?'':'warn');
+  }
+
+  async function loadTasks(){
+    let q=supabase.from('tasks').select('id,organization_id,department_id,project_id,title,assigned_user_id,status,priority,updated_at').eq('organization_id',actor.organizationId).order('created_at',{ascending:false});
+    if(actor.role==='DIRECTOR'&&actor.departmentId)q=q.eq('department_id',actor.departmentId);
+    const {data,error}=await q;if(error)throw error;tasks=data||[];
+    const select=$('taskSelect');select.replaceChildren();
+    if(!tasks.length){const opt=document.createElement('option');opt.value='';opt.textContent='ยังไม่มี Task';select.appendChild(opt);$('assignTaskBtn').disabled=true;return;}
+    for(const task of tasks){const opt=document.createElement('option');opt.value=task.id;opt.textContent=task.title;select.appendChild(opt);}
+    await syncTask();
+  }
+
+  async function syncTask(){
+    const task=tasks.find((t)=>t.id===$('taskSelect').value);
+    if(!task){$('taskSummary').textContent='เลือก Task ก่อน';$('assignTaskBtn').disabled=true;return;}
+    const project=projects.find((p)=>p.id===task.project_id);
+    $('taskSummary').replaceChildren();
+    const title=document.createElement('strong');title.textContent=task.title;
+    const meta=document.createElement('span');meta.className='muted';meta.textContent=`${project?.name||'โครงการ'} · ${task.status} · ${task.priority} · ${task.assigned_user_id?'มีผู้รับผิดชอบแล้ว':'ยังไม่มอบหมาย'}`;
+    $('taskSummary').append(title,meta);
+    const members=await getDirectory(task.department_id);
+    const available=fillMemberSelect($('taskAssigneeSelect'),members,task.assigned_user_id);
+    $('assignTaskBtn').disabled=!available||!$('taskAssigneeSelect').value;
+    setStatus('taskAssignStatus',available?'เลือกผู้รับผิดชอบแล้วกดมอบหมาย':'ยังไม่มีสมาชิกที่รับมอบหมายได้ กรุณาเชิญ DIRECTOR/OFFICER ก่อน',available?'':'warn');
+  }
+
+  async function assignProject(){
+    const project=projects.find((p)=>p.id===$('projectSelect').value);
+    const ownerId=$('projectOwnerSelect').value;
+    if(!project||!ownerId)return;
+    if(project.owner_user_id===ownerId){setStatus('projectAssignStatus','ผู้รับผิดชอบคนนี้ถูกมอบหมายอยู่แล้ว จึงไม่บันทึกซ้ำ','ok');return;}
+    $('assignProjectBtn').disabled=true;setStatus('projectAssignStatus','กำลังมอบหมาย...');
+    const {error}=await supabase.rpc('assign_project',{p_project_id:project.id,p_owner_user_id:ownerId,p_expected_updated_at:project.updated_at,p_request_id:requestId()});
+    if(error){$('assignProjectBtn').disabled=false;setStatus('projectAssignStatus',error.message.includes('CONFLICT_VERSION')?'โครงการถูกแก้จากหน้าจออื่นแล้ว กรุณาโหลดใหม่':`มอบหมายไม่สำเร็จ: ${error.message}`,'error');return;}
+    setStatus('projectAssignStatus','มอบหมายโครงการสำเร็จและบันทึก Audit แล้ว','ok');
+    directoryCache.clear();await Promise.all([loadProjects(),loadTasks()]);
+  }
+
+  async function assignTask(){
+    const task=tasks.find((t)=>t.id===$('taskSelect').value);
+    const assigneeId=$('taskAssigneeSelect').value;
+    if(!task||!assigneeId)return;
+    if(task.assigned_user_id===assigneeId){setStatus('taskAssignStatus','ผู้รับผิดชอบคนนี้ถูกมอบหมายอยู่แล้ว จึงไม่บันทึกซ้ำ','ok');return;}
+    $('assignTaskBtn').disabled=true;setStatus('taskAssignStatus','กำลังมอบหมาย...');
+    const {error}=await supabase.rpc('assign_task',{p_task_id:task.id,p_assigned_user_id:assigneeId,p_expected_updated_at:task.updated_at,p_request_id:requestId()});
+    if(error){$('assignTaskBtn').disabled=false;setStatus('taskAssignStatus',error.message.includes('CONFLICT_VERSION')?'Task ถูกแก้จากหน้าจออื่นแล้ว กรุณาโหลดใหม่':`มอบหมายไม่สำเร็จ: ${error.message}`,'error');return;}
+    setStatus('taskAssignStatus','มอบหมาย Task สำเร็จและบันทึก Audit แล้ว','ok');
+    directoryCache.clear();await loadTasks();
+  }
+
+  async function reloadAll(){directoryCache.clear();await loadProjects();await loadTasks();}
+  async function init(){actor=await requireActor();if(!actor)return;$('workspace').classList.remove('hidden');setStatus('status',`พร้อมมอบหมายงาน · Role: ${actor.role}`,'ok');await reloadAll();}
+
+  $('projectSelect').addEventListener('change',()=>syncProject().catch((e)=>setStatus('projectAssignStatus',`โหลดรายชื่อไม่สำเร็จ: ${e.message}`,'error')));
+  $('taskSelect').addEventListener('change',()=>syncTask().catch((e)=>setStatus('taskAssignStatus',`โหลดรายชื่อไม่สำเร็จ: ${e.message}`,'error')));
+  $('projectOwnerSelect').addEventListener('change',()=>{$('assignProjectBtn').disabled=!$('projectOwnerSelect').value;});
+  $('taskAssigneeSelect').addEventListener('change',()=>{$('assignTaskBtn').disabled=!$('taskAssigneeSelect').value;});
+  $('assignProjectBtn').addEventListener('click',()=>assignProject().catch((e)=>{$('assignProjectBtn').disabled=false;setStatus('projectAssignStatus',`เกิดข้อผิดพลาด: ${e.message}`,'error');}));
+  $('assignTaskBtn').addEventListener('click',()=>assignTask().catch((e)=>{$('assignTaskBtn').disabled=false;setStatus('taskAssignStatus',`เกิดข้อผิดพลาด: ${e.message}`,'error');}));
+  $('reloadBtn').addEventListener('click',()=>reloadAll().catch((e)=>setStatus('status',`โหลดใหม่ไม่สำเร็จ: ${e.message}`,'error')));
+  $('logoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.href='work-login-pilot.html';});
+  init().catch((e)=>setStatus('status',`เริ่มหน้ามอบหมายไม่สำเร็จ: ${e.message}`,'error'));
+</script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GP Work Command Center live pilot">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GP Work Command Center · Live Pilot</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#17263d;background:#f5f8fc;--navy:#103b70;--blue:#176fd1;--muted:#64748b;--line:#dce6f1;--red:#b42318;--yellow:#98600c;--green:#16865c}
+    *{box-sizing:border-box}body{margin:0}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1180px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}.top strong{font-size:17px}.top nav{display:flex;gap:14px;flex-wrap:wrap}.top a{text-decoration:none;color:var(--navy);font-weight:800}.wrap{max-width:1180px;margin:auto;padding:28px 16px 60px}.eyebrow{font-size:12px;font-weight:800;color:var(--blue);letter-spacing:.06em}.hero h1{font-size:clamp(30px,5vw,50px);margin:6px 0;line-height:1.2}.hero p{color:var(--muted);margin:0;max-width:800px}.status{margin:17px 0;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:12px}.status.ok{background:#edfaf4;color:var(--green);border-color:#b9e5d2}.status.error{background:#fff0ee;color:var(--red);border-color:#f3c5bf}.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:16px 0}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}.kpi small{display:block;color:var(--muted)}.kpi strong{display:block;font-size:26px;margin-top:5px}.red{color:var(--red)}.yellow{color:var(--yellow)}.green{color:var(--green)}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.panel h2{margin:0 0 12px;font-size:20px}.queue{display:grid;gap:9px}.item{border:1px solid var(--line);border-left-width:5px;border-radius:12px;padding:12px}.item.URGENT{border-left-color:var(--red)}.item.ATTENTION{border-left-color:#e39a20}.item strong,.item span{display:block}.item span{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5}.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mini{border:1px solid var(--line);border-radius:12px;padding:12px}.mini small{display:block;color:var(--muted)}.mini strong{font-size:23px}.table{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #e8eef5;font-size:13px;vertical-align:top}th{background:#eef4fa}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800}.URGENT{background:#feeceb;color:var(--red)}.ATTENTION{background:#fff4dc;color:var(--yellow)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.btn{border:0;border-radius:9px;padding:10px 13px;background:var(--navy);color:#fff;font-weight:800;text-decoration:none;cursor:pointer;text-align:center}.btn.secondary{background:#eef4fa;color:var(--navy)}.muted{color:var(--muted);font-size:13px}.foot{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.6}
+    @media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
+    @media(max-width:700px){
+      .top{padding:12px 14px;align-items:flex-start;flex-direction:column}.top strong{font-size:15px}.top nav{gap:10px;font-size:14px}.wrap{padding:20px 12px 44px}.eyebrow{letter-spacing:.03em}.hero h1{font-size:32px}.hero p{font-size:15px}.actions{display:grid;grid-template-columns:1fr 1fr}.actions .btn{min-height:44px;display:grid;place-items:center}.actions .btn:nth-child(2){grid-column:span 1}.kpis{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:13px}.kpi strong{font-size:25px}.panel{padding:14px}.split{grid-template-columns:1fr 1fr}.table{border:0;overflow:visible}table{min-width:0;border-collapse:separate}thead{display:none}tbody,tr,td{display:block;width:100%}tr{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:#fff}td{border:0;padding:5px 0;font-size:14px;line-height:1.5}td:nth-child(1)::before{content:"ระดับ: ";font-weight:800;color:#42546c}td:nth-child(2)::before{content:"ประเภท: ";font-weight:800;color:#42546c}td:nth-child(3)::before{content:"เรื่อง: ";font-weight:800;color:#42546c}td:nth-child(4)::before{content:"เหตุผล: ";font-weight:800;color:#42546c}.badge{margin-left:4px}
+    }
+    @media(max-width:420px){.split{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}.hero h1{font-size:30px}}
+  </style>
+</head>
+<body>
+<header class="top"><strong>GovPrompt · ศูนย์สั่งการงาน</strong><nav><a href="work-dashboard-live-pilot.html">แดชบอร์ด</a><a href="work-operations-live-pilot.html">ปฏิบัติการ</a><a href="../">GP หลัก</a></nav></header>
+<main class="wrap">
+  <section class="hero"><div class="eyebrow">ศูนย์สั่งการผู้บริหาร · ฐานข้อมูลจริง · ควบคุมสิทธิ</div><h1>เรื่องที่ต้องเห็นก่อนเริ่มวัน</h1><p>รวมโครงการและงานย่อยที่ควรเร่งรัดจากฐานข้อมูลจริง ระบบจัดลำดับตามกติกาความเสี่ยงที่กำหนดไว้ และไม่เปลี่ยนสถานะงานเอง</p></section>
+  <div id="status" class="status">กำลังตรวจสิทธิและโหลดข้อมูลจริง...</div>
+  <div class="actions"><button id="reloadBtn" class="btn" type="button">โหลดใหม่</button><a class="btn secondary" href="work-dashboard-live-pilot.html">กลับแดชบอร์ด</a><button id="logoutBtn" class="btn secondary" type="button">ออกจากระบบ</button></div>
+
+  <section id="workspace" hidden>
+    <section class="kpis">
+      <article class="kpi"><small>โครงการทั้งหมด</small><strong id="projects">0</strong></article>
+      <article class="kpi red"><small>โครงการเร่งด่วน</small><strong id="urgentProjects">0</strong></article>
+      <article class="kpi"><small>งานย่อยทั้งหมด</small><strong id="tasks">0</strong></article>
+      <article class="kpi red"><small>งานย่อยเร่งด่วน</small><strong id="urgentTasks">0</strong></article>
+      <article class="kpi yellow"><small>ต้องติดตาม</small><strong id="attention">0</strong></article>
+      <article class="kpi"><small>รายการที่ต้องดำเนินการ</small><strong id="actions">0</strong></article>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>ลำดับเรื่องที่ควรดำเนินการ</h2>
+        <div id="queue" class="queue"></div>
+      </article>
+      <article class="panel">
+        <h2>ภาพรวมงาน</h2>
+        <div class="split">
+          <div class="mini"><small>ความก้าวหน้าโครงการเฉลี่ย</small><strong id="avgProgress">0%</strong></div>
+          <div class="mini"><small>โครงการเสร็จแล้ว</small><strong id="completedProjects">0</strong></div>
+          <div class="mini"><small>งานย่อยเสร็จแล้ว</small><strong id="completedTasks">0</strong></div>
+          <div class="mini"><small>งานย่อยติดปัญหา</small><strong id="blockedTasks">0</strong></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel" style="margin-top:14px">
+      <h2>รายการที่ต้องดำเนินการทั้งหมด</h2>
+      <div class="table"><table><thead><tr><th>ระดับ</th><th>ประเภท</th><th>เรื่อง</th><th>เหตุผล</th></tr></thead><tbody id="actionRows"></tbody></table></div>
+    </section>
+    <p class="foot">ศูนย์สั่งการอ่านและจัดลำดับเฉพาะข้อมูลที่ผู้ใช้มีสิทธิเห็น · ระบบไม่อนุมัติ ไม่ปิดงาน และไม่เปลี่ยนสถานะงานแทนผู้ใช้</p>
+  </section>
+</main>
+
+<script type="module">
+  import { supabase, getPilotSessionContext } from './src/work-tracking/supabase-browser.mjs';
+  import { resolveWorkSession } from './src/work-tracking/session-context.mjs';
+  import { buildCommandCenter } from './src/work-tracking/command-center.mjs';
+
+  const statusNode = document.getElementById('status');
+  const workspace = document.getElementById('workspace');
+  const queue = document.getElementById('queue');
+  const rows = document.getElementById('actionRows');
+  const set = (id, value) => { document.getElementById(id).textContent = String(value); };
+  const setStatus = (message, kind = '') => { statusNode.textContent = message; statusNode.className = `status ${kind}`.trim(); };
+  let loading = false;
+
+  function mapProject(row) {
+    return {
+      id: row.id,
+      organizationId: row.organization_id,
+      departmentId: row.department_id,
+      projectType: row.project_type,
+      name: row.name,
+      ownerUserId: row.owner_user_id,
+      location: row.location_text,
+      contractNo: row.contract_no,
+      contractor: row.contractor_name,
+      budget: Number(row.budget_amount || 0),
+      spent: Number(row.spent_amount || 0),
+      plannedProgress: Number(row.planned_progress || 0),
+      actualProgress: Number(row.actual_progress || 0),
+      startDate: row.start_date,
+      dueDate: row.due_date,
+      status: row.status,
+      problem: row.problem_summary,
+      lastUpdatedAt: row.last_updated_at,
+    };
+  }
+
+  function mapTask(row) {
+    return {
+      id: row.id,
+      organizationId: row.organization_id,
+      departmentId: row.department_id,
+      projectId: row.project_id,
+      title: row.title,
+      assignedUserId: row.assigned_user_id,
+      status: row.status,
+      priority: row.priority,
+      dueAt: row.due_at,
+      completedAt: row.completed_at,
+      lastUpdatedAt: row.updated_at,
+    };
+  }
+
+  function render(center) {
+    set('projects', center.projectSummary.counts.total);
+    set('urgentProjects', center.counts.urgentProjects);
+    set('tasks', center.taskSummary.counts.total);
+    set('urgentTasks', center.counts.urgentTasks);
+    set('attention', center.counts.attentionProjects + center.counts.attentionTasks);
+    set('actions', center.counts.totalActionItems);
+    set('avgProgress', `${center.projectSummary.averageProgress}%`);
+    set('completedProjects', center.projectSummary.counts.completed);
+    set('completedTasks', center.taskSummary.counts.completed);
+    set('blockedTasks', center.taskSummary.counts.blocked);
+
+    queue.replaceChildren();
+    if (!center.actionQueue.length) {
+      const empty = document.createElement('div');
+      empty.className = 'muted';
+      empty.textContent = 'ยังไม่มีเรื่องที่เข้าเกณฑ์เร่งด่วน/ต้องติดตาม';
+      queue.appendChild(empty);
+    }
+    center.actionQueue.slice(0, 7).forEach((item) => {
+      const article = document.createElement('article'); article.className = `item ${item.level}`;
+      const level = document.createElement('strong'); level.textContent = `${item.level === 'URGENT' ? '🔴' : '🟡'} ${item.type === 'PROJECT' ? 'โครงการ' : 'งานย่อย'} · คะแนน ${item.score}`;
+      const title = document.createElement('span'); title.textContent = item.title || item.id;
+      const reason = document.createElement('span'); reason.textContent = item.reasons.join(' / ');
+      article.append(level, title, reason); queue.append(article);
+    });
+
+    rows.replaceChildren();
+    if (!center.actionQueue.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4; td.className = 'muted'; td.textContent = 'ยังไม่มีรายการที่ต้องดำเนินการ';
+      tr.appendChild(td); rows.appendChild(tr);
+    }
+    center.actionQueue.forEach((item) => {
+      const tr = document.createElement('tr');
+      const level = document.createElement('td'); const badge = document.createElement('span'); badge.className = `badge ${item.level}`; badge.textContent = item.level === 'URGENT' ? 'เร่งด่วน' : 'ติดตาม'; level.append(badge);
+      const type = document.createElement('td'); type.textContent = item.type === 'PROJECT' ? 'โครงการ' : 'งานย่อย';
+      const title = document.createElement('td'); title.textContent = item.title || item.id;
+      const reasons = document.createElement('td'); reasons.textContent = item.reasons.join(' / ');
+      tr.append(level, type, title, reasons); rows.append(tr);
+    });
+  }
+
+  async function loadLive() {
+    if (loading) return;
+    loading = true;
+    workspace.hidden = true;
+    setStatus('กำลังตรวจสิทธิและโหลดข้อมูลจริง...');
+    try {
+      const { session, memberships } = await getPilotSessionContext();
+      if (!session) { location.href = 'work-login-pilot.html'; return; }
+      const resolved = resolveWorkSession({ session, memberships });
+      if (!resolved.ok) { setStatus('บัญชีนี้ยังไม่มีสิทธิใช้งาน Work Tracking', 'error'); return; }
+      const actor = resolved.actor;
+
+      let projectQuery = supabase.from('projects').select('id, organization_id, department_id, project_type, name, owner_user_id, location_text, contract_no, contractor_name, budget_amount, spent_amount, planned_progress, actual_progress, start_date, due_date, status, problem_summary, last_updated_at').eq('organization_id', actor.organizationId);
+      let taskQuery = supabase.from('tasks').select('id, organization_id, department_id, project_id, title, assigned_user_id, status, priority, due_at, completed_at, updated_at').eq('organization_id', actor.organizationId);
+      if (['DIRECTOR','OFFICER'].includes(actor.role) && actor.departmentId) {
+        projectQuery = projectQuery.eq('department_id', actor.departmentId);
+        taskQuery = taskQuery.eq('department_id', actor.departmentId);
+      }
+
+      const [{ data: projectRows, error: projectError }, { data: taskRows, error: taskError }] = await Promise.all([projectQuery, taskQuery]);
+      if (projectError) { setStatus(`โหลดโครงการไม่สำเร็จ: ${projectError.message}`, 'error'); return; }
+      if (taskError) { setStatus(`โหลดงานย่อยไม่สำเร็จ: ${taskError.message}`, 'error'); return; }
+
+      const projects = (projectRows || []).map(mapProject);
+      const tasks = (taskRows || []).map(mapTask);
+      const center = buildCommandCenter({ organizationId: actor.organizationId, projects, tasks, now: new Date() });
+      render(center);
+      workspace.hidden = false;
+      setStatus(`โหลดข้อมูลจริงสำเร็จ · ${projects.length} โครงการ · ${tasks.length} งานย่อย · สิทธิ: ${actor.role}`, 'ok');
+    } finally {
+      loading = false;
+    }
+  }
+
+  document.getElementById('reloadBtn').addEventListener('click', () => loadLive().catch((e) => setStatus(`โหลดไม่สำเร็จ: ${e.message}`, 'error')));
+  document.getElementById('logoutBtn').addEventListener('click', async () => { await supabase.auth.signOut(); location.href = 'work-login-pilot.html'; });
+  window.addEventListener('focus', () => loadLive().catch(() => {}));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadLive().catch(() => {}); });
+  loadLive().catch((e) => setStatus(`เริ่มศูนย์สั่งการไม่สำเร็จ: ${e.message}`, 'error'));
+</script>
+</body>
+</html>
