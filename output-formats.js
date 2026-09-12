@@ -105,4 +105,136 @@
     buildPromptBlock,
     suggestForTool
   });
+
+  const AI_DESTINATIONS = Object.freeze({
+    chatgpt: 'https://chatgpt.com/',
+    gemini: 'https://gemini.google.com/'
+  });
+
+  function legacyCopy(text) {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    area.style.pointerEvents = 'none';
+    document.body.appendChild(area);
+    area.select();
+    area.setSelectionRange?.(0, area.value.length);
+    let ok = false;
+    try { ok = Boolean(document.execCommand?.('copy')); } catch (_) { ok = false; }
+    area.remove();
+    return ok;
+  }
+
+  async function copyPrompt(text) {
+    const value = String(text || '').trim();
+    if (!value || value === 'Prompt จะแสดงที่นี่') throw new Error('ยังไม่มี Prompt พร้อมใช้');
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(value);
+        return true;
+      } catch (_) {}
+    }
+    if (legacyCopy(value)) return true;
+    throw new Error('คัดลอก Prompt ไม่สำเร็จ');
+  }
+
+  function showHandoffStatus(message, isError = false) {
+    let status = document.getElementById('aiHandoffStatus');
+    if (!status) {
+      status = document.createElement('div');
+      status.id = 'aiHandoffStatus';
+      status.setAttribute('role', 'status');
+      status.setAttribute('aria-live', 'polite');
+      status.style.marginTop = '8px';
+      status.style.fontSize = '12px';
+      status.style.fontWeight = '700';
+      const result = document.querySelector('.result');
+      result?.appendChild(status);
+    }
+    status.textContent = message;
+    status.style.color = isError ? '#b42318' : '#176fd1';
+    clearTimeout(showHandoffStatus.timer);
+    showHandoffStatus.timer = setTimeout(() => { status.textContent = ''; }, 3500);
+  }
+
+  async function copyAndOpen(destination) {
+    const url = AI_DESTINATIONS[destination];
+    const output = document.getElementById('output');
+    if (!url || !output) return;
+    let popup = null;
+    try {
+      popup = window.open('about:blank', '_blank');
+      if (popup) popup.opener = null;
+    } catch (_) { popup = null; }
+    try {
+      await copyPrompt(output.textContent);
+      if (popup && !popup.closed) {
+        try { popup.location.replace(url); }
+        catch (_) { popup.location.href = url; }
+      } else {
+        window.location.href = url;
+      }
+      showHandoffStatus('คัดลอก Prompt แล้ว — วางใน AI แล้วส่งได้เลย');
+    } catch (error) {
+      try { popup?.close?.(); } catch (_) {}
+      showHandoffStatus(error?.message || 'ส่งต่อไป AI ไม่สำเร็จ', true);
+    }
+  }
+
+  function installExternalAiHandoff() {
+    const resultHead = document.querySelector('.result-head');
+    const actionBox = resultHead?.querySelector('div');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (!resultHead || !actionBox || !copyBtn || document.getElementById('openChatGPT')) return;
+
+    actionBox.style.display = 'flex';
+    actionBox.style.flexWrap = 'wrap';
+    actionBox.style.gap = '8px';
+    actionBox.style.alignItems = 'center';
+
+    const makeButton = (id, label, destination, primary) => {
+      const button = document.createElement('button');
+      button.id = id;
+      button.type = 'button';
+      button.textContent = label;
+      button.disabled = copyBtn.disabled;
+      button.style.border = primary ? '1px solid #176fd1' : '1px solid #dce6f1';
+      button.style.background = primary ? '#176fd1' : '#fff';
+      button.style.color = primary ? '#fff' : '#103b70';
+      button.style.borderRadius = '10px';
+      button.style.padding = '8px 11px';
+      button.style.fontWeight = '800';
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        try { await copyAndOpen(destination); }
+        finally { button.disabled = copyBtn.disabled; }
+      });
+      return button;
+    };
+
+    const chatgpt = makeButton('openChatGPT', '🤖 คัดลอก + เปิด ChatGPT', 'chatgpt', true);
+    const gemini = makeButton('openGemini', '✨ คัดลอก + เปิด Gemini', 'gemini', true);
+    actionBox.insertBefore(chatgpt, copyBtn);
+    actionBox.insertBefore(gemini, copyBtn);
+
+    copyBtn.textContent = '📋 คัดลอกไปใช้กับ AI อื่น';
+    copyBtn.title = 'คัดลอก Prompt เพื่อไปวางใน AI อื่น เช่น Claude หรือ Copilot';
+    if (downloadBtn) downloadBtn.style.display = 'none';
+
+    const syncState = () => {
+      chatgpt.disabled = copyBtn.disabled;
+      gemini.disabled = copyBtn.disabled;
+    };
+    new MutationObserver(syncState).observe(copyBtn, { attributes: true, attributeFilter: ['disabled'] });
+    syncState();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', installExternalAiHandoff, { once: true });
+  } else {
+    installExternalAiHandoff();
+  }
 })();
