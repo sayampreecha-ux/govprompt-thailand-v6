@@ -238,9 +238,11 @@
     syncState();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', installExternalAiHandoff, { once: true });
-  } else {
-    installExternalAiHandoff();
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', installExternalAiHandoff, { once: true });
+    } else {
+      installExternalAiHandoff();
+    }
   }
 })();
