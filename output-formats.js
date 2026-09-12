@@ -106,6 +106,8 @@
     suggestForTool
   });
 
+  // No-API external AI handoff. Keep GovPrompt as the preparation layer,
+  // then hand the finished Prompt to the user's own ChatGPT/Gemini session.
   const AI_DESTINATIONS = Object.freeze({
     chatgpt: 'https://chatgpt.com/',
     gemini: 'https://gemini.google.com/'
@@ -163,11 +165,15 @@
     const url = AI_DESTINATIONS[destination];
     const output = document.getElementById('output');
     if (!url || !output) return;
+
+    // Reserve a new tab synchronously inside the click gesture so iPhone/iPad
+    // Safari does not block it after the asynchronous Clipboard API call.
     let popup = null;
     try {
       popup = window.open('about:blank', '_blank');
       if (popup) popup.opener = null;
     } catch (_) { popup = null; }
+
     try {
       await copyPrompt(output.textContent);
       if (popup && !popup.closed) {
@@ -232,9 +238,11 @@
     syncState();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', installExternalAiHandoff, { once: true });
-  } else {
-    installExternalAiHandoff();
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', installExternalAiHandoff, { once: true });
+    } else {
+      installExternalAiHandoff();
+    }
   }
 })();
