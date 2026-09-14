@@ -2,6 +2,7 @@
 'use strict';
 const STATUSES=Object.freeze({PASS:'PASS',NEEDS_INFO:'NEEDS_INFO',BLOCKED:'BLOCKED',REVIEW_REQUIRED:'REVIEW_REQUIRED',NOT_APPLICABLE:'NOT_APPLICABLE',MISSING_CATALOG:'MISSING_CATALOG'});
 const MINIMUM_CONFIDENCE=.3, PDPA_FIELD_PATTERN=/บัตร|เลขประจำตัว|บัญชี|สุขภาพ|biometric/i;
+const VALID_CONCLUSIONS=new Set(['ยืนยันได้','ยืนยันได้เมื่อครบเงื่อนไข','ยังยืนยันไม่ได้']);
 const clone=v=>JSON.parse(JSON.stringify(v));
 function freeze(v){if(!v||typeof v!=='object'||Object.isFrozen(v))return v;Object.values(v).forEach(freeze);return Object.freeze(v)}
 function transitionFallback(t={}){
@@ -16,6 +17,20 @@ function transitionFallback(t={}){
  if(unresolved)blockers.push('later-authority-effect-unresolved');
  return {pass:!blockers.length,status:blockers.length?'BLOCKED_LATER_AUTHORITY_CHECK':'PASS',decisionLock:!!blockers.length,blockers};
 }
+function decisionIntegrityCheck(d={}){
+ if(d.enabled!==true)return {pass:true,status:'NOT_APPLICABLE',decisionLock:false,blockers:[],conclusionLevel:d.conclusionLevel||null};
+ const blockers=[];
+ if(d.factsChecked!==true)blockers.push('material-facts-not-checked');
+ if(d.applicableAuthorityChecked!==true)blockers.push('applicable-authority-not-checked');
+ if(d.legalVersionChecked!==true)blockers.push('legal-version-not-checked');
+ if(d.ruleChainChecked!==true)blockers.push('rule-chain-not-checked');
+ if(d.counterCheckCompleted!==true)blockers.push('counter-check-not-completed');
+ if(d.primarySourceChecked!==true)blockers.push('primary-source-not-checked');
+ const unresolved=Array.isArray(d.unresolvedPotentialReversals)?d.unresolvedPotentialReversals.filter(Boolean):[];
+ if(unresolved.length)blockers.push('potential-reversal-unresolved');
+ if(!VALID_CONCLUSIONS.has(String(d.conclusionLevel||'')))blockers.push('invalid-or-missing-conclusion-level');
+ return {pass:!blockers.length,status:blockers.length?'BLOCKED_DECISION_INTEGRITY':'PASS',decisionLock:!!blockers.length,blockers,unresolvedPotentialReversals:clone(unresolved),conclusionLevel:d.conclusionLevel||null};
+}
 function evaluate(envelope){
  const source=envelope||{},inputs=source.userInputs||{},entries=Object.entries(inputs);
  const missingFields=entries.filter(([,v])=>!String(v||'').trim()).map(([f])=>f),providedFields=entries.filter(([,v])=>String(v||'').trim()).map(([f])=>f);
@@ -25,9 +40,10 @@ function evaluate(envelope){
  const pdpaFields=entries.map(([f])=>f).filter(f=>PDPA_FIELD_PATTERN.test(f)),pdpaConcerns=pdpaFields.length?['personal-data-field-present']:[],missingInformation=[];
  if(!providedFields.length)missingInformation.push('user-inputs');if(evidenceRequired&&!evidenceProvided)missingInformation.push('required-evidence');missingEvidenceTypes.forEach(type=>missingInformation.push(`required-evidence:${type}`));
  const transitionGate=globalThis.GOVPROMPT_LEGAL_TRANSITION_GATE?.evaluate?.(source.legalTransition||{})||transitionFallback(source.legalTransition||{});
+ const decisionGate=decisionIntegrityCheck(source.decisionIntegrity||{});
  let status=STATUSES.PASS;
- if(!transitionGate.pass)status=STATUSES.BLOCKED;else if(source.catalogStatus===STATUSES.MISSING_CATALOG)status=STATUSES.MISSING_CATALOG;else if(source.catalogStatus===STATUSES.NOT_APPLICABLE)status=STATUSES.NOT_APPLICABLE;else if(!hasSelection||fallback)status=STATUSES.BLOCKED;else if(missingInformation.length)status=STATUSES.NEEDS_INFO;else if(riskFlags.length||pdpaConcerns.length||confidence<MINIMUM_CONFIDENCE||unverified.length)status=STATUSES.REVIEW_REQUIRED;
- return freeze({status,decisionLock:!transitionGate.pass,checks:{completeness:{passed:providedFields.length>0&&!missingFields.length,providedFields,missingFields},requiredEvidence:{required:evidenceRequired||requiredEvidenceTypes.length>0,provided:evidenceProvided,requiredTypes:requiredEvidenceTypes,missingTypes:missingEvidenceTypes,unverifiedTypes:unverified,passed:(!evidenceRequired||evidenceProvided)&&!missingEvidenceTypes.length},missingInformation,riskFlags,confidence:{value:confidence,minimum:MINIMUM_CONFIDENCE,passed:confidence>=MINIMUM_CONFIDENCE},sourceReadiness:{ready:(evidenceProvided||!evidenceRequired)&&!missingEvidenceTypes.length,evidenceTypes:clone(source.evidence?.types||[]),verificationReady:!unverified.length},pdpaSecurity:{concerns:pdpaConcerns,requiresReview:!!pdpaConcerns.length},legalAuthorityTransition:transitionGate,workflowReadiness:{ready:status===STATUSES.PASS&&transitionGate.pass}}});
+ if(!transitionGate.pass||!decisionGate.pass)status=STATUSES.BLOCKED;else if(source.catalogStatus===STATUSES.MISSING_CATALOG)status=STATUSES.MISSING_CATALOG;else if(source.catalogStatus===STATUSES.NOT_APPLICABLE)status=STATUSES.NOT_APPLICABLE;else if(!hasSelection||fallback)status=STATUSES.BLOCKED;else if(missingInformation.length)status=STATUSES.NEEDS_INFO;else if(riskFlags.length||pdpaConcerns.length||confidence<MINIMUM_CONFIDENCE||unverified.length)status=STATUSES.REVIEW_REQUIRED;
+ return freeze({status,decisionLock:!transitionGate.pass||!decisionGate.pass,checks:{completeness:{passed:providedFields.length>0&&!missingFields.length,providedFields,missingFields},requiredEvidence:{required:evidenceRequired||requiredEvidenceTypes.length>0,provided:evidenceProvided,requiredTypes:requiredEvidenceTypes,missingTypes:missingEvidenceTypes,unverifiedTypes:unverified,passed:(!evidenceRequired||evidenceProvided)&&!missingEvidenceTypes.length},missingInformation,riskFlags,confidence:{value:confidence,minimum:MINIMUM_CONFIDENCE,passed:confidence>=MINIMUM_CONFIDENCE},sourceReadiness:{ready:(evidenceProvided||!evidenceRequired)&&!missingEvidenceTypes.length,evidenceTypes:clone(source.evidence?.types||[]),verificationReady:!unverified.length},pdpaSecurity:{concerns:pdpaConcerns,requiresReview:!!pdpaConcerns.length},legalAuthorityTransition:transitionGate,decisionIntegrity:decisionGate,workflowReadiness:{ready:status===STATUSES.PASS&&transitionGate.pass&&decisionGate.pass}}});
 }
-const api=Object.freeze({evaluate,statuses:STATUSES});if(typeof module!=='undefined'&&module.exports)module.exports=api;if(typeof window!=='undefined')window.GOVPROMPT_QUALITY_GATE=api;
+const api=Object.freeze({evaluate,statuses:STATUSES,decisionIntegrityCheck});if(typeof module!=='undefined'&&module.exports)module.exports=api;if(typeof window!=='undefined')window.GOVPROMPT_QUALITY_GATE=api;
 })();
