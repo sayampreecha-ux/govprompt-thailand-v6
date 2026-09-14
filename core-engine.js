@@ -33,6 +33,7 @@
         requiredTypes: clone(source.evidence?.requiredTypes || [])
       },
       legalTransition: clone(source.legalTransition || {}),
+      decisionIntegrity: clone(source.decisionIntegrity || {}),
       riskFlags: clone(source.riskFlags || []),
       workflowState: String(valueOr(source.workflowState, 'idle'))
     });
