@@ -3,12 +3,27 @@
 
   const WORKFLOW_STATES = new Set(['idle', 'searching', 'selected', 'collecting-input', 'generated']);
   const PRECEDENT_PATTERN = /คำพิพากษา|คำวินิจฉัย|หนังสือหารือ|ข้อหารือ|แนววินิจฉัย|แนวปฏิบัติ|บรรทัดฐาน|precedent|ศาลปกครอง|\bอ\.\s*\d+\/\d+/i;
+  const HIGH_RISK_PATTERN = /กฎหมาย|การเงิน|คลัง|พัสดุ|งบประมาณ|บุคคล|สิทธิ|อำนาจ|สภา|เบิกจ่าย|เดินทาง/i;
 
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
   function freeze(value) {
     if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
     Object.values(value).forEach(freeze);
     return Object.freeze(value);
+  }
+
+  function decisionIntegrityDefaults(enabled = false) {
+    return {
+      enabled,
+      factsChecked: !enabled,
+      applicableAuthorityChecked: !enabled,
+      legalVersionChecked: !enabled,
+      ruleChainChecked: !enabled,
+      counterCheckCompleted: !enabled,
+      primarySourceChecked: !enabled,
+      unresolvedPotentialReversals: [],
+      conclusionLevel: enabled ? null : 'ยืนยันได้'
+    };
   }
 
   function initialState() {
@@ -29,6 +44,7 @@
         contraryEvidenceCheckCompleted: false,
         laterAuthorities: []
       },
+      decisionIntegrity: decisionIntegrityDefaults(false),
       riskFlags: [],
       workflowState: 'idle'
     });
@@ -46,6 +62,7 @@
     if ('routing' in partial) next.routing = { ...next.routing, ...clone(partial.routing || {}) };
     if ('evidence' in partial) next.evidence = { ...next.evidence, ...clone(partial.evidence || {}) };
     if ('legalTransition' in partial) next.legalTransition = { ...next.legalTransition, ...clone(partial.legalTransition || {}) };
+    if ('decisionIntegrity' in partial) next.decisionIntegrity = { ...next.decisionIntegrity, ...clone(partial.decisionIntegrity || {}) };
     if ('riskFlags' in partial) next.riskFlags = [...new Set((partial.riskFlags || []).map(String))];
     if ('workflowState' in partial && WORKFLOW_STATES.has(partial.workflowState)) next.workflowState = partial.workflowState;
     state = freeze(next);
@@ -68,7 +85,7 @@
 
   function selectTool(tool) {
     const category = tool?.category || null;
-    const highRisk = /กฎหมาย|การเงิน|คลัง|พัสดุ|งบประมาณ|บุคคล|สิทธิ|อำนาจ/i.test(String(category || ''));
+    const highRisk = HIGH_RISK_PATTERN.test(String(category || '')) || HIGH_RISK_PATTERN.test(String(tool?.name || ''));
     return update({
       selectedGpId: tool?.id || null,
       category,
@@ -82,6 +99,8 @@
         contraryEvidenceCheckCompleted: !highRisk,
         laterAuthorities: []
       },
+      decisionIntegrity: decisionIntegrityDefaults(highRisk),
+      riskFlags: highRisk ? ['decision-integrity-required'] : [],
       workflowState: tool ? 'selected' : 'idle'
     });
   }
@@ -105,6 +124,7 @@
   }
 
   function setLegalTransition(values) { return update({ legalTransition: values }); }
+  function setDecisionIntegrity(values) { return update({ decisionIntegrity: values }); }
   function clearUserInputs() { return update({ userInputs: {}, workflowState: state.selectedGpId ? 'selected' : 'idle' }); }
   function setWorkflowState(workflowState) { return update({ workflowState }); }
   function reset() { state = initialState(); return get(); }
@@ -116,6 +136,7 @@
     selectTool,
     setUserInputs,
     setLegalTransition,
+    setDecisionIntegrity,
     clearUserInputs,
     setWorkflowState,
     reset
