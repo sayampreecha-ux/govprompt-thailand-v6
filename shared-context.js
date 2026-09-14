@@ -4,6 +4,7 @@
   const WORKFLOW_STATES = new Set(['idle', 'searching', 'selected', 'collecting-input', 'generated']);
   const PRECEDENT_PATTERN = /คำพิพากษา|คำวินิจฉัย|หนังสือหารือ|ข้อหารือ|แนววินิจฉัย|แนวปฏิบัติ|บรรทัดฐาน|precedent|ศาลปกครอง|\bอ\.\s*\d+\/\d+/i;
   const HIGH_RISK_PATTERN = /กฎหมาย|การเงิน|คลัง|พัสดุ|งบประมาณ|บุคคล|สิทธิ|อำนาจ|สภา|เบิกจ่าย|เดินทาง/i;
+  const CONTINUITY_EVENT_PATTERN = /ย้าย|โอน|แต่งตั้ง|บรรจุ|สอบคัดเลือก|เลื่อนระดับ|กลับเข้ารับราชการ|รายงานตัว|ต่างท้องที่|เปลี่ยนสถานะ|สิทธิเดิม|สิทธิต่อเนื่อง|ต่อเนื่อง|กลางเดือน|ช่วงเดิม|ช่วงใหม่|ก่อน.*หลัง|ภายหลัง|ต่อมา/i;
 
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
   function freeze(value) {
@@ -26,6 +27,19 @@
     };
   }
 
+  function eventContinuityDefaults(required = false) {
+    return {
+      required,
+      eventClassificationChecked: !required,
+      rightContinuityChecked: !required,
+      multipleLegalBasisChecked: !required,
+      timelineChecked: !required,
+      continuityOverrideChecked: !required,
+      finalCounterCheckCompleted: !required,
+      unresolvedContinuityIssues: []
+    };
+  }
+
   function initialState() {
     return freeze({
       version: 7,
@@ -45,6 +59,7 @@
         laterAuthorities: []
       },
       decisionIntegrity: decisionIntegrityDefaults(false),
+      eventContinuity: eventContinuityDefaults(false),
       riskFlags: [],
       workflowState: 'idle'
     });
@@ -63,6 +78,7 @@
     if ('evidence' in partial) next.evidence = { ...next.evidence, ...clone(partial.evidence || {}) };
     if ('legalTransition' in partial) next.legalTransition = { ...next.legalTransition, ...clone(partial.legalTransition || {}) };
     if ('decisionIntegrity' in partial) next.decisionIntegrity = { ...next.decisionIntegrity, ...clone(partial.decisionIntegrity || {}) };
+    if ('eventContinuity' in partial) next.eventContinuity = { ...next.eventContinuity, ...clone(partial.eventContinuity || {}) };
     if ('riskFlags' in partial) next.riskFlags = [...new Set((partial.riskFlags || []).map(String))];
     if ('workflowState' in partial && WORKFLOW_STATES.has(partial.workflowState)) next.workflowState = partial.workflowState;
     state = freeze(next);
@@ -100,6 +116,7 @@
         laterAuthorities: []
       },
       decisionIntegrity: decisionIntegrityDefaults(highRisk),
+      eventContinuity: eventContinuityDefaults(false),
       riskFlags: highRisk ? ['decision-integrity-required'] : [],
       workflowState: tool ? 'selected' : 'idle'
     });
@@ -107,8 +124,9 @@
 
   function setUserInputs(values) {
     const userInputs = clone(values || {});
-    const combined = Object.values(userInputs).map(String).join(' ');
+    const combined = [state.query, ...Object.values(userInputs)].map(String).join(' ');
     const precedentReliedOn = PRECEDENT_PATTERN.test(combined);
+    const continuityRequired = CONTINUITY_EVENT_PATTERN.test(combined) && state.decisionIntegrity?.enabled === true;
     const legalTransition = precedentReliedOn
       ? {
           precedentReliedOn: true,
@@ -120,12 +138,19 @@
           laterAuthorities: []
         }
       : state.legalTransition;
-    return update({ userInputs, legalTransition, workflowState: 'collecting-input' });
+    return update({
+      userInputs,
+      legalTransition,
+      eventContinuity: continuityRequired ? eventContinuityDefaults(true) : state.eventContinuity,
+      riskFlags: continuityRequired ? [...new Set([...(state.riskFlags || []), 'event-continuity-required'])] : state.riskFlags,
+      workflowState: 'collecting-input'
+    });
   }
 
   function setLegalTransition(values) { return update({ legalTransition: values }); }
   function setDecisionIntegrity(values) { return update({ decisionIntegrity: values }); }
-  function clearUserInputs() { return update({ userInputs: {}, workflowState: state.selectedGpId ? 'selected' : 'idle' }); }
+  function setEventContinuity(values) { return update({ eventContinuity: values }); }
+  function clearUserInputs() { return update({ userInputs: {}, eventContinuity: eventContinuityDefaults(false), workflowState: state.selectedGpId ? 'selected' : 'idle' }); }
   function setWorkflowState(workflowState) { return update({ workflowState }); }
   function reset() { state = initialState(); return get(); }
 
@@ -137,6 +162,7 @@
     setUserInputs,
     setLegalTransition,
     setDecisionIntegrity,
+    setEventContinuity,
     clearUserInputs,
     setWorkflowState,
     reset
