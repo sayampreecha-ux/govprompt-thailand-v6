@@ -2,6 +2,7 @@
 'use strict';
 const STATUSES=Object.freeze({PASS:'PASS',NEEDS_INFO:'NEEDS_INFO',BLOCKED:'BLOCKED',REVIEW_REQUIRED:'REVIEW_REQUIRED',NOT_APPLICABLE:'NOT_APPLICABLE',MISSING_CATALOG:'MISSING_CATALOG'});
 const MINIMUM_CONFIDENCE=.3, PDPA_FIELD_PATTERN=/บัตร|เลขประจำตัว|บัญชี|สุขภาพ|biometric/i;
+const HIGH_RISK_PATTERN=/กฎหมาย|การเงิน|คลัง|พัสดุ|งบประมาณ|บุคคล|สิทธิ|อำนาจ|สภา|เบิกจ่าย|เดินทาง/i;
 const VALID_CONCLUSIONS=new Set(['ยืนยันได้','ยืนยันได้เมื่อครบเงื่อนไข','ยังยืนยันไม่ได้']);
 const clone=v=>JSON.parse(JSON.stringify(v));
 function freeze(v){if(!v||typeof v!=='object'||Object.isFrozen(v))return v;Object.values(v).forEach(freeze);return Object.freeze(v)}
@@ -45,5 +46,28 @@ function evaluate(envelope){
  if(!transitionGate.pass||!decisionGate.pass)status=STATUSES.BLOCKED;else if(source.catalogStatus===STATUSES.MISSING_CATALOG)status=STATUSES.MISSING_CATALOG;else if(source.catalogStatus===STATUSES.NOT_APPLICABLE)status=STATUSES.NOT_APPLICABLE;else if(!hasSelection||fallback)status=STATUSES.BLOCKED;else if(missingInformation.length)status=STATUSES.NEEDS_INFO;else if(riskFlags.length||pdpaConcerns.length||confidence<MINIMUM_CONFIDENCE||unverified.length)status=STATUSES.REVIEW_REQUIRED;
  return freeze({status,decisionLock:!transitionGate.pass||!decisionGate.pass,checks:{completeness:{passed:providedFields.length>0&&!missingFields.length,providedFields,missingFields},requiredEvidence:{required:evidenceRequired||requiredEvidenceTypes.length>0,provided:evidenceProvided,requiredTypes:requiredEvidenceTypes,missingTypes:missingEvidenceTypes,unverifiedTypes:unverified,passed:(!evidenceRequired||evidenceProvided)&&!missingEvidenceTypes.length},missingInformation,riskFlags,confidence:{value:confidence,minimum:MINIMUM_CONFIDENCE,passed:confidence>=MINIMUM_CONFIDENCE},sourceReadiness:{ready:(evidenceProvided||!evidenceRequired)&&!missingEvidenceTypes.length,evidenceTypes:clone(source.evidence?.types||[]),verificationReady:!unverified.length},pdpaSecurity:{concerns:pdpaConcerns,requiresReview:!!pdpaConcerns.length},legalAuthorityTransition:transitionGate,decisionIntegrity:decisionGate,workflowReadiness:{ready:status===STATUSES.PASS&&transitionGate.pass&&decisionGate.pass}}});
 }
-const api=Object.freeze({evaluate,statuses:STATUSES,decisionIntegrityCheck});if(typeof module!=='undefined'&&module.exports)module.exports=api;if(typeof window!=='undefined')window.GOVPROMPT_QUALITY_GATE=api;
+function reasoningPolicy(category=''){
+ if(!HIGH_RISK_PATTERN.test(String(category||'')))return '';
+ return `\n\nมาตรฐานตรวจสอบก่อนสรุปสำหรับงานความเสี่ยงสูง\n- ใช้เฉพาะข้อเท็จจริงที่มีผลต่อคำตอบ และห้ามสมมติข้อเท็จจริงสำคัญ\n- ตรวจว่าฐานกฎหมาย/ระเบียบ/หลักเกณฑ์ใช้กับบุคคล หน่วยงาน เรื่อง และช่วงเวลาเกิดเหตุนี้จริง รวมทั้งฉบับแก้ไขและบทเฉพาะกาล โดยใช้แหล่งปฐมภูมิ/ทางการก่อน\n- ห้ามหยุดที่ข้อกฎหมายแรก ต้องตรวจนิยาม บทหลัก เงื่อนไข ข้อยกเว้น บทอ้างถึง บทต่อเนื่อง บทเฉพาะ สิทธิต่อเนื่อง เหตุระงับหรือสิ้นสุดสิทธิ หนังสือสั่งการ และแนววินิจฉัยที่อาจเปลี่ยนผล\n- ก่อนฟันธง ให้ตรวจฐานตรงข้ามเสมอ: ถ้าเบื้องต้นว่าไม่ได้ ให้หาฐานที่อาจทำให้ได้; ถ้าเบื้องต้นว่าได้ ให้หาฐานที่อาจทำให้ไม่ได้\n- ค้นไม่พบไม่เท่ากับไม่มี หากแหล่งสำคัญยังตรวจไม่ครบให้ระบุข้อจำกัด\n- สรุปได้เพียง: ยืนยันได้ / ยืนยันได้เมื่อครบเงื่อนไข / ยังยืนยันไม่ได้\n- ตอบแบบ Answer First: ข้อสรุปสั้น ระดับความแน่นอน ฐานสำคัญ เงื่อนไขที่เปลี่ยนผล และสิ่งที่ควรตรวจต่อ\n- อย่าเปิดเผยกระบวนการคิดภายในหรือรายการตรวจสอบภายในแก่ผู้ใช้; แสดงเฉพาะผลและเหตุผลที่จำเป็น`;
+}
+function installPromptPolicy(){
+ if(typeof document==='undefined')return;
+ const form=document.getElementById('promptForm'),output=document.getElementById('output');
+ if(!form||!output||form.dataset.decisionIntegrityInstalled==='1')return;
+ form.dataset.decisionIntegrityInstalled='1';
+ const original=form.onsubmit;
+ form.onsubmit=function(event){
+   const result=typeof original==='function'?original.call(this,event):undefined;
+   const category=globalThis.GOVPROMPT_CONTEXT?.get?.().category||'';
+   const policy=reasoningPolicy(category);
+   if(policy&&!output.textContent.includes('มาตรฐานตรวจสอบก่อนสรุปสำหรับงานความเสี่ยงสูง'))output.textContent+=policy;
+   return result;
+ };
+ const copy=document.getElementById('copyBtn');
+ if(copy)copy.onclick=async()=>{await navigator.clipboard.writeText(output.textContent||'');};
+ const download=document.getElementById('downloadBtn');
+ if(download)download.onclick=()=>{const b=new Blob([output.textContent||''],{type:'text/plain;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='GovPrompt-V7.txt';a.click();URL.revokeObjectURL(u);};
+}
+if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',installPromptPolicy,{once:true});
+const api=Object.freeze({evaluate,statuses:STATUSES,decisionIntegrityCheck,reasoningPolicy});if(typeof module!=='undefined'&&module.exports)module.exports=api;if(typeof window!=='undefined')window.GOVPROMPT_QUALITY_GATE=api;
 })();
