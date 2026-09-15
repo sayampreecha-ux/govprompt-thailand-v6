@@ -28,9 +28,11 @@ function submitWorkflow(gpId, category, evidenceTypes = []) {
 }
 
 test('production form submit flow wires the Batch 1 plan after Core Engine and Quality Gate', () => {
-  assert.match(indexHtml, /const workflowExpansion=window\.GOVPROMPT_WORKFLOW_EXPANSION;/);
-  assert.match(indexHtml, /const workflowPlan=workflowExpansion\?\.plan\(execution,quality\);/);
-  assert.match(indexHtml, /window\.GOVPROMPT_WORKFLOW_PLAN=workflowPlan\|\|null;/);
+  // Production intentionally groups dependency bindings in one const declaration.
+  // Assert semantic wiring rather than a particular declaration formatting style.
+  assert.match(indexHtml, /workflowExpansion=window\.GOVPROMPT_WORKFLOW_EXPANSION/);
+  assert.match(indexHtml, /const execution=coreEngine\?\.prepare\(sharedContext\?\.get\(\)\);const quality=qualityGate\?\.evaluate\(execution\)/);
+  assert.match(indexHtml, /window\.GOVPROMPT_WORKFLOW_PLAN=workflowExpansion\?\.plan\(execution,quality\)\|\|null/);
 });
 
 test('all Batch 1 production workflow paths block readiness when their evidence is absent', () => {
