@@ -22,7 +22,10 @@
     { tool:'DOMAIN_COUNCIL', pattern:/สภาท้องถิ่น|สภาอบจ|สภาเทศบาล|สภาอบต|ญัตติ|ข้อบัญญัติ|กระทู้|แปรญัตติ/i }
   ]);
 
-  function normalize(value){return String(value??'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\s+/g,' ').trim()}
+  // Thai vowels and tone marks are Unicode combining marks (\p{M}).
+  // Preserve them during normalization so intents such as "ค่า K" and "อัตรากำลัง"
+  // remain intact and can be routed by the existing V7.1 router.
+  function normalize(value){return String(value??'').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{M}\p{N}]+/gu,' ').replace(/\s+/g,' ').trim()}
   function compact(value){return normalize(value).replace(/\s/g,'')}
   function unique(values){return [...new Set(values.filter(Boolean))]}
   function queryTerms(query){
