@@ -57,8 +57,7 @@
       return;
     }
 
-    // Privacy-first progressive enhancement: never put the prompt in a URL.
-    // Copy locally first, then open the provider's real service after explicit user action.
+    // Privacy-first: prompt data is never placed in a provider URL or sent before a user click.
     const copied = await copyPrompt();
     const opened = window.open(url, '_blank', 'noopener,noreferrer');
     if (!opened) {
@@ -99,24 +98,46 @@
     media.addEventListener?.('change', applyMobile);
   }
 
+  function generateFromPrimaryEntry(q) {
+    // Existing GOVPROMPT_ROUTER remains the only router. Existing tool open + form submit
+    // remain the only prompt-generation pipeline; this adapter only drives that UI path.
+    const routed = window.GOVPROMPT_ROUTER?.route?.(q);
+    if (!routed || routed.fallback || !routed.tool?.id) return false;
+
+    const selector = `[data-open="${CSS.escape(routed.tool.id)}"]`;
+    const button = document.querySelector(selector);
+    if (!button) return false;
+    button.click();
+
+    const form = document.getElementById('promptForm');
+    if (!form) return false;
+    const first = form.querySelector('textarea[name="f0"],input[name="f0"]');
+    if (first) first.value = q;
+
+    // Dispatching the existing submit handler preserves Core V7.1, quality gates,
+    // workflow planning and generated-prompt formatting without duplicating logic.
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    document.getElementById('output')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return true;
+  }
+
   function enhancePrimaryEntry() {
     const input = document.getElementById('mainPrompt');
     const send = document.getElementById('mainSend');
     if (!input || !send || send.dataset.externalEnhanced === '1') return;
     send.dataset.externalEnhanced = '1';
 
-    // Keep the existing router/pipeline as the single source of truth.
-    // This enhancement only makes the routed tool easier to enter; it does not add a second router.
+    // The page's original click handler routes/renders first. Then this minimal adapter
+    // enters the routed tool and invokes the already-existing generation pipeline.
     send.addEventListener('click', () => {
       const q = String(input.value || '').trim();
       if (!q) return;
       window.setTimeout(() => {
-        const routed = window.GOVPROMPT_ROUTER?.route?.(q);
-        if (!routed || routed.fallback || !routed.tool?.id) return;
-        const button = document.querySelector(`[data-open="${CSS.escape(routed.tool.id)}"]`);
-        if (button) button.focus({ preventScroll: true });
+        if (!generateFromPrimaryEntry(q)) {
+          toast('เลือกผู้ช่วยที่ตรงกับงานด้านล่างเพื่อระบุรายละเอียดเพิ่มเติม');
+        }
       }, 0);
-    }, { capture: true });
+    });
   }
 
   function init() {
