@@ -1,0 +1,62 @@
+name: Apply Final UX Patch v2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-final-ux-patch-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Baseline tests
+        run: |
+          set +e
+          node --test test/*.test.mjs > /tmp/baseline.log 2>&1
+          set -e
+          grep '^# tests\|^# pass\|^# fail' /tmp/baseline.log > /tmp/baseline.summary || true
+          cat /tmp/baseline.summary
+      - name: Apply minimal index patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="external-ai-actions.js"></script>'
+          if tag not in s:
+              assert '</body>' in s
+              p.write_text(s.replace('</body>', tag+'\n</body>', 1), encoding='utf-8')
+          PY
+      - name: Verify zero regression
+        run: |
+          node --check external-ai-actions.js
+          set +e
+          node --test test/*.test.mjs > /tmp/patched.log 2>&1
+          set -e
+          grep '^# tests\|^# pass\|^# fail' /tmp/patched.log > /tmp/patched.summary || true
+          cat /tmp/patched.summary
+          diff -u /tmp/baseline.summary /tmp/patched.summary
+          test "$(grep -o 'class="work-card"' index.html | wc -l)" -eq 12
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert s.index('id="mainPrompt"') < s.index('id="workGrid"')
+          assert '<script src="external-ai-actions.js"></script>' in s
+          PY
+      - name: Commit production source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'feat(ux): load external AI action layer'
+          git push
