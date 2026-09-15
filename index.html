@@ -100,5 +100,6 @@ function routeFrom(text){const q=String(text||'').trim();if(!q){document.getElem
 document.getElementById('mainSend').onclick=()=>routeFrom(document.getElementById('mainPrompt').value);document.getElementById('mainPrompt').onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')routeFrom(e.currentTarget.value)};document.querySelectorAll('#workGrid [data-q]').forEach(b=>b.onclick=()=>{document.getElementById('mainPrompt').value=b.dataset.q;routeFrom(b.dataset.q)});document.getElementById('attachBtn').onclick=()=>document.getElementById('mainFile').click();document.getElementById('cameraBtn').onclick=()=>document.getElementById('mainFile').click();document.getElementById('micBtn').onclick=()=>toast('ใช้ไมโครโฟนของอุปกรณ์เพื่อพิมพ์ด้วยเสียงได้');document.getElementById('mainFile').onchange=e=>toast(e.target.files.length?`เลือก ${e.target.files.length} ไฟล์แล้ว`:'');function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}render();
 })();
 </script>
+<script src="external-ai-actions.js"></script>
 </body>
 </html>
