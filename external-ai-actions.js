@@ -49,6 +49,15 @@
     form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));return showResult();
   }
   function runPrimary(){const input=document.getElementById('mainPrompt'),q=String(input?.value||'').trim();if(!q){input?.focus();return}const search=document.getElementById('toolSearch');if(search){search.value=q;search.dispatchEvent(new Event('input',{bubbles:true}))}if(!submitExistingPipeline(q))toast('ยังจัดหมวดอัตโนมัติไม่ได้ — เลือกผู้ช่วยตามงานด้านล่างได้ทันที')}
-  function init(){ensureResultView();const input=document.getElementById('mainPrompt'),send=document.getElementById('mainSend');if(!input||!send)return;send.onclick=e=>{e?.preventDefault?.();runPrimary()};input.onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runPrimary()}}}
+  function init(){
+    ensureResultView();
+    /* Keep the complete GP catalog and existing category/search workflow intact; only its
+       initial presentation is hidden. Existing showTools() removes this class when a user
+       explicitly chooses a category, so no catalog, Router, Core, Gate or workflow data changes. */
+    document.getElementById('tools')?.classList.add('hidden');
+    const input=document.getElementById('mainPrompt'),send=document.getElementById('mainSend');if(!input||!send)return;
+    send.onclick=e=>{e?.preventDefault?.();runPrimary()};
+    input.onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runPrimary()}};
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
