@@ -31,4 +31,21 @@ jobs:
           node --check workflow-expansion.js
           node --check workflow-orchestration.js
       - name: Run test suite
-        run: node --test test/*.test.mjs
+        id: tests
+        shell: bash
+        run: |
+          set +e
+          node --test test/*.test.mjs 2>&1 | tee test-output.txt
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Upload test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: test-output.txt
+          retention-days: 1
+      - name: Enforce test result
+        if: steps.tests.outputs.status != '0'
+        run: exit 1
