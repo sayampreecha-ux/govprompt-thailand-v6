@@ -42,7 +42,9 @@
 
   function submitExistingPipeline(q){
     const routed=window.GOVPROMPT_ROUTER?.route?.(q);if(!routed||routed.fallback||!routed.tool?.id)return false;
-    const button=document.querySelector(`[data-open="${esc(routed.tool.id)}"]`);if(!button)return false;button.click();
+    let button=document.querySelector(`[data-open="${esc(routed.tool.id)}"]`);
+    if(!button&&typeof window.routeFrom==='function'){window.routeFrom(q);button=document.querySelector(`[data-open="${esc(routed.tool.id)}"]`)}
+    if(!button)return false;button.click();
     const form=document.getElementById('promptForm');if(!form)return false;
     const inputs=[...form.querySelectorAll('textarea,input')].filter(el=>/^f\d+$/.test(el.name||''));if(!inputs.length)return false;
     inputs.forEach((el,index)=>{if(index===0||el.required)el.value=q});
