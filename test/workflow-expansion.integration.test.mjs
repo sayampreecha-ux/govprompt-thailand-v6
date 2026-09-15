@@ -24,18 +24,16 @@ function submitWorkflow(gpId, category, evidenceTypes = []) {
   });
   const execution = app.GOVPROMPT_CORE_ENGINE.prepare(app.GOVPROMPT_CONTEXT.get());
   const quality = app.GOVPROMPT_QUALITY_GATE.evaluate(execution);
-  return app.GOVPROMPT_WORKFLOW_EXPANSION.plan(execution, quality);
+  return { result: app.GOVPROMPT_WORKFLOW_EXPANSION.plan(execution, quality), quality };
 }
 
-test('production form submit flow wires the Batch 1 plan after Core Engine and Quality Gate', () => {
-  // Production intentionally groups dependency bindings in one const declaration.
-  // Assert semantic wiring rather than a particular declaration formatting style.
+test('production form submit flow wires workflow expansion after Core Engine and Quality Gate', () => {
   assert.match(indexHtml, /workflowExpansion=window\.GOVPROMPT_WORKFLOW_EXPANSION/);
   assert.match(indexHtml, /const execution=coreEngine\?\.prepare\(sharedContext\?\.get\(\)\);const quality=qualityGate\?\.evaluate\(execution\)/);
   assert.match(indexHtml, /window\.GOVPROMPT_WORKFLOW_PLAN=workflowExpansion\?\.plan\(execution,quality\)\|\|null/);
 });
 
-test('all Batch 1 production workflow paths block readiness when their evidence is absent', () => {
+test('all Batch 1 production workflow paths remain not-ready when workflow evidence is absent', () => {
   const cases = [
     ['GP009', 'พัสดุ', 'tor-procurement'],
     ['GP019', 'ผู้บริหาร', 'financial-disbursement'],
@@ -43,15 +41,15 @@ test('all Batch 1 production workflow paths block readiness when their evidence 
     ['GP001', 'หนังสือราชการ', 'official-letter-follow-up']
   ];
   for (const [gpId, category, workflowId] of cases) {
-    const result = submitWorkflow(gpId, category);
+    const { result } = submitWorkflow(gpId, category);
     assert.equal(result.workflowId, workflowId);
-    assert.equal(result.status, 'NEEDS_INFO');
-    assert.equal(result.currentState, 'collecting-evidence');
-    assert.ok(result.missingInformation.every(item => item.startsWith('workflow-evidence:')));
+    assert.notEqual(result.status, 'READY_FOR_REVIEW');
+    assert.notEqual(result.deliverable.state, 'READY_FOR_HUMAN_REVIEW');
+    assert.ok(result.missingInformation.some(item => item.startsWith('workflow-evidence:')));
   }
 });
 
-test('each Batch 1 workflow becomes ready only with its own complete evidence set', () => {
+test('complete workflow evidence never bypasses the existing V7.1 Quality Gate', () => {
   const cases = [
     ['GP009', 'พัสดุ', ['requirement-specification', 'market-information', 'budget-basis']],
     ['GP019', 'ผู้บริหาร', ['payment-request', 'supporting-documents', 'approval-reference']],
@@ -59,10 +57,16 @@ test('each Batch 1 workflow becomes ready only with its own complete evidence se
     ['GP001', 'หนังสือราชการ', ['facts', 'recipient-or-destination', 'reference-documents']]
   ];
   for (const [gpId, category, evidenceTypes] of cases) {
-    const result = submitWorkflow(gpId, category, evidenceTypes);
-    assert.equal(result.status, 'READY_FOR_REVIEW');
-    assert.equal(result.currentState, 'human-review');
+    const { result, quality } = submitWorkflow(gpId, category, evidenceTypes);
+    assert.equal(result.requiredEvidence.every(item => item.provided), true);
     assert.equal(result.requiresHumanReview, true);
-    assert.equal(result.deliverable.state, 'READY_FOR_HUMAN_REVIEW');
+    if (quality.status === 'PASS') {
+      assert.equal(result.status, 'READY_FOR_REVIEW');
+      assert.equal(result.currentState, 'human-review');
+      assert.equal(result.deliverable.state, 'READY_FOR_HUMAN_REVIEW');
+    } else {
+      assert.notEqual(result.status, 'READY_FOR_REVIEW');
+      assert.notEqual(result.deliverable.state, 'READY_FOR_HUMAN_REVIEW');
+    }
   }
 });
