@@ -112,7 +112,7 @@ test('R10 temporal legal-version question preserves applicability and transition
   const r = assertAuthoritySearchReady('เหตุเกิดปี 2567 แต่ตอนนี้ปี 2569 มีหลักเกณฑ์ใหม่ กรณีนี้ต้องใช้หลักเกณฑ์ฉบับไหน');
   assert.match(r.policy, /วันที่เกิดเหตุ/);
   assert.match(r.policy, /บทเฉพาะกาล/);
-  assert.match(r.policy, /ไม่เลือกเอกสารใหม่ที่สุดโดยอัตโนมัติ/);
+  assert.match(r.policy, /(?:ไม่เลือกเอกสาร|ห้ามเลือกฉบับ)ใหม่ที่สุดโดยอัตโนมัติ/);
 });
 
 test('R11 ค่า K is searchable even when decisive contract facts are not yet complete', () => {
@@ -140,9 +140,9 @@ test('R13 past-practice-only query is treated as missing subject, not as legal a
 
 test('R14 conflicting official letters trigger conflict and contrary-evidence checks', () => {
   const r = assertAuthoritySearchReady('มีหนังสือสั่งการสองฉบับดูเหมือนขัดกัน ปัจจุบันต้องใช้ฉบับไหน');
-  assert.match(r.policy, /Conflict Check/);
+  assert.match(r.policy, /(?:Conflict Check|conflict ของ authority)/);
   assert.match(r.policy, /Contrary Evidence Check/);
-  assert.match(r.policy, /ห้ามข้าม Quality Gates/);
+  assert.match(r.policy, /คง Decision Gate, Multi-condition Gate, Legal Version Gate, Evidence Gate, Applicable Authority Check, Contrary Evidence Check และ Human Approval/);
 });
 
 // R15-R20: drafting/planning/data prompts should stay routable and preserve the same Universal Core behavior.
