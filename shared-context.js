@@ -48,7 +48,7 @@
       category: null,
       userInputs: {},
       routing: { score: 0, confidence: 0, matchedReason: '', fallback: true },
-      evidence: { provided: false, types: [], count: 0 },
+      evidence: { provided: false, types: [], count: 0, records: [], requiredTypes: [] },
       legalTransition: {
         precedentReliedOn: false,
         precedentFactDate: null,
@@ -147,6 +147,20 @@
     });
   }
 
+  function setEvidence(values = {}) {
+    const incoming = clone(values || {});
+    const types = [...new Set([...(state.evidence?.types || []), ...((incoming.types || []).map(String))])];
+    const count = incoming.count === undefined ? Number(state.evidence?.count) || 0 : Math.max(0, Number(incoming.count) || 0);
+    return update({
+      evidence: {
+        ...incoming,
+        provided: incoming.provided === true || count > 0 || types.length > 0,
+        count,
+        types
+      }
+    });
+  }
+
   function setLegalTransition(values) { return update({ legalTransition: values }); }
   function setDecisionIntegrity(values) { return update({ decisionIntegrity: values }); }
   function setEventContinuity(values) { return update({ eventContinuity: values }); }
@@ -160,6 +174,7 @@
     setRouting,
     selectTool,
     setUserInputs,
+    setEvidence,
     setLegalTransition,
     setDecisionIntegrity,
     setEventContinuity,
