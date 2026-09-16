@@ -52,17 +52,43 @@ function evaluate(envelope){
  const evidenceRequired=riskFlags.includes('evidence-required'),evidenceProvided=source.evidence?.provided===true||(Number(source.evidence?.count)||0)>0,evidenceRecords=Array.isArray(source.evidence?.records)?source.evidence.records:[],requiredEvidenceTypes=[...new Set((source.evidence?.requiredTypes||[]).map(String))];
  const supplied=new Set(evidenceRecords.filter(r=>['supplied','needs-verification','verified-by-human'].includes(r?.status)).map(r=>String(r.type))),unverified=requiredEvidenceTypes.filter(type=>evidenceRecords.find(r=>String(r?.type)===type)?.status!=='verified-by-human'),missingEvidenceTypes=requiredEvidenceTypes.filter(type=>!supplied.has(type));
  const pdpaFields=entries.map(([f])=>f).filter(f=>PDPA_FIELD_PATTERN.test(f)),pdpaConcerns=pdpaFields.length?['personal-data-field-present']:[],missingInformation=[];
- if(!providedFields.length)missingInformation.push('user-inputs');if(evidenceRequired&&!evidenceProvided)missingInformation.push('required-evidence');missingEvidenceTypes.forEach(type=>missingInformation.push(`required-evidence:${type}`));
+ if(!providedFields.length)missingInformation.push('user-inputs');
+ if(evidenceRequired&&!evidenceProvided)missingInformation.push('required-evidence');
+ missingEvidenceTypes.forEach(type=>missingInformation.push(`required-evidence:${type}`));
  const transitionGate=globalThis.GOVPROMPT_LEGAL_TRANSITION_GATE?.evaluate?.(source.legalTransition||{})||transitionFallback(source.legalTransition||{});
  const decisionGate=decisionIntegrityCheck(source.decisionIntegrity||{});
  const continuityGate=eventContinuityCheck(source.eventContinuity||{});
+ const finalDecisionLocked=!transitionGate.pass||!decisionGate.pass||!continuityGate.pass;
  let status=STATUSES.PASS;
- if(!transitionGate.pass||!decisionGate.pass||!continuityGate.pass)status=STATUSES.BLOCKED;else if(source.catalogStatus===STATUSES.MISSING_CATALOG)status=STATUSES.MISSING_CATALOG;else if(source.catalogStatus===STATUSES.NOT_APPLICABLE)status=STATUSES.NOT_APPLICABLE;else if(!hasSelection||fallback)status=STATUSES.BLOCKED;else if(missingInformation.length)status=STATUSES.NEEDS_INFO;else if(riskFlags.length||pdpaConcerns.length||confidence<MINIMUM_CONFIDENCE||unverified.length)status=STATUSES.REVIEW_REQUIRED;
- return freeze({status,decisionLock:!transitionGate.pass||!decisionGate.pass||!continuityGate.pass,checks:{completeness:{passed:providedFields.length>0&&!missingFields.length,providedFields,missingFields},requiredEvidence:{required:evidenceRequired||requiredEvidenceTypes.length>0,provided:evidenceProvided,requiredTypes:requiredEvidenceTypes,missingTypes:missingEvidenceTypes,unverifiedTypes:unverified,passed:(!evidenceRequired||evidenceProvided)&&!missingEvidenceTypes.length},missingInformation,riskFlags,confidence:{value:confidence,minimum:MINIMUM_CONFIDENCE,passed:confidence>=MINIMUM_CONFIDENCE},sourceReadiness:{ready:(evidenceProvided||!evidenceRequired)&&!missingEvidenceTypes.length,evidenceTypes:clone(source.evidence?.types||[]),verificationReady:!unverified.length},pdpaSecurity:{concerns:pdpaConcerns,requiresReview:!!pdpaConcerns.length},legalAuthorityTransition:transitionGate,decisionIntegrity:decisionGate,eventContinuity:continuityGate,workflowReadiness:{ready:status===STATUSES.PASS&&transitionGate.pass&&decisionGate.pass&&continuityGate.pass}}});
+ // A final-decision lock must not block verified partial answers or authority retrieval.
+ if(source.catalogStatus===STATUSES.MISSING_CATALOG)status=STATUSES.MISSING_CATALOG;
+ else if(source.catalogStatus===STATUSES.NOT_APPLICABLE)status=STATUSES.NOT_APPLICABLE;
+ else if(!hasSelection||fallback)status=STATUSES.BLOCKED;
+ else if(missingInformation.length)status=STATUSES.NEEDS_INFO;
+ else if(finalDecisionLocked||riskFlags.length||pdpaConcerns.length||confidence<MINIMUM_CONFIDENCE||unverified.length)status=STATUSES.REVIEW_REQUIRED;
+ return freeze({
+   status,
+   decisionLock:finalDecisionLocked,
+   partialAnswerAllowed:hasSelection&&!fallback,
+   checks:{
+     completeness:{passed:providedFields.length>0&&!missingFields.length,providedFields,missingFields},
+     requiredEvidence:{required:evidenceRequired||requiredEvidenceTypes.length>0,provided:evidenceProvided,requiredTypes:requiredEvidenceTypes,missingTypes:missingEvidenceTypes,unverifiedTypes:unverified,passed:(!evidenceRequired||evidenceProvided)&&!missingEvidenceTypes.length},
+     missingInformation,
+     riskFlags,
+     confidence:{value:confidence,minimum:MINIMUM_CONFIDENCE,passed:confidence>=MINIMUM_CONFIDENCE},
+     sourceReadiness:{ready:(evidenceProvided||!evidenceRequired)&&!missingEvidenceTypes.length,evidenceTypes:clone(source.evidence?.types||[]),verificationReady:!unverified.length},
+     pdpaSecurity:{concerns:pdpaConcerns,requiresReview:!!pdpaConcerns.length},
+     legalAuthorityTransition:transitionGate,
+     decisionIntegrity:decisionGate,
+     eventContinuity:continuityGate,
+     workflowReadiness:{ready:status===STATUSES.PASS&&transitionGate.pass&&decisionGate.pass&&continuityGate.pass},
+     partialAnswerReadiness:{ready:hasSelection&&!fallback,finalDecisionLocked}
+   }
+ });
 }
 function reasoningPolicy(category=''){
  if(!HIGH_RISK_PATTERN.test(String(category||'')))return '';
- return `\n\nมาตรฐานตรวจสอบก่อนสรุปสำหรับงานความเสี่ยงสูง\n- ใช้เฉพาะข้อเท็จจริงที่มีผลต่อคำตอบ และห้ามสมมติข้อเท็จจริงสำคัญ\n- ตรวจว่าฐานกฎหมาย/ระเบียบ/หลักเกณฑ์ใช้กับบุคคล หน่วยงาน เรื่อง และช่วงเวลาเกิดเหตุนี้จริง รวมทั้งฉบับแก้ไขและบทเฉพาะกาล โดยใช้แหล่งปฐมภูมิ/ทางการก่อน\n- ห้ามหยุดที่ข้อกฎหมายแรก ต้องตรวจนิยาม บทหลัก เงื่อนไข ข้อยกเว้น บทอ้างถึง บทต่อเนื่อง บทเฉพาะ สิทธิต่อเนื่อง เหตุระงับหรือสิ้นสุดสิทธิ หนังสือสั่งการ และแนววินิจฉัยที่อาจเปลี่ยนผล\n- ก่อนฟันธง ให้ตรวจฐานตรงข้ามเสมอ: ถ้าเบื้องต้นว่าไม่ได้ ให้หาฐานที่อาจทำให้ได้; ถ้าเบื้องต้นว่าได้ ให้หาฐานที่อาจทำให้ไม่ได้\n- เมื่อมีเหตุเปลี่ยนสถานะหรือท้องที่ ห้ามยึดชื่อที่ผู้ใช้เรียก เช่น ย้าย โอน สอบได้ บรรจุ แต่งตั้ง หรือเลื่อนระดับ ให้จำแนกผลทางกฎหมายของเหตุการณ์จริงจากคำสั่งและตัวบทก่อน\n- หากมีสิทธิเดิม ให้ตรวจสาย สิทธิเดิม → เหตุการณ์เปลี่ยนสถานะ/ท้องที่ → บทต่อเนื่อง → เงื่อนไขสถานะใหม่ → เหตุระงับ/สิ้นสุด → สิทธิหลังเหตุการณ์ และห้ามละเลยบทคุ้มครองสิทธิเดิม\n- หากเหตุการณ์เดียวเกี่ยวข้องหลายสิทธิหรือหลายฐานกฎหมาย ให้แยกฐาน เงื่อนไข ระยะเวลา และเพดานของแต่ละสิทธิ ห้ามนำเงื่อนไขของสิทธิหนึ่งไปตัดอีกสิทธิโดยไม่มีกฎหมายรองรับ\n- เมื่อสิทธิเปลี่ยนกลางเดือนหรือกลางเหตุการณ์ ให้สร้างเส้นเวลาจากวันสิ้นสุดสถานะเดิม วันที่คำสั่งมีผล วันที่รายงานตัว วันที่เริ่มสถานะใหม่ และช่วงใช้สิทธิแต่ละประเภท พร้อมตรวจช่วงซ้อน ช่วงขาด และการเบิกซ้ำก่อนคำนวณวันหรือเงิน\n- ถ้าบททั่วไปดูเหมือนตัดสิทธิ ให้ค้นบทเฉพาะ บทต่อเนื่อง บทคุ้มครองสิทธิ หรือข้อยกเว้นที่อาจรักษาสิทธิเดิมไว้ก่อนสรุป\n- ตรวจภายในอีกครั้งว่าไม่ได้พิจารณาเฉพาะสิทธิใหม่จนพลาดสิทธิเดิมที่ต่อเนื่อง และไม่ได้เอาเงื่อนไขของสิทธิหนึ่งไปตัดอีกสิทธิโดยไม่มีฐานกฎหมาย\n- ค้นไม่พบไม่เท่ากับไม่มี หากแหล่งสำคัญยังตรวจไม่ครบให้ระบุข้อจำกัด\n- สรุปได้เพียง: ยืนยันได้ / ยืนยันได้เมื่อครบเงื่อนไข / ยังยืนยันไม่ได้\n- ตอบแบบ Answer First: ข้อสรุปสั้น ระดับความแน่นอน ฐานสำคัญ เงื่อนไขที่เปลี่ยนผล และสิ่งที่ควรตรวจต่อ\n- อย่าเปิดเผยกระบวนการคิดภายในหรือรายการตรวจสอบภายในแก่ผู้ใช้; แสดงเฉพาะผลและเหตุผลที่จำเป็น`;
+ return `\n\nมาตรฐานตรวจสอบงานความเสี่ยงสูง — Adaptive Review\n- ใช้ข้อเท็จจริงและเอกสารที่ผู้ใช้ให้ก่อน แล้วตรวจฐานปฐมภูมิที่ตรงเรื่องและฉบับที่ใช้กับวันเกิดเหตุ; ห้ามสมมติข้อเท็จจริงสำคัญ\n- เริ่มจากหลักฐานที่มี → กฎหลัก → เอกสารที่อ้างตรง → ฉบับแก้ไข/ยกเลิกที่เกี่ยวข้อง → เทียบข้อเท็จจริง → contrary check แบบเจาะจง แล้วประเมินว่าพอหรือยัง\n- High Risk ไม่เท่ากับค้นทุกฐานข้อมูล: ถ้าฐานปฐมภูมิที่ตรงเรื่องและเงื่อนไขสำคัญพอแล้ว ให้หยุดค้นและตอบ; ยกระดับการค้นเฉพาะเมื่อพบ conflict, ฉบับที่ใช้ไม่ชัด, บทเฉพาะกาล/สิทธิเดิม, ข้อยกเว้นสำคัญ หรือจำเป็นต้องพึ่งคำพิพากษา/หนังสือหารือ\n- Multi-condition Gate: ห้ามสรุปสิทธิ อำนาจ การเบิกจ่าย พัสดุ หรือผลทางบุคคลจากเงื่อนไขเพียงข้อเดียว ต้องเทียบเงื่อนไขสาระสำคัญกับข้อเท็จจริงก่อน\n- เมื่อมีเหตุเปลี่ยนสถานะหรือท้องที่ ห้ามยึดชื่อที่ผู้ใช้เรียก เช่น ย้าย โอน สอบได้ บรรจุ แต่งตั้ง หรือเลื่อนระดับ ให้จำแนกผลทางกฎหมายของเหตุการณ์จริงจากคำสั่งและตัวบทก่อน\n- หากมีสิทธิเดิม ให้ตรวจสิทธิเดิม → เหตุเปลี่ยนสถานะ/ท้องที่ → บทต่อเนื่องหรือบทคุ้มครอง → เงื่อนไขสถานะใหม่ → เหตุระงับ/สิ้นสุด → สิทธิหลังเหตุการณ์\n- หากเหตุการณ์เดียวเกี่ยวข้องหลายสิทธิหรือหลายฐานกฎหมาย ให้แยกฐาน เงื่อนไข ระยะเวลา และเพดานของแต่ละสิทธิ ห้ามยืมเงื่อนไขของสิทธิหนึ่งไปตัดอีกสิทธิโดยไม่มีฐานกฎหมาย\n- เมื่อสิทธิเปลี่ยนกลางเดือนหรือกลางเหตุการณ์ ให้ตรวจวันที่คำสั่งมีผล วันที่รายงานตัว วันที่เริ่มสถานะใหม่ ช่วงสิทธิเดิม/ใหม่ ช่วงซ้อน ช่วงขาด และความเสี่ยงการเบิกซ้ำก่อนคำนวณวันหรือเงิน\n- ก่อนฟันธง ให้ทำ contrary check อย่างน้อยหนึ่งรอบแบบเจาะจงต่อ tentative conclusion; ไม่ต้องเปิด Full Search ใหม่ทั้งหมดหากไม่พบ lead น้ำหนักสูงที่อาจกลับผล\n- Decision Lock ใช้ห้ามฟันธง “ยืนยันได้” เมื่อฐานสำคัญยังไม่ครบ แต่ไม่ห้ามตอบส่วนที่ยืนยันแล้วหรือสรุป “ยืนยันได้เมื่อครบเงื่อนไข / ยังยืนยันไม่ได้” พร้อมสิ่งที่ขาด\n- ค้นไม่พบไม่เท่ากับไม่มี; หากแหล่งสำคัญยังตรวจไม่ครบให้ระบุข้อจำกัด แต่ห้ามค้นต่อเพียงเพื่อเพิ่มจำนวนแหล่งอ้างอิง\n- สรุปได้เพียง: ยืนยันได้ / ยืนยันได้เมื่อครบเงื่อนไข / ยังยืนยันไม่ได้\n- ตอบแบบ Answer First: ข้อสรุปสั้น ระดับความแน่นอน ฐานสำคัญ เงื่อนไขที่เปลี่ยนผล และสิ่งที่ควรตรวจต่อ\n- อย่าเปิดเผยกระบวนการคิดภายในหรือ checklist ภายในแก่ผู้ใช้; แสดงเฉพาะผล เหตุผล และหลักฐานที่จำเป็น`;
 }
 function installPromptPolicy(){
  if(typeof document==='undefined')return;
@@ -74,7 +100,7 @@ function installPromptPolicy(){
    const result=typeof original==='function'?original.call(this,event):undefined;
    const category=globalThis.GOVPROMPT_CONTEXT?.get?.().category||'';
    const policy=reasoningPolicy(category);
-   if(policy&&!output.textContent.includes('มาตรฐานตรวจสอบก่อนสรุปสำหรับงานความเสี่ยงสูง'))output.textContent+=policy;
+   if(policy&&!output.textContent.includes('มาตรฐานตรวจสอบงานความเสี่ยงสูง — Adaptive Review'))output.textContent+=policy;
    return result;
  };
  const copy=document.getElementById('copyBtn');
