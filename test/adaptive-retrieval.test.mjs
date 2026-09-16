@@ -111,3 +111,26 @@ test('shared context records evidence metadata for retrieval without persistence
   assert.equal(snapshot.evidence.count, 1);
   assert.deepEqual(plain(snapshot.evidence.types), ['official-letter']);
 });
+
+test('MOI circular 0804.6/W16453 case uses provided evidence first and does not enter FULL review by default', () => {
+  const gate = load('core-engine.js', 'GOVPROMPT_CORE_ENGINE').officialAuthorityRetrievalGate;
+  const query = 'ตรวจหนังสือกระทรวงมหาดไทย มท 0804.6/ว 16453 ลงวันที่ 7 กันยายน 2569 เรื่องแนวทางการกำกับดูแลให้เป็นไปตามกฎหมายและมติ ก.จ. ก.ท. และ ก.อบต. ว่าแนวทางปฏิบัติถูกต้องหรือไม่ โดยมีภาพหนังสือ 2 หน้าแนบแล้ว';
+  const evidence = { provided: true, count: 2, types: ['official-letter-page-1', 'official-letter-page-2'] };
+  const scope = gate.evaluateScope({ query, evidence });
+  const policy = gate.promptPolicy({ query, category: 'กฎหมาย', evidence });
+
+  assert.equal(scope.status, 'SEARCH_READY');
+  assert.equal(scope.retrievalLevel, 'FAST_VERIFY');
+  assert.equal(scope.suppliedEvidence.provided, true);
+  assert.equal(scope.suppliedEvidence.count, 2);
+  assert.equal(scope.retrievalFlow[0], 'PROVIDED_EVIDENCE');
+  assert.match(policy, /อ่านและใช้ก่อนค้นเว็บ/);
+  assert.match(policy, /ห้ามค้นเอกสารเดิมซ้ำโดยไม่มีเหตุ/);
+  assert.match(policy, /High Risk ≠ Full Search อัตโนมัติ/);
+  assert.match(policy, /ยกระดับ FULL AUTHORITY REVIEW เฉพาะเมื่อ/);
+
+  const partial = gate.assessDecisionSufficiency({ authoritySufficient: false, factsSufficient: true });
+  assert.equal(partial.partialAnswerAllowed, true);
+  assert.equal(partial.finalDecisionAllowed, false);
+  assert.equal(partial.nextAction, 'CONTINUE_TARGETED_AUTHORITY_RETRIEVAL');
+});
