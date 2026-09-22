@@ -11,7 +11,7 @@
   function detectOrgType(source = {}) {
     const input = normalize([
       source.orgType, source.organizationType, source.unitType, source.agency,
-      source.department, source.query, ...Object.values(source.userInputs || {})
+      source.department, source.query, source.task?.query, ...Object.values(source.userInputs || {})
     ].join(' '));
     if (/องค์การบริหารส่วนจังหวัด|\bอบจ\b/i.test(input)) return 'อบจ';
     if (/เทศบาลนคร|\bทน\b/i.test(input)) return 'เทศบาลนคร';
@@ -32,7 +32,7 @@
 
   function isBudgetMatter(source = {}) {
     return /งบประมาณ|เงินอุดหนุนเฉพาะกิจ|เงินอุดหนุน|เงินจัดสรร|คำของบ|ขอรับงบ|โอนเงินจัดสรร|เปลี่ยนแปลงเงินจัดสรร|แผนการใช้จ่าย|สำนักงบประมาณ|สงป\.?/i.test(
-      [source.query, ...Object.values(source.userInputs || {})].join(' ')
+      [source.query, source.task?.query, ...Object.values(source.userInputs || {})].join(' ')
     );
   }
 
