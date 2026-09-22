@@ -55,10 +55,10 @@ function evaluate(envelope){
  if(!providedFields.length)missingInformation.push('user-inputs');
  if(evidenceRequired&&!evidenceProvided)missingInformation.push('required-evidence');
  missingEvidenceTypes.forEach(type=>missingInformation.push(`required-evidence:${type}`));
- const transitionGate=globalThis.GOVPROMPT_LEGAL_TRANSITION_GATE?.evaluate?.(source.legalTransition||{})||transitionFallback(source.legalTransition||{});
+ const transitionGate=globalThis.GOVPROMPT_LEGAL_TRANSITION_GATE?.evaluate?.(source.legalTransition||{})||transitionFallback(source.legalTransition||{});\n const budgetAuthorityGate=globalThis.GOVPROMPT_BUDGET_AUTHORITY_GATE?.evaluate?.(source)||{applicable:false,status:'NOT_APPLICABLE',decisionLock:false,blockers:[]};
  const decisionGate=decisionIntegrityCheck(source.decisionIntegrity||{});
  const continuityGate=eventContinuityCheck(source.eventContinuity||{});
- const finalDecisionLocked=!transitionGate.pass||!decisionGate.pass||!continuityGate.pass;
+ const finalDecisionLocked=!transitionGate.pass||!decisionGate.pass||!continuityGate.pass||budgetAuthorityGate.decisionLock;
  let status=STATUSES.PASS;
  // A final-decision lock must not block verified partial answers or authority retrieval.
  if(source.catalogStatus===STATUSES.MISSING_CATALOG)status=STATUSES.MISSING_CATALOG;
@@ -78,10 +78,10 @@ function evaluate(envelope){
      confidence:{value:confidence,minimum:MINIMUM_CONFIDENCE,passed:confidence>=MINIMUM_CONFIDENCE},
      sourceReadiness:{ready:(evidenceProvided||!evidenceRequired)&&!missingEvidenceTypes.length,evidenceTypes:clone(source.evidence?.types||[]),verificationReady:!unverified.length},
      pdpaSecurity:{concerns:pdpaConcerns,requiresReview:!!pdpaConcerns.length},
-     legalAuthorityTransition:transitionGate,
+     legalAuthorityTransition:transitionGate,\n     budgetAuthority:budgetAuthorityGate,
      decisionIntegrity:decisionGate,
      eventContinuity:continuityGate,
-     workflowReadiness:{ready:status===STATUSES.PASS&&transitionGate.pass&&decisionGate.pass&&continuityGate.pass},
+     workflowReadiness:{ready:status===STATUSES.PASS&&transitionGate.pass&&decisionGate.pass&&continuityGate.pass&&!budgetAuthorityGate.decisionLock},
      partialAnswerReadiness:{ready:hasSelection&&!fallback,finalDecisionLocked}
    }
  });
