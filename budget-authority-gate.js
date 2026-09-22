@@ -13,11 +13,11 @@
       source.orgType, source.organizationType, source.unitType, source.agency,
       source.department, source.query, source.task?.query, ...Object.values(source.userInputs || {})
     ].join(' '));
-    if (/องค์การบริหารส่วนจังหวัด|\bอบจ\b/i.test(input)) return 'อบจ';
-    if (/เทศบาลนคร|\bทน\b/i.test(input)) return 'เทศบาลนคร';
-    if (/เทศบาลเมือง|\bทม\b/i.test(input)) return 'เทศบาลเมือง';
-    if (/เทศบาลตำบล|\bทต\b/i.test(input)) return 'เทศบาลตำบล';
-    if (/องค์การบริหารส่วนตำบล|\bอบต\b/i.test(input)) return 'อบต';
+    if (/องค์การบริหารส่วนจังหวัด|(?:^|[\s,./()])อบจ(?:$|[\s,./()])/i.test(input)) return 'อบจ';
+    if (/เทศบาลนคร|(?:^|[\s,./()])ทน(?:$|[\s,./()])/i.test(input)) return 'เทศบาลนคร';
+    if (/เทศบาลเมือง|(?:^|[\s,./()])ทม(?:$|[\s,./()])/i.test(input)) return 'เทศบาลเมือง';
+    if (/เทศบาลตำบล|(?:^|[\s,./()])ทต(?:$|[\s,./()])/i.test(input)) return 'เทศบาลตำบล';
+    if (/องค์การบริหารส่วนตำบล|(?:^|[\s,./()])อบต(?:$|[\s,./()])/i.test(input)) return 'อบต';
     return null;
   }
 
