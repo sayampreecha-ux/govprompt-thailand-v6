@@ -23,7 +23,7 @@
 
   function detectFiscalYear(source = {}) {
     const input = normalize([
-      source.fiscalYear, source.budgetYear, source.query,
+      source.fiscalYear, source.budgetYear, source.query, source.task?.query,
       ...Object.values(source.userInputs || {})
     ].join(' '));
     if (/2569|2026/.test(input)) return FY2026;
