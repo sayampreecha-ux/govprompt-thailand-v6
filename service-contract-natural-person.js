@@ -97,5 +97,7 @@
     ].join('\n');
   }
 
-  window.GOVPROMPT_SERVICE_TOR_ENGINE = Object.freeze({ build, buildFromFreeText });
+  const api = Object.freeze({ build, buildFromFreeText });
+  window.GOVPROMPT_SERVICE_TOR_ENGINE = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })();
