@@ -36,3 +36,17 @@ test('locks when the procurement object is not sufficiently described',()=>{
   assert.equal(r.classification,'UNDETERMINED');
   assert.equal(r.decisionLock,true);
 });
+
+test('exposes verified V727 authority rules and supersession',()=>{
+  const r=gate().classify({'ลักษณะงานที่ต้องการจ้าง':'ช่วยบันทึกข้อมูลและจัดทำเอกสาร','ผลผลิต/งานที่ต้องส่งมอบ':'ชุดข้อมูลและเอกสารตามรายการส่งมอบรายเดือน'});
+  assert.equal(r.authorityCheck.versionStatus,'CURRENT_SOURCE_VERIFIED');
+  assert.match(r.authorityCheck.authority,/ว 727/);
+  assert.match(r.authorityCheck.supersedes,/ว 877/);
+  assert.equal(r.authorityCheck.exemptions.length,2);
+  assert.equal(r.authorityCheck.requiredEvidence.length,4);
+});
+
+test('marks non-V727 procurement object explicitly',()=>{
+  const r=gate().classify({'ลักษณะงานที่ต้องการจ้าง':'ซ่อมรถเทศบาล','ผลผลิต/งานที่ต้องส่งมอบ':'รถที่ซ่อมเสร็จพร้อมใช้งาน'});
+  assert.equal(r.authorityCheck.status,'NOT_V727_BY_OBJECT');
+});
