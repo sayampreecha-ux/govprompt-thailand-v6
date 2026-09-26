@@ -1,0 +1,23 @@
+name: GP223 Regression
+
+on:
+  push:
+    paths:
+      - 'service-contract-natural-person.js'
+      - 'procurement-classification-gate.js'
+      - 'gp223-regression-test.js'
+      - '.github/workflows/gp223-regression.yml'
+  workflow_dispatch:
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run GP223 regression
+        run: node gp223-regression-test.js
