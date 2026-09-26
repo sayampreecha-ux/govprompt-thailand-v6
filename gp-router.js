@@ -24,7 +24,21 @@
   function queryTerms(query){const text=normalize(query);const words=text.split(' ').filter(term=>term.length>1&&!STOP_TERMS.has(term));const thaiRuns=text.match(/[\u0E00-\u0E7F]{4,}/g)||[];const fragments=thaiRuns.flatMap(run=>{const terms=[];for(let length=4;length<=Math.min(run.length,8);length+=1){for(let start=0;start<=run.length-length;start+=1)terms.push(run.slice(start,start+length))}return terms});return unique([...words,...fragments])}
   function scoreTool(terms,query,tool){const name=compact(tool.name),description=compact(tool.desc),category=compact(tool.category),fields=compact((tool.fields||[]).join(' '));const matchedTerms=terms.filter(term=>[name,description,category,fields].some(text=>text.includes(term)));const score=matchedTerms.reduce((total,term)=>total+(name.includes(term)?.12:0)+(description.includes(term)?.08:0)+(category.includes(term)?.04:0)+(fields.includes(term)?.03:0),0);const exactNameBonus=compact(query).includes(name)?.55:0;return{tool,matchedTerms:unique(matchedTerms).slice(0,3),score:Math.min(1,score+exactNameBonus)}}
   function fallback(){return Object.freeze({selectedGpId:null,score:0,confidence:0,matchedReason:'ไม่พบ GP ที่ตรงกับคำค้นอย่างเพียงพอ',fallback:true})}
-  function domainCandidate(query){const match=DOMAIN_INTENTS.find(intent=>intent.pattern.test(query));if(!match)return null;const tool=DOMAIN_TOOLS.find(item=>item.id===match.tool);return tool?{tool,matchedTerms:['domain-intent'],score:1}:null}
+  const OLDER_EMPLOYEE_PATTERN=/(พนักงานผู้สูงอายุ|ผู้สูงอายุ.*(ทำงาน|จ้าง|ปฏิบัติงาน)|เกษียณแล้ว.*(จ้าง|ทำงาน|กลับมา)|หลังเกษียณ.*(จ้าง|ทำงาน)|จ้าง.*(ผู้สูงอายุ|คนเกษียณ)|กลับเข้ามาทำงาน.*เกษียณ|เกษียณ.*กลับมา.*ทำงาน)/i;
+  const OLDER_EMPLOYEE_TOOL=Object.freeze({
+    id:'DOMAIN_PERSONNEL_OLDER_EMPLOYEE',
+    icon:'👥',
+    category:'งานบุคคล',
+    name:'วิเคราะห์การจ้างพนักงานผู้สูงอายุหลังเกษียณ',
+    desc:'ตรวจคุณสมบัติ ประเภทการจ้าง ลักษณะงาน หลักเกณฑ์ของ อปท. ค่าตอบแทน ระยะเวลาจ้าง อำนาจอนุมัติ งบประมาณ และหลักฐาน โดยต้องตรวจฐานอำนาจและฉบับที่ใช้บังคับก่อนสรุป',
+    fields:['คำถามหรือภารกิจ','สถานะบุคคล/อายุ/ประวัติการทำงาน','หน่วยงานและตำแหน่ง/งานที่จะให้ปฏิบัติ','ช่วงเวลา/วันที่เกี่ยวข้อง','หลักเกณฑ์หรือหนังสือที่มี','งบประมาณ/อัตราค่าตอบแทนที่ต้องการ (ถ้ามี)','เอกสารหรือหลักฐานที่มี']
+  });
+  function domainCandidate(query){
+    if(OLDER_EMPLOYEE_PATTERN.test(query))return {tool:OLDER_EMPLOYEE_TOOL,matchedTerms:['older-employee-personnel'],score:1};
+    const match=DOMAIN_INTENTS.find(intent=>intent.pattern.test(query));if(!match)return null;
+    const tool=DOMAIN_TOOLS.find(item=>item.id===match.tool);
+    return tool?{tool,matchedTerms:['domain-intent'],score:1}:null
+  }
   function route(query){const text=normalize(query);const tools=Array.isArray(window.GOVPROMPT_TOOLS)?window.GOVPROMPT_TOOLS:[];if(!text||!tools.length)return fallback();const terms=queryTerms(text);const ranked=tools.map(tool=>scoreTool(terms,text,tool));const domain=domainCandidate(text);if(domain)ranked.push(domain);ranked.sort((left,right)=>right.score-left.score||left.tool.id.localeCompare(right.tool.id));const selected=ranked[0];if(!selected||selected.score<MINIMUM_SCORE)return fallback();return Object.freeze({selectedGpId:selected.tool.id,score:Number(selected.score.toFixed(2)),confidence:Number(selected.score.toFixed(2)),matchedReason:`ตรงกับ ${selected.tool.id}: ${selected.matchedTerms.join(', ')}`,fallback:false,tool:selected.tool})}
   window.GOVPROMPT_ROUTER=Object.freeze({route});
 })();
