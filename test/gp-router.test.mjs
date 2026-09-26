@@ -43,7 +43,7 @@ test('returns fallback when no government-work domain matches', () => {
 test('is deterministic and does not mutate the source catalog', () => {
   const route = router();
   const before = structuredClone(catalog);
-  assert.equal(catalog.length, 20);
+  assert.equal(catalog.length, 21);
   assert.deepEqual(route.route('ตรวจร่าง TOR'), route.route('ตรวจร่าง TOR'));
   assert.deepEqual(catalog, before);
 });
