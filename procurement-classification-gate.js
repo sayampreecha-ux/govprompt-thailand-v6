@@ -2,6 +2,14 @@
   'use strict';
 
   const V727 = 'กค (กวจ) 0405.2/ว 727 ลงวันที่ 22 กันยายน 2569';
+  const V877 = 'กค (กวจ) 0405.2/ว 877 ลงวันที่ 4 ธันวาคม 2568';
+  const V727_RULES = Object.freeze({
+    supersedes: V877,
+    legalDefinition: 'งานจ้างเหมาบริการมุ่งเน้นผลสำเร็จของงานภายในระยะเวลาตามสัญญา/ข้อตกลง ผู้รับจ้างมีอิสระในการทำงาน ผู้ว่าจ้างไม่มีอำนาจควบคุมบังคับบัญชาหรือสั่งการ มีเพียงตรวจตราและสั่งแก้ไขเมื่อผิดพลาดบกพร่อง',
+    paymentGate: 'จ่ายสินจ้างเมื่อถึงงวด/เงื่อนไขส่งมอบ ผู้รับจ้างส่งมอบงาน และผู้ตรวจรับตรวจรับถูกต้องครบถ้วนแล้ว',
+    exemptions: ['ระเบียบฯ ข้อ 162 และ 163 เรื่องค่าปรับ', 'ระเบียบฯ ข้อ 168 เรื่องหลักประกันการปฏิบัติตามสัญญา'],
+    torRule: 'TOR ต้องสอดคล้องกับลักษณะงานจ้างเหมาบริการและเงื่อนไขตามแบบสัญญาจ้างงานบริการประเภทจ้างเหมาบริการบุคคลธรรมดา'
+  });
   const SERVICE_TERMS = [
     'ช่วยปฏิบัติงาน','สนับสนุนงาน','บันทึกข้อมูล','จัดทำเอกสาร','ธุรการ',
     'วิเคราะห์นโยบายและแผน','สำรวจข้อมูล','ดูแลสถานที่','ทำความสะอาด',
@@ -44,8 +52,22 @@
       decisionLock = true;
     }
 
+    const authorityCheck = Object.freeze({
+      status: classification === 'NATURAL_PERSON_SERVICE_CANDIDATE' ? 'APPLICABLE_CANDIDATE_VERIFY_FACTS' : classification === 'OTHER_PROCUREMENT_SERVICE' ? 'NOT_V727_BY_OBJECT' : 'LOCKED_FOR_CLASSIFICATION',
+      authority: V727,
+      issuingAuthority: 'กรมบัญชีกลาง / คณะกรรมการวินิจฉัยปัญหาการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ',
+      versionStatus: 'CURRENT_SOURCE_VERIFIED',
+      supersedes: V877,
+      legalDefinition: V727_RULES.legalDefinition,
+      independenceRequirement: 'ตรวจว่าผู้รับจ้างมีอิสระในการทำงาน และหน่วยงานไม่ควบคุมบังคับบัญชาหรือสั่งการแบบลูกจ้าง',
+      paymentRequirement: V727_RULES.paymentGate,
+      exemptions: Object.freeze(V727_RULES.exemptions),
+      torRequirement: V727_RULES.torRule,
+      requiredEvidence: Object.freeze(['TOR/ขอบเขตงานที่ระบุผลสำเร็จและผลส่งมอบ','เงื่อนไขสัญญาหรือข้อตกลง','หลักฐานการส่งมอบงาน','รายงาน/หลักฐานการตรวจรับ'])
+    });
+
     return Object.freeze({
-      policyVersion: 'v727-classification-gate.1',
+      policyVersion: 'v727-classification-gate.2',
       authority: V727,
       rule: 'PERSON_STATUS_IS_NOT_PROCUREMENT_CLASSIFICATION',
       classification,
@@ -54,7 +76,8 @@
       otherProcurementHits: Object.freeze(otherHits),
       decisionLock,
       reason,
-      nextAction
+      nextAction,
+      authorityCheck
     });
   }
 
