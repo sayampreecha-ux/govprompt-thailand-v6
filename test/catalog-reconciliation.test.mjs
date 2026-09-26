@@ -16,10 +16,10 @@ function api() {
 
 test('reconciles the repository catalog without inventing missing GPs', () => {
   const result = api().reconcile(catalog);
-  assert.equal(result.summary.present, 20);
-  assert.equal(result.summary.missing, 202);
-  assert.deepEqual([...result.present], Array.from({ length: 20 }, (_, index) => `GP${String(index + 1).padStart(3, '0')}`));
-  assert.equal(result.missing[0], 'GP021');
+  assert.equal(result.summary.present, 21);
+  assert.equal(result.summary.missing, 201);
+  assert.deepEqual([...result.present], Array.from({ length: 21 }, (_, index) => `GP${String(index + 1).padStart(3, '0')}`));
+  assert.equal(result.missing[0], 'GP022');
   assert.equal(result.missing.at(-1), 'GP222');
   assert.deepEqual([...result.duplicate], []);
   assert.deepEqual([...result.conflict], []);
