@@ -29,6 +29,7 @@ jobs:
           node --check budget-authority-gate.js
           node --check legal-authority-transition-gate.js
           node --check gp-router.js
+          node --check emergency-procurement-gate.js
           node --check workflow-expansion.js
           node --check workflow-orchestration.js
       - name: Run test suite
@@ -36,6 +37,9 @@ jobs:
         shell: bash
         run: |
           set +e
+          node emergency-procurement-gate-test.js 2>&1 | tee gate-output.txt
+          gate_status=${PIPESTATUS[0]}
+          if [ "$gate_status" -ne 0 ]; then exit "$gate_status"; fi
           node --test test/*.test.mjs 2>&1 | tee test-output.txt
           status=${PIPESTATUS[0]}
           echo "status=$status" >> "$GITHUB_OUTPUT"
@@ -45,7 +49,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-output
-          path: test-output.txt
+          path: |
+            test-output.txt
+            gate-output.txt
           retention-days: 1
       - name: Enforce test result
         if: steps.tests.outputs.status != '0'
