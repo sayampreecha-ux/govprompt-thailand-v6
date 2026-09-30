@@ -47,3 +47,35 @@ test('non-budget questions are not intercepted', () => {
   assert.equal(result.applicable, false);
   assert.equal(result.status, 'NOT_APPLICABLE');
 });
+
+
+test('reserved budget with commitment is not routed to rule 30 automatically', () => {
+  const result = gate().evaluate({
+    query: 'อบจ เงินกันกรณีมิได้ก่อหนี้ผูกพัน ต่อมาทำสัญญาแล้ว ก่อหนี้ผูกพันแล้ว'
+  });
+  assert.equal(result.budgetStatus, 'COMMITTED');
+  assert.equal(result.authorityRoute.primaryRuleCandidate, 'CHECK_RULE_31_FIRST');
+  assert.equal(result.authorityRoute.rule30.applicableByKeyword, false);
+});
+
+test('reserved budget without commitment requires status-aware rule selection', () => {
+  const result = gate().evaluate({
+    query: 'อบจ เงินกันกรณีมิได้ก่อหนี้ผูกพัน'
+  });
+  assert.equal(result.budgetStatus, 'UNCOMMITTED');
+  assert.equal(result.authorityRoute.primaryRuleCandidate, 'CHECK_RULE_30_IF_BUDGET_STATEMENT_CHANGE');
+});
+
+test('council procedure is not automatic from budget keyword', () => {
+  const result = gate().evaluate({
+    query: 'อบจ เงินกัน ก่อหนี้ผูกพันแล้ว'
+  });
+  assert.equal(result.authorityRoute.councilProcedure.candidate, 'NOT_AUTOMATIC');
+});
+
+test('rule 38 is treated as procedure, not substantive budget authority', () => {
+  const result = gate().evaluate({
+    query: 'อบจ ญัตติแก้ไขมติสภาเรื่องเงินกัน ก่อหนี้ผูกพันแล้ว'
+  });
+  assert.equal(result.authorityRoute.councilProcedure.rule38.includes('กระบวนการเสนอญัตติ'), true);
+});
