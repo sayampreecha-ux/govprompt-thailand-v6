@@ -166,7 +166,12 @@
         candidate: budgetChange.councilMotion ? 'CHECK_COUNCIL_AUTHORITY' : 'NOT_AUTOMATIC',
         rule38: 'ใช้ข้อ 38 เฉพาะเมื่อผลการตรวจสาระพบว่าต้องเสนอญัตติต่อสภา; ข้อ 38 เป็นกระบวนการเสนอญัตติ ไม่ใช่ฐานอำนาจสาระของการแก้ไขงบประมาณ'
       },
-      decisionLock: !budgetStatus || (
+      decisionLock: (
+        !budgetStatus &&
+        /เงินกัน|กันเงิน|ก่อหนี้|ข้อผูกพัน|คำชี้แจง|มติสภา|ญัตติ/i.test(
+          [source.query, source.task?.query, ...Object.values(source.userInputs || {})].join(' ')
+        )
+      ) || (
         budgetStatus === 'COMMITTED' &&
         budgetChange.statement &&
         budgetChange.amountIncrease === false &&
