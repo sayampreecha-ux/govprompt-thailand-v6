@@ -79,3 +79,35 @@ test('rule 38 is treated as procedure, not substantive budget authority', () => 
   });
   assert.equal(result.authorityRoute.councilProcedure.rule38.includes('กระบวนการเสนอญัตติ'), true);
 });
+
+
+test('RPH maintenance fund non-committed reservation routes through rule 9 to financial rule 61 and council approval', () => {
+  const result = gate().evaluate({
+    query: 'อบจ เงินบำรุง รพ.สต. กันเงินกรณีมิได้ก่อหนี้ผูกพัน รายการค่าครุภัณฑ์'
+  });
+  assert.equal(result.rphMaintenanceFund, true);
+  assert.equal(result.rphReservationRoute.initialWithholding.trigger, true);
+  assert.match(result.rphReservationRoute.initialWithholding.authorityChain[0], /ข้อ 9/);
+  assert.equal(result.rphReservationRoute.initialWithholding.authorityChain[1], 'ระเบียบการเงิน อปท. พ.ศ. 2566 ข้อ 61');
+  assert.equal(result.rphReservationRoute.initialWithholding.authorityChain[2], 'เสนอขออนุมัติต่อสภาท้องถิ่น');
+});
+
+test('RPH maintenance fund reserved item amendment routes to rule 30', () => {
+  const result = gate().evaluate({
+    query: 'อบจ แก้ไขมติสภา เงินบำรุง รพ.สต. รายการที่กันเงินไว้แล้ว แก้ไขคำชี้แจง'
+  });
+  assert.equal(result.rphMaintenanceFund, true);
+  assert.equal(result.rphReservationRoute.amendReservedItem.trigger, true);
+  assert.match(result.rphReservationRoute.amendReservedItem.authorityChain[0], /ข้อ 30/);
+  assert.equal(result.rphReservationRoute.amendReservedItem.authorityChain.some(x => /ข้อ 29 ประกอบข้อ 30/.test(x)), true);
+});
+
+test('RPH reserved investment item substantive change requires rule 29 with rule 30', () => {
+  const result = gate().evaluate({
+    query: 'อบจ แก้ไขมติสภา เงินบำรุง รพ.สต. รายการที่กันเงินไว้แล้ว เปลี่ยนปริมาณ'
+  });
+  assert.equal(result.rphMaintenanceFund, true);
+  assert.equal(result.rphReservationRoute.amendReservedItem.trigger, true);
+  assert.equal(result.rphReservationRoute.decisionLock, true);
+  assert.equal(result.rphReservationRoute.amendReservedItem.authorityChain.some(x => /ข้อ 29 ประกอบข้อ 30/.test(x)), true);
+});
