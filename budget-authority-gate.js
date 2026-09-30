@@ -52,6 +52,26 @@
     return null;
   }
 
+  function detectRphMaintenanceFund(source = {}) {
+    const input = normalize([
+      source.query, source.task?.query, source.fundType, source.budgetType,
+      ...Object.values(source.userInputs || {})
+    ].join(' '));
+    return /เงินบำรุง/.test(input) && /รพ\.สต\.|โรงพยาบาลส่งเสริมสุขภาพตำบล|หน่วยบริการสาธารณสุข|โรงพยาบาล/.test(input);
+  }
+
+  function detectReservationAction(source = {}) {
+    const input = normalize([
+      source.query, source.task?.query, source.action, source.changeType,
+      ...Object.values(source.userInputs || {})
+    ].join(' '));
+    return {
+      initialWithholding: /กันเงิน/.test(input) && /มิได้ก่อหนี้ผูกพัน|ไม่ได้ก่อหนี้ผูกพัน|ไม่ก่อหนี้ผูกพัน/.test(input),
+      amendReservedItem: /แก้ไข|เปลี่ยนแปลง/.test(input) && /คำชี้แจง|รายการ|มติสภา|กันเงิน/.test(input) && /กันเงิน|เงินกัน/.test(input),
+      councilResolution: /มติสภา|แก้ไข.*มติ|เปลี่ยนแปลง.*มติ|ญัตติ/.test(input)
+    };
+  }
+
   function detectBudgetChange(source = {}) {
     const input = normalize([
       source.budgetChange, source.changeType, source.query, source.task?.query,
@@ -78,6 +98,8 @@
     const blockers = [];
     const budgetStatus = detectBudgetStatus(source);
     const budgetChange = detectBudgetChange(source);
+    const rphMaintenanceFund = detectRphMaintenanceFund(source);
+    const reservationAction = detectReservationAction(source);
     let budgetUnitStatus = 'UNVERIFIED';
 
     if (fiscalYear === FY2026 && DIRECT_TYPES.includes(orgType)) {
@@ -96,6 +118,34 @@
       required: null,
       rule: GOVERNOR_REASON,
       determination: 'NO_AUTO_ROUTE'
+    };
+
+    const rphReservationRoute = rphMaintenanceFund ? {
+      applicable: true,
+      initialWithholding: {
+        trigger: reservationAction.initialWithholding,
+        authorityChain: [
+          'ระเบียบเงินบำรุงโรงพยาบาลและหน่วยบริการสาธารณสุขของ อปท. พ.ศ. 2560 และที่แก้ไขเพิ่มเติม พ.ศ. 2561 ข้อ 9',
+          'ระเบียบการเงิน อปท. พ.ศ. 2566 ข้อ 61',
+          'เสนอขออนุมัติต่อสภาท้องถิ่น'
+        ],
+        note: 'ข้อ 9 เป็นบทเชื่อมให้ใช้ระเบียบการเงินของ อปท.; ฐานการกันเงินกรณีมิได้ก่อหนี้ผูกพันสำหรับครุภัณฑ์ ที่ดินและสิ่งก่อสร้างอยู่ที่ข้อ 61'
+      },
+      amendReservedItem: {
+        trigger: reservationAction.amendReservedItem,
+        authorityChain: reservationAction.amendReservedItem ? [
+          'ระเบียบวิธีการงบประมาณของ อปท. พ.ศ. 2563 ข้อ 30',
+          'หากการแก้ไขในงบลงทุนทำให้ลักษณะ ปริมาณ คุณภาพ หรือสถานที่ก่อสร้างเปลี่ยน ให้ตรวจข้อ 29 ประกอบข้อ 30',
+          'ผู้มีอำนาจให้กันเงินเป็นผู้อนุมัติ; หากเดิมสภาท้องถิ่นเป็นผู้อนุมัติการกันเงิน ให้เสนอให้สภาท้องถิ่นพิจารณา'
+        ] : [],
+        note: 'อย่าใช้ข้อ 61 เป็นฐานหลักในการแก้ไขรายการที่กันเงินไว้แล้ว; ให้แยกเป็นการแก้ไขคำชี้แจง/รายการตามข้อ 30 และตรวจข้อ 29 เมื่อเข้าเงื่อนไข'
+      },
+      decisionLock: reservationAction.amendReservedItem && !reservationAction.councilResolution && budgetChange.substantive
+    } : {
+      applicable: false,
+      initialWithholding: { trigger: false, authorityChain: [], note: '' },
+      amendReservedItem: { trigger: false, authorityChain: [], note: '' },
+      decisionLock: false
     };
 
     const authorityRoute = {
@@ -135,8 +185,14 @@
       applicable: true,
       status: decisionLock ? 'VERIFY_BUDGET_AUTHORITY' : 'DIRECT_UNIT_RULE_READY',
       decisionLock, blockers: [...blockers, ...gateBlockers], fiscalYear, orgType, budgetUnitStatus,
-      budgetStatus, budgetChange, authorityRoute,
+      budgetStatus, budgetChange, rphMaintenanceFund, reservationAction, authorityRoute,
+      rphReservationRoute,
       authorityBase: [
+        ...(rphMaintenanceFund ? [
+          'ระเบียบเงินบำรุงโรงพยาบาลและหน่วยบริการสาธารณสุขของ อปท. พ.ศ. 2560 และที่แก้ไขเพิ่มเติม พ.ศ. 2561 ข้อ 9',
+          'ระเบียบการเงิน อปท. พ.ศ. 2566 ข้อ 61 สำหรับการกันเงินกรณีมิได้ก่อหนี้ผูกพัน',
+          'ระเบียบวิธีการงบประมาณของ อปท. พ.ศ. 2563 ข้อ 29–30 สำหรับการแก้ไขรายการที่กันเงินไว้แล้ว'
+        ] : []),
         'พ.ร.บ.วิธีการงบประมาณ พ.ศ. 2561',
         'ระเบียบว่าด้วยการบริหารงบประมาณ พ.ศ. 2562',
         'ระเบียบ/หลักเกณฑ์การรับเงินและการเบิกจ่ายเงินของ อปท. ที่ใช้บังคับกับรายการและช่วงเวลา',
@@ -147,7 +203,10 @@
     });
   }
 
-  const api = Object.freeze({ evaluate, detectOrgType, detectFiscalYear, detectBudgetStatus, detectBudgetChange });
+  const api = Object.freeze({
+    evaluate, detectOrgType, detectFiscalYear, detectBudgetStatus, detectBudgetChange,
+    detectRphMaintenanceFund, detectReservationAction
+  });
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof window !== 'undefined') window.GOVPROMPT_BUDGET_AUTHORITY_GATE = api;
 })();
