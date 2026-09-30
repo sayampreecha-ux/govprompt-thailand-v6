@@ -27,6 +27,11 @@
 
     .bottom-nav{grid-template-columns:repeat(5,1fr)}.bottom-nav .pending{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#6b6550}.bottom-nav .pending span{font-size:12px;line-height:1.2}.bottom-nav .pending b{width:30px;height:30px;border-radius:50%;background:#a97808;color:#fff;display:grid;place-items:center;font-size:15px}.bottom-nav .pending:active{transform:scale(.98)}
     @media(max-width:680px){.topbar{height:140px;align-items:flex-start;padding:30px 14px 0}.top-actions{padding-top:2px}.brand{align-items:flex-start}.brandmark{margin-top:1px}.brand strong{font-size:20px;line-height:1.35}.brand small{font-size:13px;line-height:1.4}.facebook{padding:10px 17px;font-size:17px}.plus{width:58px;height:58px;border-radius:18px;font-size:30px}.shortcut{width:72px;height:64px}.work-home{padding-top:0}.work-home .menu-head{margin-top:28px}.work-home h1{font-size:30px}.work-grid{gap:14px}.work-card{min-height:116px;padding:15px 12px}.work-name{font-size:20px}.bottom-nav{height:88px}.bottom-nav button{padding:8px 2px 7px}.bottom-nav span{font-size:24px}.bottom-nav small{font-size:12px}.bottom-nav .pending b{width:30px;height:30px}}
+
+    /* GovPrompt v7.1 — live Pages UI-only polish. */
+    .composer-bottom{grid-template-columns:1fr auto}
+    .composer-bottom .icon-btn{display:flex;align-items:center;justify-content:center}
+    @media(max-width:680px){.composer-bottom{grid-template-columns:1fr auto;gap:8px}.composer-bottom .icon-btn{width:48px;height:48px}.send{width:46px;height:46px}}
 </style>
 </head>
 <body>
@@ -57,13 +62,8 @@
         </select>
       </div>
       <div class="composer-bottom">
-        <button class="icon-btn" id="attachBtn" type="button" aria-label="แนบเอกสาร">📎</button>
-        <button class="icon-btn" id="photoBtn" type="button" aria-label="แนบภาพ">▣</button>
         <button class="icon-btn" id="composerShortcutBtn" type="button" aria-label="ทางลัด">⚡</button>
-        <button class="file-pick" id="filePickBtn" type="button">📎 เอกสารประกอบ <span>⌄</span></button>
         <button class="send" id="sendBtn" type="button" aria-label="ส่ง">↑</button>
-        <input id="docInput" type="file" hidden multiple>
-        <input id="imageInput" type="file" hidden accept="image/*" multiple>
       </div>
       <div class="composer-note"><strong>Public Beta:</strong> ใช้งานฟรี · GovPrompt ช่วยจัดคำถาม ตรวจความเสี่ยง และเตรียม Prompt เพื่อใช้กับ ChatGPT/AI · ผู้ใช้ต้องตรวจทานข้อมูลก่อนนำไปใช้จริง</div>
     </div>
@@ -72,7 +72,7 @@
   <section class="work-home" aria-labelledby="workTitle">
     <div class="menu-head"><div>
       <h1 id="workTitle">เลือกผู้ช่วยตามงาน</h1>
-      <p>12 หมวดงาน เรียงจากงานที่ใช้บ่อย • มีเส้นทางช่วยเหลือประชาชนและสาธารณภัยอัตโนมัติ</p>
+      <p>13 หมวดงาน เรียงจากงานที่ใช้บ่อย • มีเส้นทางช่วยเหลือประชาชนและสาธารณภัยอัตโนมัติ</p>
     </div></div>
     <div class="work-grid" id="workGrid">
       <button class="work-card" data-q="ช่วยเหลือประชาชนและสาธารณภัย" style="--card-line:#c8ddcf"><span class="work-icon">🧰</span><span class="work-name">ช่วยเหลือประชาชนและสาธารณภัย</span><span class="chev">⌄</span></button>
@@ -129,13 +129,7 @@ function routeFrom(text){const q=String(text||'').trim();if(!q){document.getElem
 function openCategory(q){const mainPrompt=document.getElementById('mainPrompt');if(mainPrompt){mainPrompt.value=q+' : ';mainPrompt.focus();window.scrollTo({top:0,behavior:'smooth'});toast('เลือกหมวดงานแล้ว พิมพ์รายละเอียดต่อได้เลย');}}
 document.querySelectorAll('#workGrid [data-q]').forEach(b=>b.onclick=()=>openCategory(b.dataset.q));
 const mainPrompt=document.getElementById('mainPrompt');
-const docInput=document.getElementById('docInput'),imageInput=document.getElementById('imageInput');
-document.getElementById('attachBtn').onclick=()=>docInput.click();
-document.getElementById('filePickBtn').onclick=()=>docInput.click();
-document.getElementById('photoBtn').onclick=()=>imageInput.click();
 document.getElementById('composerShortcutBtn').onclick=()=>document.getElementById('shortcutBtn').click();
-docInput.onchange=()=>{const n=[...docInput.files].map(f=>f.name).join(', ');if(n)toast('แนบเอกสารแล้ว: '+n)};
-imageInput.onchange=()=>{const n=[...imageInput.files].map(f=>f.name).join(', ');if(n)toast('แนบภาพแล้ว: '+n)};
 document.getElementById('sendBtn').onclick=()=>{const q=String(mainPrompt?.value||'').trim();if(!q){mainPrompt?.focus();return}routeFrom(q);};
 mainPrompt?.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();document.getElementById('sendBtn').click();}});
 
