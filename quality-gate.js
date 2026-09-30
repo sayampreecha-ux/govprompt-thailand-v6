@@ -83,7 +83,7 @@ function evaluate(envelope){
      budgetAuthority:budgetAuthorityGate,
      decisionIntegrity:decisionGate,
      eventContinuity:continuityGate,
-     workflowReadiness:{ready:status===STATUSES.PASS&&transitionGate.pass&&decisionGate.pass&&continuityGate.pass&&!budgetAuthorityGate.decisionLock},
+     workflowReadiness:{ready:status===STATUSES.PASS&&transitionGate.pass&&decisionGate.pass&&continuityGate.pass&&!budgetAuthorityGate.decisionLock&&!disasterSpendingGate.decisionLock},
      partialAnswerReadiness:{ready:hasSelection&&!fallback,finalDecisionLocked}
    }
  });
