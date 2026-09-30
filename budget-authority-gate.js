@@ -57,7 +57,7 @@
       source.query, source.task?.query, source.fundType, source.budgetType,
       ...Object.values(source.userInputs || {})
     ].join(' '));
-    return /เงินบำรุง/.test(input) && /รพ\.สต\.|โรงพยาบาลส่งเสริมสุขภาพตำบล|หน่วยบริการสาธารณสุข|โรงพยาบาล/.test(input);
+    return /เงินบำรุง/.test(input) && /รพ\.สต\.|โรงพยาบาลส่งเสริมสุขภาพตำบล|หน่วยบริการสาธารณสุข/.test(input);
   }
 
   function detectReservationAction(source = {}) {
@@ -140,7 +140,7 @@
         ] : [],
         note: 'อย่าใช้ข้อ 61 เป็นฐานหลักในการแก้ไขรายการที่กันเงินไว้แล้ว; ให้แยกเป็นการแก้ไขคำชี้แจง/รายการตามข้อ 30 และตรวจข้อ 29 เมื่อเข้าเงื่อนไข'
       },
-      decisionLock: reservationAction.amendReservedItem && !reservationAction.councilResolution && budgetChange.substantive
+      decisionLock: reservationAction.amendReservedItem && budgetChange.substantive && source.rule29Checked !== true
     } : {
       applicable: false,
       initialWithholding: { trigger: false, authorityChain: [], note: '' },
