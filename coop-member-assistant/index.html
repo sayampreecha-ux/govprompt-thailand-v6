@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#176b45">
+<meta name="description" content="AI ผู้ช่วยสมาชิก สอ.อปท. ตอบคำถามพื้นฐานจากข้อมูลทางการ และส่งต่อเจ้าหน้าที่เมื่อเป็นข้อมูลเฉพาะสมาชิก">
+<title>AI ผู้ช่วยสมาชิก สอ.อปท.</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f7f4;color:#17322a;font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;line-height:1.55}.wrap{max-width:760px;margin:auto;padding:12px 12px 90px}.top{position:sticky;top:0;z-index:10;background:#f3f7f4eF;backdrop-filter:blur(8px);padding:8px 0;display:flex;gap:8px}.top button{flex:1;min-height:44px;border:1px solid #d7e5dc;border-radius:12px;background:#fff;font:inherit;font-weight:750;color:#245441}.top .contact{background:#e7f5ed;color:#176b45}.hero{background:#fff;border:1px solid #e2ebe5;border-radius:22px;padding:22px 17px;box-shadow:0 10px 34px #1b563315}.eyebrow{font-size:13px;font-weight:800;color:#176b45}.hero h1{font-size:clamp(25px,6vw,34px);line-height:1.2;margin:5px 0}.sub{margin:0;color:#5c6f67;font-size:17px}.ask{display:flex;gap:8px;margin:18px 0 8px}.ask input{flex:1;min-width:0;border:2px solid #cbdad1;border-radius:14px;min-height:54px;padding:13px;font:inherit;font-size:17px}.ask input:focus{outline:3px solid #d6efe1;border-color:#176b45}.ask button{min-width:72px;border:0;border-radius:14px;background:#176b45;color:white;font:inherit;font-weight:800}.hint{font-size:13px;color:#6b7d75}.title{font-weight:850;margin:18px 0 9px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.quick{min-height:72px;border:1px solid #dce7e0;border-radius:15px;background:#fff;text-align:left;padding:12px;font:inherit;font-weight:800;color:#17322a}.quick small{display:block;font-weight:500;color:#6c7c76;margin-top:2px}.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:5px}.chip{white-space:nowrap;border:1px solid #d8e5dc;border-radius:999px;padding:9px 12px;background:#fff;font:inherit}.privacy{margin:18px 0 0;background:#f7faf8;border-radius:12px;padding:11px;font-size:13px;color:#61736b}.ans{margin-top:14px;background:#fff;border:1px solid #e0e9e3;border-radius:18px;padding:18px;box-shadow:0 7px 24px #17392a0d}.hidden{display:none}.badge{display:inline-block;padding:4px 9px;border-radius:999px;background:#e9f5ef;color:#176b45;font-size:13px;font-weight:800}.body{white-space:pre-line;margin-top:9px}.detail{margin:12px 0 0;padding-left:1.2rem}.actions{display:grid;gap:8px;margin-top:14px}.actions a{display:block;text-decoration:none;padding:11px 12px;border-radius:11px;background:#edf6ff;color:#164d83;font-weight:750}.sources{margin-top:14px;border-top:1px solid #edf1ee;padding-top:10px}.sources summary{cursor:pointer;font-weight:750;color:#586c63}.sources a{display:block;margin-top:6px;color:#276044;overflow-wrap:anywhere}.follow{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.contactbox{position:fixed;left:12px;right:12px;bottom:12px;max-width:736px;margin:auto;background:#fff;border:1px solid #dce8e0;border-radius:18px;padding:16px;box-shadow:0 18px 50px #10281e30;z-index:30}.contacthead{display:flex;justify-content:space-between;align-items:center}.close{border:0;background:#eef4f0;border-radius:10px;width:38px;height:38px;font-size:20px}.clinks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.clinks a,.clinks button{min-height:48px;border:0;border-radius:12px;padding:10px;font:inherit;font-weight:750;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center}.tel{background:#e8f5ed;color:#176b45}.line{background:#eefbea;color:#28751f}.fb{background:#edf5ff;color:#155298}.web{background:#f4f1ff;color:#5b43a2}@media(min-width:620px){.grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:420px){.wrap{padding-left:9px;padding-right:9px}.hero{padding:18px 14px}.clinks{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><button id="homeBtn">🏠 หน้าแรก</button><button id="contactBtn" class="contact">☎️ ติดต่อเจ้าหน้าที่</button></div>
+  <section class="hero" id="home">
+    <div class="eyebrow">สหกรณ์ออมทรัพย์องค์กรปกครองส่วนท้องถิ่น จำกัด</div>
+    <h1>🤖 AI ผู้ช่วยสมาชิก สอ.อปท.</h1>
+    <p class="sub"><strong>ถามเรื่องสหกรณ์ได้เลย</strong> — ตอบจากข้อมูลทางการที่จัดเตรียมไว้</p>
+    <form id="form" class="ask"><input id="q" maxlength="500" autocomplete="off" placeholder="พิมพ์คำถาม เช่น สวัสดิการมีกี่แบบ"><button>ถาม</button></form>
+    <div class="hint">กดหัวข้อก็ได้ ไม่ต้องรู้ชื่อระเบียบหรือประกาศ</div>
+    <div class="title">เรื่องที่สมาชิกถามบ่อย</div>
+    <div class="grid">
+      <button class="quick" data-q="เงินกู้มีกี่แบบ">💰 เงินกู้<small>ประเภท แบบฟอร์ม ติดต่อ</small></button>
+      <button class="quick" data-q="สวัสดิการมีกี่แบบ">❤️ สวัสดิการ<small>สิทธิ แบบขอรับ ทุน</small></button>
+      <button class="quick" data-q="เงินฝาก">🏦 เงินฝาก<small>แบบฟอร์ม ขั้นตอน ติดต่อ</small></button>
+      <button class="quick" data-q="สมัครสมาชิกใหม่">👤 สมาชิก<small>สมัคร โอนย้าย ลาออก</small></button>
+      <button class="quick" data-q="แบบฟอร์มทั้งหมด">📄 แบบฟอร์ม<small>ค้นตามงานที่ต้องทำ</small></button>
+      <button class="quick" data-contact="1">☎️ ติดต่อ<small>โทร LINE Facebook</small></button>
+    </div>
+    <div class="title">คำถามยอดนิยม</div>
+    <div class="chips">
+      <button class="chip" data-q="เพิ่งคลอดลูก ขอแบบอะไร">เพิ่งคลอดลูก</button>
+      <button class="chip" data-q="ทุนเรียนลูก">ทุนเรียนลูก</button>
+      <button class="chip" data-q="ปันผลปี 69">ปันผลปี 69</button>
+      <button class="chip" data-q="ขอใบสมัครสมาชิก">ใบสมัครสมาชิก</button>
+    </div>
+    <div class="privacy">🔒 ข้อมูลเฉพาะสมาชิก เช่น ยอดหนี้ หุ้น เงินฝาก ผลอนุมัติ หรือวงเงินเฉพาะตัว ระบบจะส่งต่อเจ้าหน้าที่ทันที และไม่ขอรหัสผ่าน/OTP</div>
+  </section>
+  <section id="out" class="ans hidden" aria-live="polite"></section>
+</main>
+<section id="contactBox" class="contactbox hidden">
+  <div class="contacthead"><strong>☎️ ติดต่อ สอ.อปท.</strong><button id="closeContact" class="close">×</button></div>
+  <div class="clinks">
+    <a class="tel" href="tel:022418250">โทร 02-241-8250-1</a>
+    <button class="line" id="copyLine">LINE @dlasavingcoop</button>
+    <a class="fb" href="https://www.facebook.com/Dlasavingcooppage" target="_blank" rel="noopener">Facebook</a>
+    <a class="web" href="https://www.dlasavingcoop.com/" target="_blank" rel="noopener">เว็บไซต์สหกรณ์</a>
+  </div>
+</section>
+<script>
+(function(root,factory){
+  const data=factory();
+  if(typeof module==='object'&&module.exports) module.exports=data;
+  else root.COOP_KB=data;
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
+  return {
+    version:'2.0.0-pages',
+    verifiedAt:'2026-10-03',
+    product:'AI ผู้ช่วยสมาชิก สอ.อปท.',
+    official:{
+      home:'https://www.dlasavingcoop.com/',
+      procedure:'https://www.dlasavingcoop.com/show.php?Category=procedure',
+      notices:'https://www.dlasavingcoop.com/list.php?Category=notice',
+      contact:'https://www.dlasavingcoop.com/show.php?Category=contact',
+      payment:'https://dlasavingcoop.com/show.php?Category=payment',
+      memberForms:'https://www.dlasavingcoop.com/show.php?No=772',
+      emergencyLoan:'https://www.dlasavingcoop.com/show.php?No=773',
+      ordinaryLoanForms:'https://www.dlasavingcoop.com/show.php?No=774',
+      welfareForms:'https://www.dlasavingcoop.com/show.php?No=775',
+      depositForms:'https://www.dlasavingcoop.com/show.php?No=807',
+      specialLoanForms:'https://www.dlasavingcoop.com/show.php?No=2385',
+      memberApplication:'https://drive.google.com/file/d/1TvtIW_yrOcBYuvRNZmbU58sDpgyd1P6e/view?usp=sharing',
+      educationLoan:'https://drive.google.com/file/d/1cK6zUQSPdT-3NT7bJ3WXO_MWP_ruzXLi/view?usp=sharing',
+      sharesDepositLoan:'https://drive.google.com/file/d/1b9-zInSX-azm1lQPQnqJK5Es5eYmBaxe/view?usp=sharing',
+      vacationLoan:'https://drive.google.com/file/d/1qC30WEF9YTq1oo-M0r8sySLg2J2uNoIL/view?usp=sharing',
+      disasterLoan:'https://drive.google.com/file/d/1YXj7yWsr7ZQC2MlL0Dt7qMaJO_vCY0kb/view?usp=sharing',
+      guarantorDebtLoan:'https://drive.google.com/file/d/1ZjfxQntcenz5DfpWSd4owcM6zOwEHfW8/view?usp=sharing',
+      transfer:'https://drive.google.com/file/d/1ejFNdA3oKnhHyszg8bQjwmhVUf5Dp6Jy/view?usp=sharing',
+      resignation:'https://drive.google.com/file/d/1hcVCP8NcKw8c-hWvQQFdFxzVrBGcanNN/view?usp=sharing',
+      welfareRule:'https://drive.google.com/file/d/1l-WYt403pVZ0Rc6aWbFnIH5-BXkUisZ8/view?usp=sharing',
+      welfareAmendment2:'https://drive.google.com/file/d/1DVazU8xDNsSmK5oCobOcS_jnwdzNmg18/view?usp=sharing',
+      welfareFamilyDeath:'https://drive.google.com/file/d/1Fs51CIR2Rm5-4oxkTwfYYHyJAnKCPRZ7/view?usp=drivesdk',
+      facebook:'https://www.facebook.com/Dlasavingcooppage',
+      ordinaryLoanContact:'https://dlasavingcoop.com/board_content.php?No=41045',
+      emergencyLoanContact:'https://www.dlasavingcoop.com/board_content.php?No=39123',
+      registrationContact:'https://dlasavingcoop.com/show.php?No=4589',
+      depositGuide:'https://dlasavingcoop.com/show.php?No=2959'
+    },
+    contacts:{
+      general:{
+        phone:'02-241-8250-1', fax:'02-241-8252', line:'@dlasavingcoop',
+        facebook:'สหกรณ์ออมทรัพย์องค์กรปกครองส่วนท้องถิ่น จำกัด',
+        address:'111/1 หมู่ 1 ซอยคลองหลวง 8 ตำบลคลองหนึ่ง อำเภอคลองหลวง จังหวัดปทุมธานี 12120'
+      },
+      ordinaryLoan:{published:'24 เม.ย. 2569', people:[
+        ['คุณเตือนจิตต์','083-928-8638'],['คุณศุจินธร','092-391-8898'],['คุณณิชากร','092-371-6139'],['คุณสุนทรี','088-655-7581'],['คุณปรวีย์','092-630-9360']
+      ]},
+      emergencyLoan:{published:'15 ก.ค. 2568', people:[['คุณอรวรรณ','083-929-3058'],['คุณวรัญญา','091-727-2541']]},
+      registration:{published:'ข้อมูลเผยแพร่ปี 2568', people:[
+        ['คุณรัชปภา','092-391-8135'],['คุณปิยาภา','083-929-2739'],['คุณวิราภรณ์','092-391-7688'],['คุณสุปราณี','083-929-2830'],['คุณเรวดี','092-391-8117'],['ว่าที่ ร.ต.นรภัทร','092-391-1540']
+      ]},
+      deposit:{published:'หน้าเว็บที่ตรวจ ณ 3 ต.ค. 2569', people:[['คุณมิรันตี','092-391-5896'],['คุณพัชรมณฑ์','091-727-5236']]}
+    },
+    dividend:{
+      title:'กำหนดแนวทางการจ่ายเงินปันผลหุ้นและเงินเฉลี่ยคืน ประจำปีบัญชี 2569',
+      noticeNo:'04916', published:'2 ก.ย. 2569', verifiedAt:'3 ต.ค. 2569',
+      note:'ระบบไม่แสดงอัตราปันผล/เฉลี่ยคืนจนกว่าจะมีหลักฐานอัตราที่อนุมัติชัดเจน'
+    },
+    welfare:{
+      types:['สวัสดิการเพื่อการคลอดบุตร','สวัสดิการเพื่อการสมรส','สวัสดิการเพื่อการศาสนา','สวัสดิการเพื่อการสำเร็จการศึกษา','สวัสดิการบำเหน็จสมาชิก','สวัสดิการทุนส่งเสริมการศึกษาของบุตรสมาชิก','สวัสดิการเพื่อการสงเคราะห์สมาชิกและครอบครัว','สวัสดิการเพื่อการสงเคราะห์สมาชิกกรณีประสบภัย'],
+      scholarshipLevels:['อุดมศึกษา','มัธยมศึกษา','ประถมศึกษา','ก่อนประถมศึกษา/ปฐมวัย'],
+      childBirth:['เป็นสวัสดิการประเภทหนึ่งตามระเบียบสวัสดิการสมาชิก','ใช้แบบขอรับสวัสดิการจากหน้าสวัสดิการทางการ','หลักฐานสำคัญรวมถึงสำเนาสูติบัตร','ยื่นภายใน 180 วันตามหลักเกณฑ์ที่ตรวจไว้'],
+      familyDeath:['กรณีบิดา/มารดาโดยชอบด้วยกฎหมายถึงแก่กรรม มีหลักเกณฑ์สงเคราะห์ครอบครัว','ข้อมูลที่ตรวจไว้ระบุ 3,000 บาทต่อคนสำหรับกรณีที่เข้าเงื่อนไข','เพื่อความปลอดภัยควรยื่นภายใน 120 วัน; หากเกินให้เจ้าหน้าที่ตรวจข้อกำหนดที่ใช้บังคับ']
+    }
+  };
+});
+
+</script>
+<script>
+(function(root,factory){
+  let kb;
+  if(typeof module==='object'&&module.exports){ kb=require('../data/kb.js'); module.exports=factory(kb); }
+  else { root.COOP_APP=factory(root.COOP_KB); }
+})(typeof globalThis!=='undefined'?globalThis:this,function(KB){
+  const S=KB.official;
+  const C=KB.contacts;
+  const line=(rows=[])=>rows.map(x=>`${x[0]} ${x[1]}`).join(' · ');
+  const src=(title,url,note='')=>({title,url,note});
+  const res=(intent,answer,opt={})=>({intent,answer,details:opt.details||[],actions:opt.actions||[],sources:opt.sources||[],followups:opt.followups||[],status:opt.status||'ข้อมูลจากแหล่งทางการ',privacy:!!opt.privacy});
+
+  function norm(s=''){return String(s).trim().replace(/\s+/g,' ').replace(/[?？]+$/g,'');}
+  function personal(q){
+    return /\b\d{13}\b|(?:OTP|รหัสผ่าน|password)|(?:ยอดหนี้|หนี้คงเหลือ|ยอดหุ้น|ยอดเงินฝาก|เงินฝากคงเหลือ|ผลอนุมัติ|สถานะคำขอ|วงเงินคงเหลือ|กู้เพิ่มได้ไหม|กู้ได้เท่าไร).*(?:ผม|ฉัน|ดิฉัน|หนู|ของผม|ของฉัน)|(?:ผม|ฉัน|ดิฉัน|หนู).*(?:ยอดหนี้|ยอดหุ้น|ยอดเงินฝาก|ผลอนุมัติ|กู้เพิ่ม|กู้ได้เท่าไร|ปันผลของ)/i.test(q);
+  }
+  function handoff(q){
+    let target='โทรศัพท์กลาง 02-241-8250-1 หรือ LINE Official @dlasavingcoop';
+    if(/กู้|สินเชื่อ/i.test(q)) target=`งานเงินกู้สามัญ: ${line(C.ordinaryLoan.people)} หรือโทรกลาง ${C.general.phone}`;
+    else if(/ทะเบียน|สมาชิก|ปันผล/i.test(q)) target=`งานทะเบียนสมาชิก: ${line(C.registration.people)} หรือโทรกลาง ${C.general.phone}`;
+    else if(/เงินฝาก/i.test(q)) target=`งานเงินฝาก: ${line(C.deposit.people)} หรือโทรกลาง ${C.general.phone}`;
+    else if(/สวัสดิการ|ทุน/i.test(q)) target=`งานสวัสดิการ: โทรกลาง ${C.general.phone} หรือ LINE Official ${C.general.line}`;
+    return res('personal_handoff',`เรื่องนี้ต้องใช้ข้อมูลเฉพาะสมาชิก ระบบนี้ไม่ตรวจยอด/สถานะ/ผลอนุมัติแทนเจ้าหน้าที่ครับ\n\n${target}`,{
+      status:'🔒 ข้อมูลเฉพาะสมาชิก — ส่งต่อเจ้าหน้าที่',privacy:true,
+      details:['อย่าส่งเลขบัตรประชาชน เลขบัญชี รหัสผ่าน หรือ OTP ในหน้าเว็บนี้','แจ้งเลขสมาชิกเฉพาะเมื่ออยู่ในช่องทางทางการของสหกรณ์'],
+      actions:[['☎️ โทรสหกรณ์','tel:022418250'],['🌐 หน้าติดต่อทางการ',S.contact]],
+      sources:[src('หน้าติดต่อ สอ.อปท.',S.contact)]
+    });
+  }
+
+  function answer(input){
+    const q=norm(input);
+    if(!q) return res('empty','พิมพ์คำถามได้เลย เช่น “สวัสดิการมีกี่แบบ” หรือ “ขอใบสมัครสมาชิก”',{status:'พร้อมตอบ'});
+    if(personal(q)) return handoff(q);
+
+    if(/ช่องทางติดต่อ|ติดต่อสหกรณ์|เบอร์สหกรณ์|โทรสหกรณ์|ไลน์.*สหกรณ์|facebook|เฟสบุ/i.test(q)) return res('contact',
+      `ช่องทางหลัก สอ.อปท.\n• โทร ${C.general.phone}\n• LINE Official ${C.general.line}\n• Facebook: ${C.general.facebook}\n• เว็บไซต์: www.dlasavingcoop.com\n• ที่อยู่: ${C.general.address}`,{
+        details:[`กู้สามัญ (${C.ordinaryLoan.published}): ${line(C.ordinaryLoan.people)}`,`กู้ฉุกเฉิน (${C.emergencyLoan.published}): ${line(C.emergencyLoan.people)}`,`งานทะเบียน (${C.registration.published}): ${line(C.registration.people)}`,`งานเงินฝาก (${C.deposit.published}): ${line(C.deposit.people)}`],
+        actions:[['☎️ โทร 02-241-8250-1','tel:022418250'],['Facebook ทางการ',S.facebook],['เว็บไซต์สหกรณ์',S.home]],sources:[src('หน้าติดต่อทางการ',S.contact)]
+      });
+
+    if(/สวัสดิการ.*กี่|สวัสดิการ.*มีอะไร|มีสวัสดิการ/i.test(q)) return res('welfare_all',`สวัสดิการสมาชิกที่ตรวจยืนยันไว้มี 8 ประเภท:\n${KB.welfare.types.map((x,i)=>`${i+1}. ${x}`).join('\n')}`,{
+      actions:[['เปิดแบบขอรับสวัสดิการ',S.welfareForms]],sources:[src('แบบฟอร์มและหลักเกณฑ์สวัสดิการ',S.welfareForms),src('ระเบียบสวัสดิการสมาชิก',S.welfareRule)],followups:['เพิ่งคลอดลูก ขอแบบอะไร','ทุนเรียนลูกมีอะไรบ้าง','แม่เสียได้สวัสดิการไหม']
+    });
+    if(/คลอดลูก|คลอดบุตร|มีลูก/i.test(q)) return res('welfare_childbirth','มีสวัสดิการเพื่อการคลอดบุตรครับ',{
+      details:KB.welfare.childBirth,actions:[['เปิดแบบขอรับสวัสดิการ',S.welfareForms]],sources:[src('แบบฟอร์ม/หลักเกณฑ์สวัสดิการ',S.welfareForms),src('ระเบียบสวัสดิการสมาชิก',S.welfareRule)],followups:['สวัสดิการมีกี่แบบ','ติดต่อสวัสดิการ']
+    });
+    if(/ทุน.*(?:ลูก|บุตร)|ทุนการศึกษา|ทุนเรียน/i.test(q)) return res('scholarship',`ทุนส่งเสริมการศึกษาของบุตรสมาชิกแบ่งเป็น 4 ระดับ: ${KB.welfare.scholarshipLevels.join(' / ')}`,{
+      details:['ประกาศทุนและช่วงเวลารับสมัครให้ตรวจประกาศประจำปีล่าสุดก่อนยื่น'],actions:[['ดูประกาศทางการ',S.notices],['ดูแบบสวัสดิการ',S.welfareForms]],sources:[src('ประกาศทางการ สอ.อปท.',S.notices),src('ระเบียบสวัสดิการ',S.welfareRule)]
+    });
+    if(/(?:พ่อ|แม่|บิดา|มารดา).*(?:เสีย|ถึงแก่กรรม)|งานศพ|ค่าทำศพ/i.test(q)) return res('welfare_family_death','กรณีบิดา/มารดาโดยชอบด้วยกฎหมายถึงแก่กรรม มีสวัสดิการสงเคราะห์ครอบครัวตามหลักเกณฑ์ที่เกี่ยวข้อง',{
+      details:KB.welfare.familyDeath,actions:[['เปิดแบบสวัสดิการ',S.welfareForms]],sources:[src('หลักเกณฑ์กรณีครอบครัวถึงแก่กรรม',S.welfareFamilyDeath),src('แบบสวัสดิการ',S.welfareForms)]
+    });
+    if(/ประสบภัย|น้ำท่วม|ไฟไหม้|ภัยพิบัติ/i.test(q) && /สวัสดิการ/i.test(q)) return res('welfare_disaster','มีสวัสดิการสงเคราะห์สมาชิกกรณีประสบภัย และมีแบบขอรับแยกจากเงินกู้ภัยพิบัติครับ',{
+      details:['สวัสดิการประสบภัยไม่ใช่เงินกู้','สิทธิและเอกสารให้ยึดแบบ/หลักเกณฑ์สวัสดิการปัจจุบัน'],actions:[['เปิดแบบสวัสดิการประสบภัย',S.welfareForms]],sources:[src('แบบฟอร์มและหลักเกณฑ์สวัสดิการ',S.welfareForms)]
+    });
+
+    if(/เงินกู้.*(?:กี่แบบ|กี่ประเภท|มีอะไร)|กู้.*(?:กี่แบบ|มีอะไร)|^เงินกู้$|^กู้$/i.test(q)) return res('loan_all','เงินกู้สมาชิกแบ่งเป็น 3 หมวดใหญ่: 1) เงินกู้สามัญ 2) เงินกู้เพื่อเหตุฉุกเฉิน 3) เงินกู้พิเศษ',{
+      details:['หน้าแบบกู้สามัญเผยแพร่แบบใช้งานหลายกรณี เช่น บุคคลค้ำ การศึกษา ภัยพิบัติ หุ้น/เงินฝาก พักผ่อน และพัฒนาคุณภาพชีวิต','วงเงิน ดอกเบี้ย คนค้ำ และเงื่อนไขตัวเลข ต้องตรวจฉบับปัจจุบันก่อนใช้ เพราะมีการแก้ไขระเบียบปี 2569'],actions:[['เงินกู้สามัญ/แบบฟอร์ม',S.ordinaryLoanForms],['เงินกู้ฉุกเฉิน',S.emergencyLoan],['เงินกู้พิเศษ',S.specialLoanForms]],sources:[src('ระเบียบและหลักเกณฑ์',S.procedure)]
+    });
+    if(/กู้สามัญ|เงินกู้สามัญ/i.test(q)) return res('loan_ordinary','เงินกู้สามัญมีแบบฟอร์มและหลักเกณฑ์ทางการให้เลือกตามวัตถุประสงค์ครับ',{
+      details:['ถ้าถามวงเงิน ดอกเบี้ย จำนวนผู้ค้ำ หรือคุณสมบัติเฉพาะตัว ระบบจะไม่เดา ให้เปิดหลักเกณฑ์ปัจจุบันหรือติดต่อเจ้าหน้าที่'],actions:[['เปิดแบบกู้สามัญ',S.ordinaryLoanForms],['ติดต่อกู้สามัญ',S.ordinaryLoanContact]],sources:[src('หน้ารวมแบบกู้สามัญ',S.ordinaryLoanForms),src('หน้ารวมระเบียบ',S.procedure)]
+    });
+    if(/กู้ฉุกเฉิน|เงินกู้ฉุกเฉิน/i.test(q)) return res('loan_emergency','มีเงินกู้เพื่อเหตุฉุกเฉินครับ แบบคำขอและหลักเกณฑ์อยู่ในหน้าทางการของสหกรณ์',{
+      details:['ตัวเลขวงเงิน ดอกเบี้ย และเงื่อนไขต้องยึดฉบับปัจจุบัน ไม่ใช้ข้อมูลเก่าปะปน'],actions:[['เปิดหลักเกณฑ์/แบบกู้ฉุกเฉิน',S.emergencyLoan]],sources:[src('เงินกู้ฉุกเฉิน',S.emergencyLoan),src('หน้ารวมระเบียบ',S.procedure)]
+    });
+    if(/กู้พิเศษ|เงินกู้พิเศษ|เคหะ|ไถ่ถอนจำนอง/i.test(q)) return res('loan_special','มีเงินกู้พิเศษและแบบคำขอเฉพาะวัตถุประสงค์ เช่น เคหะ ไถ่ถอนจำนอง และกรณีที่สหกรณ์กำหนดครับ',{
+      actions:[['เปิดแบบกู้พิเศษ',S.specialLoanForms]],sources:[src('แบบกู้พิเศษ',S.specialLoanForms),src('หน้ารวมระเบียบ',S.procedure)]
+    });
+    if(/กู้.*การศึกษา|เพื่อการศึกษา|ค่าเทอม/i.test(q)) return res('loan_education','กู้เพื่อการศึกษามีแบบคำขอเฉพาะ และเอกสารหลักเกี่ยวกับผู้กู้/ผู้ค้ำ รายได้ และสถานศึกษา',{
+      details:['แบบที่ตรวจไว้ระบุหลักฐานรายได้ย้อนหลัง 3 เดือน','รายละเอียดเงื่อนไขให้ยึดแบบและหลักเกณฑ์ปัจจุบัน'],actions:[['เปิดแบบกู้เพื่อการศึกษา',S.educationLoan]],sources:[src('แบบกู้เพื่อการศึกษา',S.educationLoan)]
+    });
+    if(/กู้.*(?:ภัยพิบัติ|น้ำท่วม|ไฟไหม้)/i.test(q)) return res('loan_disaster','มีแบบเงินกู้สามัญเพื่อช่วยเหลือสมาชิกกรณีภัยพิบัติ แยกจากสวัสดิการประสบภัยครับ',{
+      details:['เอกสารเฉพาะที่แบบกำหนดรวมถึงหนังสือรับรองผู้ประสบภัยและภาพความเสียหาย'],actions:[['เปิดแบบกู้ภัยพิบัติ',S.disasterLoan]],sources:[src('แบบกู้ภัยพิบัติ',S.disasterLoan)]
+    });
+
+    if(/แบบฟอร์ม.*สมาชิก|ใบสมัครสมาชิก|สมัครสมาชิก|สมาชิกใหม่/i.test(q)) return res('member_apply','สมัครสมาชิกมีใบสมัครสมาชิกประเภทสามัญและแบบงานทะเบียนที่เกี่ยวข้องในหน้าทางการครับ',{
+      details:['แบบสมัครที่ตรวจไว้มีค่าธรรมเนียมและเอกสารประกอบระบุในตัวแบบ','ให้ใช้แบบล่าสุดจากหน้าเว็บก่อนยื่น'],actions:[['เปิดใบสมัครสมาชิก',S.memberApplication],['แบบฟอร์มสมาชิก/ทะเบียนทั้งหมด',S.memberForms]],sources:[src('แบบฟอร์มสมาชิก',S.memberForms),src('ใบสมัครสมาชิก',S.memberApplication)]
+    });
+    if(/โอนย้าย|โอนสมาชิก|ย้ายสหกรณ์/i.test(q)) return res('transfer','การโอนย้ายสมาชิกมีแบบและระเบียบเฉพาะ โดยกรณีย้ายต้นสังกัดให้เตรียมสำเนาคำสั่งโอน/ย้ายตามที่แบบกำหนด',{
+      actions:[['เปิดระเบียบ/แบบโอนสมาชิก',S.transfer]],sources:[src('การโอนสมาชิก',S.transfer)]
+    });
+    if(/ลาออก|ออกจากสหกรณ์|พ้นสมาชิก/i.test(q)) return res('resignation','การลาออกต้องตรวจหนี้และภาระค้ำประกันก่อน และดำเนินการตามระเบียบการให้สมาชิกออกจากสหกรณ์',{
+      actions:[['เปิดระเบียบการออกจากสมาชิก',S.resignation]],sources:[src('ระเบียบการให้สมาชิกออก',S.resignation)]
+    });
+
+    if(/เงินฝาก|เปิดบัญชี|ปิดบัญชี|ถอนเงินฝาก/i.test(q)) return res('deposit','เรื่องเงินฝากมีหน้าแบบฟอร์มและขั้นตอนทางการของสหกรณ์ครับ',{
+      details:['อัตราดอกเบี้ยเป็นข้อมูลที่เปลี่ยนได้ จึงไม่ฝังตัวเลขเก่าในระบบนี้ ให้ตรวจประกาศ/หน้าเงินฝากปัจจุบันก่อนทำรายการ'],actions:[['แบบฟอร์มเงินฝาก',S.depositForms],['ติดต่อเงินฝาก',S.depositGuide]],sources:[src('แบบฟอร์มเงินฝาก',S.depositForms),src('คำแนะนำงานเงินฝาก',S.depositGuide)]
+    });
+
+    if(/ปันผล|เฉลี่ยคืน/i.test(q)) return res('dividend',`ประกาศปันผล/เฉลี่ยคืนที่ตรวจไว้ล่าสุด ณ ${KB.dividend.verifiedAt}: “${KB.dividend.title}” (${KB.dividend.noticeNo}, ${KB.dividend.published})`,{
+      details:[KB.dividend.note,'หากใช้งานหลังวันที่ตรวจสอบ ให้เปิดหน้าประกาศทางการเพื่อตรวจว่ามีฉบับใหม่กว่าหรือไม่'],actions:[['เปิดหน้าประกาศล่าสุด',S.notices]],sources:[src('ประกาศทางการ สอ.อปท.',S.notices)]
+    });
+
+    if(/แบบฟอร์ม|แบบขอรับ|ดาวน์โหลด/i.test(q)) return res('forms','หาแบบฟอร์มได้ตามงาน โดยใช้หน้ารวมทางการเพื่อให้ได้ฉบับล่าสุดครับ',{
+      details:['สมาชิก/ทะเบียน','เงินกู้ฉุกเฉิน','เงินกู้สามัญ','เงินกู้พิเศษ','สวัสดิการ','เงินฝาก'],actions:[['สมาชิก/ทะเบียน',S.memberForms],['กู้ฉุกเฉิน',S.emergencyLoan],['กู้สามัญ',S.ordinaryLoanForms],['กู้พิเศษ',S.specialLoanForms],['สวัสดิการ',S.welfareForms],['เงินฝาก',S.depositForms]],sources:[src('เว็บไซต์ สอ.อปท.',S.home)]
+    });
+    if(/ประกาศ|ข่าวล่าสุด|ข่าวสหกรณ์/i.test(q)) return res('notices','ประกาศและข่าวล่าสุดให้ตรวจจากหน้าประกาศทางการของสหกรณ์โดยตรงครับ',{
+      actions:[['เปิดประกาศล่าสุด',S.notices]],sources:[src('ประกาศทางการ สอ.อปท.',S.notices)]
+    });
+    if(/ชำระเงิน|ส่งค่าหุ้น|จ่ายเงินกู้/i.test(q)) return res('payment','วิธีการชำระเงินและนำส่งค่าหุ้น/เงินกู้มีหน้าทางการแยกไว้ครับ',{
+      actions:[['เปิดวิธีการชำระเงิน',S.payment]],sources:[src('วิธีการชำระเงิน',S.payment)]
+    });
+
+    return res('fallback','ยังไม่มีคำตอบที่ยืนยันไว้สำหรับคำถามนี้ครับ เพื่อไม่ให้ข้อมูลผิด ระบบจะไม่เดา',{
+      status:'ยังยืนยันข้อมูลนี้ไม่ได้',actions:[['ค้นจากเว็บไซต์สหกรณ์',S.home],['ดูประกาศทางการ',S.notices],['☎️ ติดต่อสหกรณ์','tel:022418250']],sources:[src('เว็บไซต์ทางการ สอ.อปท.',S.home)],followups:['เงินกู้มีกี่แบบ','สวัสดิการมีกี่แบบ','ขอแบบฟอร์ม','ช่องทางติดต่อสหกรณ์ทั้งหมด']
+    });
+  }
+
+  return {answer,personal,norm};
+});
+
+</script>
+<script>
+const q=document.getElementById('q'),out=document.getElementById('out'),box=document.getElementById('contactBox');
+function render(r){out.replaceChildren();out.classList.remove('hidden');const b=document.createElement('div');b.className='badge';b.textContent=r.status;out.append(b);const body=document.createElement('div');body.className='body';body.textContent=r.answer;out.append(body);if(r.details?.length){const ul=document.createElement('ul');ul.className='detail';r.details.forEach(x=>{const li=document.createElement('li');li.textContent=x;ul.append(li)});out.append(ul)}if(r.actions?.length){const d=document.createElement('div');d.className='actions';r.actions.forEach(([t,u])=>{const a=document.createElement('a');a.textContent=t;a.href=u;if(/^https:/.test(u)){a.target='_blank';a.rel='noopener'}d.append(a)});out.append(d)}if(r.sources?.length){const det=document.createElement('details');det.className='sources';const s=document.createElement('summary');s.textContent='📚 แหล่งข้อมูล';det.append(s);r.sources.forEach(x=>{const a=document.createElement('a');a.textContent=x.title+(x.note?` — ${x.note}`:'');a.href=x.url;a.target='_blank';a.rel='noopener';det.append(a)});out.append(det)}if(r.followups?.length){const d=document.createElement('div');d.className='follow';r.followups.forEach(x=>{const bt=document.createElement('button');bt.className='chip';bt.textContent=x;bt.onclick=()=>ask(x);d.append(bt)});out.append(d)}out.scrollIntoView({behavior:'smooth',block:'start'})}
+function ask(text){q.value=text;render(COOP_APP.answer(text));}
+document.getElementById('form').onsubmit=e=>{e.preventDefault();ask(q.value)};
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>ask(b.dataset.q));
+document.querySelectorAll('[data-contact]').forEach(b=>b.onclick=()=>box.classList.remove('hidden'));
+document.getElementById('contactBtn').onclick=()=>box.classList.remove('hidden');document.getElementById('closeContact').onclick=()=>box.classList.add('hidden');
+document.getElementById('homeBtn').onclick=()=>{q.value='';out.classList.add('hidden');out.replaceChildren();box.classList.add('hidden');document.getElementById('home').scrollIntoView({behavior:'smooth'});q.focus()};
+document.getElementById('copyLine').onclick=async()=>{try{await navigator.clipboard.writeText('@dlasavingcoop');document.getElementById('copyLine').textContent='คัดลอก @dlasavingcoop แล้ว'}catch{alert('LINE Official: @dlasavingcoop')}};
+</script>
+</body></html>
