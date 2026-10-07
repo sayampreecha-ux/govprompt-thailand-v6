@@ -59,7 +59,8 @@ function evaluate(envelope){
  const budgetAuthorityGate=globalThis.GOVPROMPT_BUDGET_AUTHORITY_GATE?.evaluate?.(source)||{applicable:false,status:'NOT_APPLICABLE',decisionLock:false,blockers:[]};
  const decisionGate=decisionIntegrityCheck(source.decisionIntegrity||{});
  const continuityGate=eventContinuityCheck(source.eventContinuity||{});
- const finalDecisionLocked=!transitionGate.pass||!decisionGate.pass||!continuityGate.pass||budgetAuthorityGate.decisionLock;
+ const disasterSpendingGate=source.disasterSpending||{applicable:false,status:'NOT_APPLICABLE',decisionLock:false,blockers:[]};
+ const finalDecisionLocked=!transitionGate.pass||!decisionGate.pass||!continuityGate.pass||budgetAuthorityGate.decisionLock||disasterSpendingGate.decisionLock;
  let status=STATUSES.PASS;
  // A final-decision lock must not block verified partial answers or authority retrieval.
  if(source.catalogStatus===STATUSES.MISSING_CATALOG)status=STATUSES.MISSING_CATALOG;
@@ -83,6 +84,7 @@ function evaluate(envelope){
      budgetAuthority:budgetAuthorityGate,
      decisionIntegrity:decisionGate,
      eventContinuity:continuityGate,
+     disasterSpending:disasterSpendingGate,
      workflowReadiness:{ready:status===STATUSES.PASS&&transitionGate.pass&&decisionGate.pass&&continuityGate.pass&&!budgetAuthorityGate.decisionLock&&!disasterSpendingGate.decisionLock},
      partialAnswerReadiness:{ready:hasSelection&&!fallback,finalDecisionLocked}
    }
