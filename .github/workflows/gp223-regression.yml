@@ -5,7 +5,7 @@ on:
     paths:
       - 'service-contract-natural-person.js'
       - 'procurement-classification-gate.js'
-      - 'gp223-regression-test.js'
+      - 'gp223-regression-test.js'\n      - 'test/gp223-auto-execution.test.mjs'\n      - 'test/gp223-2569-redteam.test.mjs'
       - '.github/workflows/gp223-regression.yml'
   workflow_dispatch:
 
@@ -20,4 +20,4 @@ jobs:
         with:
           node-version: 20
       - name: Run GP223 regression
-        run: node gp223-regression-test.js
+        run: |\n          node gp223-regression-test.js\n          node --test test/gp223-auto-execution.test.mjs test/gp223-2569-redteam.test.mjs
