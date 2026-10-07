@@ -29,7 +29,7 @@ function submitWorkflow(gpId, category, evidenceTypes = []) {
 
 test('production form submit flow wires workflow expansion after Core Engine and Quality Gate', () => {
   assert.match(indexHtml, /workflowExpansion=window\.GOVPROMPT_WORKFLOW_EXPANSION/);
-  assert.match(indexHtml, /const execution=coreEngine\?\.prepare\(sharedContext\?\.get\(\)\);const quality=qualityGate\?\.evaluate\(execution\)/);
+  assert.match(indexHtml, /const execution=coreEngine\?\.prepare\(\{\.\.\.sharedContext\?\.get\(\),disasterSpending:disasterReview\}\);const quality=qualityGate\?\.evaluate\(execution\)/);
   assert.match(indexHtml, /window\.GOVPROMPT_WORKFLOW_PLAN=workflowExpansion\?\.plan\(execution,quality\)\|\|null/);
 });
 
