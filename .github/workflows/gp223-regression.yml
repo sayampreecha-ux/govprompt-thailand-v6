@@ -5,8 +5,17 @@ on:
     paths:
       - 'service-contract-natural-person.js'
       - 'procurement-classification-gate.js'
-      - 'gp223-regression-test.js'\n      - 'test/gp223-auto-execution.test.mjs'\n      - 'test/gp223-2569-redteam.test.mjs'
+      - 'gp223-regression-test.js'
+      - 'test/gp223-auto-execution.test.mjs'
+      - 'test/gp223-2569-redteam.test.mjs'
       - '.github/workflows/gp223-regression.yml'
+  pull_request:
+    paths:
+      - 'service-contract-natural-person.js'
+      - 'procurement-classification-gate.js'
+      - 'gp223-regression-test.js'
+      - 'test/gp223-auto-execution.test.mjs'
+      - 'test/gp223-2569-redteam.test.mjs'
   workflow_dispatch:
 
 jobs:
@@ -20,4 +29,6 @@ jobs:
         with:
           node-version: 20
       - name: Run GP223 regression
-        run: |\n          node gp223-regression-test.js\n          node --test test/gp223-auto-execution.test.mjs test/gp223-2569-redteam.test.mjs
+        run: |
+          node gp223-regression-test.js
+          node --test test/gp223-auto-execution.test.mjs test/gp223-2569-redteam.test.mjs
