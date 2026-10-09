@@ -28,3 +28,11 @@ test('unsupported official forms never silently become PK5',()=>{
 test('unrelated and out of range requests do not select internal control',()=>{
  for(const q of ['ทำ ปค.50','เลข ปค.15','ร่าง TOR รถยนต์','ช่วยน้ำท่วม','สรุปรายงานประชุม','ติดตามผลโครงการถนน','สวัสดีตอนเช้า']){const {state,sandbox}=harness();sandbox.routeFrom(q);assert.equal(state.selected,null,q);assert.equal(state.search.value,q);}
 });
+test('TOR wrapper accepts the existing immutable engine without mutation',()=>{
+ const original=Object.freeze({build:()=> 'TOR draft',buildFromFreeText:()=> 'free draft'});
+ const sandbox={window:{GOVPROMPT_SERVICE_TOR_ENGINE:original}};
+ vm.runInNewContext(fs.readFileSync('tor-v159-gate.js','utf8'),sandbox);
+ assert.equal(original.build(),'TOR draft');
+ assert.ok(sandbox.window.GOVPROMPT_SERVICE_TOR_ENGINE.build({}).includes('TOR GOVERNANCE GATE'));
+ assert.ok(sandbox.window.GOVPROMPT_SERVICE_TOR_ENGINE.buildFromFreeText('x').includes('Human Approval'));
+});

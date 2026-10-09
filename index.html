@@ -145,13 +145,13 @@ function openCategory(q){const toolsSection=document.getElementById('tools'),sea
 document.querySelectorAll('#workGrid [data-q]').forEach(b=>{b.setAttribute('aria-expanded','false');b.onclick=()=>{const wasOpen=b.getAttribute('aria-expanded')==='true';document.querySelectorAll('.category-tasks').forEach(el=>el.remove());document.querySelectorAll('#workGrid [data-q]').forEach(el=>el.setAttribute('aria-expanded','false'));if(wasOpen)return;b.setAttribute('aria-expanded','true');const q=b.dataset.q;if(q==='ควบคุมภายใน'){const panel=document.createElement('div');panel.className='category-tasks';panel.setAttribute('aria-label','งานควบคุมภายใน');tools.filter(t=>t.category===q).forEach(t=>{const btn=document.createElement('button');btn.type='button';btn.textContent=t.name;btn.onclick=()=>openTool(t.id);panel.appendChild(btn)});b.after(panel);}else openCategory(q);}});
 
 const mainPrompt=document.getElementById('mainPrompt');
-document.getElementById('composerShortcutBtn').onclick=()=>document.getElementById('shortcutBtn').click();
+document.getElementById('composerShortcutBtn').onclick=()=>{document.getElementById('shortcutModal').classList.remove('hidden');document.body.style.overflow='hidden'};
 document.getElementById('sendBtn').onclick=()=>{const q=String(mainPrompt?.value||'').trim();if(!q){mainPrompt?.focus();return}routeFrom(q);if(window.GOVPROMPT_INTERNAL_CONTROL?.applies(q)&&active?.id?.startsWith('GPIC')&&!modal.classList.contains('hidden')){const mode=document.getElementById('outputMode').value;if(mode!=='ให้ระบบเลือกอัตโนมัติ')document.getElementById('tone').value=mode;form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));form.style.display='none';}};
 mainPrompt?.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();document.getElementById('sendBtn').click();}});
 const shortcutModalEl=document.getElementById('shortcutModal'),shortcutList=document.getElementById('shortcutList');
 const shortcutIds=['GP009','GP005','GP013','GP001','GP017','GP021'];
 shortcutList.innerHTML=shortcutIds.map(id=>{const t=tools.find(x=>x.id===id);return t?'<button class="shortcut-item" type="button" data-shortcut="'+t.id+'">'+(t.icon||'🤖')+' '+t.name+'</button>':''}).join('');
-document.getElementById('shortcutBtn').onclick=()=>{shortcutModalEl.classList.remove('hidden');document.body.style.overflow='hidden'};
+const shortcutButton=document.getElementById('shortcutBtn');if(shortcutButton)shortcutButton.onclick=()=>{shortcutModalEl.classList.remove('hidden');document.body.style.overflow='hidden'};
 document.getElementById('closeShortcut').onclick=()=>{shortcutModalEl.classList.add('hidden');document.body.style.overflow=''};
 shortcutModalEl.onclick=e=>{if(e.target===shortcutModalEl){shortcutModalEl.classList.add('hidden');document.body.style.overflow=''}};
 shortcutList.querySelectorAll('[data-shortcut]').forEach(b=>b.onclick=()=>{const t=tools.find(x=>x.id===b.dataset.shortcut);shortcutModalEl.classList.add('hidden');openTool(b.dataset.shortcut,t)});
