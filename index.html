@@ -31,6 +31,20 @@
     .composer-bottom{grid-template-columns:1fr auto}
     .composer-bottom .icon-btn{display:flex;align-items:center;justify-content:center}
     @media(max-width:680px){.composer-bottom{grid-template-columns:1fr auto;gap:8px}.composer-bottom .icon-btn{width:48px;height:48px}.send{width:46px;height:46px}}
+
+    /* Additive production entry and mobile smoke fixes. */
+    .modal-body form[style*="none"] + .result{grid-column:1/-1}
+    .work-card[aria-expanded="true"]{border-color:var(--green)}
+    .category-tasks{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px;border:1px solid var(--line);border-radius:16px;background:#fff}
+    .category-tasks button{text-align:left;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--ink);min-width:0}
+    .result pre{overflow-wrap:anywhere}
+    @media(max-width:680px){
+      #composerShortcutBtn{display:none}.composer-bottom{grid-template-columns:1fr}.send{justify-self:end}
+      .work-grid,.category-tasks{grid-template-columns:1fr}.work-card{min-height:64px;grid-template-columns:34px minmax(0,1fr) 18px}.work-name{font-size:18px}
+      .topbar{height:80px;padding:14px 10px 0}.brand{gap:7px;min-width:0}.brandmark{width:38px;height:38px;font-size:18px;flex-shrink:0}.brand strong{font-size:16px}.brand small{font-size:10px}.top-actions{gap:6px;flex-shrink:0}.facebook{font-size:13px;padding:8px 10px}.plus{width:40px;height:40px;font-size:24px}
+      .modal-card{min-height:100dvh}.modal-body{padding-bottom:100px}.modal-card header{gap:8px}.modal-card header>div{min-width:0}.modal-card h2{font-size:24px}.modal-card header p{font-size:14px}
+      .result-head{flex-wrap:wrap;gap:8px}.result-head>div{display:flex;gap:4px}
+    }
 </style>
 </head>
 <body>
