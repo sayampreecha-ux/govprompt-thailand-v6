@@ -50,6 +50,7 @@
     Object.defineProperty(engine, '__V159_WRAPPED__', {value:true, enumerable:false});
   }
 
-  wrap(window.GOVPROMPT_SERVICE_TOR_ENGINE);
+  const sourceEngine=window.GOVPROMPT_SERVICE_TOR_ENGINE;
+  if(sourceEngine){const wrappedEngine={...sourceEngine};wrap(wrappedEngine);window.GOVPROMPT_SERVICE_TOR_ENGINE=Object.freeze(wrappedEngine);}
   window.GOVPROMPT_TOR_V159_GATE = Object.freeze({authority:AUTHORITY,fields:TOR_FIELDS,policy:policyBlock});
 })();
