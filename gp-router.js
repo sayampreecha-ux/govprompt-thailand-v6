@@ -39,6 +39,14 @@
     const tool=DOMAIN_TOOLS.find(item=>item.id===match.tool);
     return tool?{tool,matchedTerms:['domain-intent'],score:1}:null
   }
-  function route(query){const text=normalize(query);const tools=Array.isArray(window.GOVPROMPT_TOOLS)?window.GOVPROMPT_TOOLS:[];if(!text||!tools.length)return fallback();const terms=queryTerms(text);const ranked=tools.map(tool=>scoreTool(terms,text,tool));const domain=domainCandidate(text);if(domain)ranked.push(domain);ranked.sort((left,right)=>right.score-left.score||left.tool.id.localeCompare(right.tool.id));const selected=ranked[0];if(!selected||selected.score<MINIMUM_SCORE)return fallback();return Object.freeze({selectedGpId:selected.tool.id,score:Number(selected.score.toFixed(2)),confidence:Number(selected.score.toFixed(2)),matchedReason:`ตรงกับ ${selected.tool.id}: ${selected.matchedTerms.join(', ')}`,fallback:false,tool:selected.tool})}
+  const CONTROL_FORMS=Object.freeze({'1':'GPIC03','4':'GPIC02','5':'GPIC01','6':'GPIC04','2':'GPIC06','3':'GPIC07'});
+  function controlCandidate(query,tools){
+    const form=String(query).match(/(?:^|[^\p{L}\p{N}])ป\s*\.?\s*ค\s*\.?\s*([1-6])(?!\d)/iu);
+    const audit=/(?:ควบคุมภายใน|ประเมินผลการควบคุมภายใน|รายงานควบคุมภายใน|สอบทานการควบคุมภายใน)/i.test(query);
+    const id=form?CONTROL_FORMS[form[1]]:(audit?'GPIC01':null);
+    const tool=tools.find(item=>item.id===id);
+    return tool?{tool,matchedTerms:['internal-control-form'],score:1}:null;
+  }
+  function route(query){const text=normalize(query);const tools=Array.isArray(window.GOVPROMPT_TOOLS)?window.GOVPROMPT_TOOLS:[];if(!text||!tools.length)return fallback();const terms=queryTerms(text);const control=controlCandidate(query,tools);if(control)return Object.freeze({selectedGpId:control.tool.id,score:1,confidence:1,matchedReason:'ตรงกับแบบรายงานควบคุมภายใน '+control.tool.id,fallback:false,tool:control.tool});const ranked=tools.map(tool=>scoreTool(terms,text,tool));const domain=domainCandidate(text);if(domain)ranked.push(domain);ranked.sort((left,right)=>right.score-left.score||left.tool.id.localeCompare(right.tool.id));const selected=ranked[0];if(!selected||selected.score<MINIMUM_SCORE)return fallback();return Object.freeze({selectedGpId:selected.tool.id,score:Number(selected.score.toFixed(2)),confidence:Number(selected.score.toFixed(2)),matchedReason:`ตรงกับ ${selected.tool.id}: ${selected.matchedTerms.join(', ')}`,fallback:false,tool:selected.tool})}
   window.GOVPROMPT_ROUTER=Object.freeze({route});
 })();
