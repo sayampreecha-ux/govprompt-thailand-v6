@@ -1,5 +1,5 @@
 (function(root){'use strict';
-const KEY=/ปค[.\s]*[1-6]|วค[.\s]*[12]|ควบคุมภายใน|บริหาร(?:จัดการ)?ความเสี่ยง|risk register/i;
+const KEY=/ปค[.\s]*[1-6](?!\d)|วค[.\s]*[12](?!\d)|ควบคุมภายใน|บริหาร(?:จัดการ)?ความเสี่ยง|risk register/i;
 const POLICY=[
 '[GovPrompt: Internal Control / Risk Management — additive policy]',
 'ให้ AI ปลายทางตรวจต้นฉบับทางการที่ใช้บังคับสำหรับประเภทหน่วยงานและปีงบประมาณก่อนใช้แบบรายงาน; ห้ามเดาชื่อแบบ เลขข้อ หรือผู้ลงนาม',
