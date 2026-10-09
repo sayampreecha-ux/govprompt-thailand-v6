@@ -32,6 +32,7 @@ jobs:
           node --check emergency-procurement-gate.js
           node --check workflow-expansion.js
           node --check workflow-orchestration.js
+          node --check internal-control-policy.js
       - name: Run test suite
         id: tests
         shell: bash
@@ -40,6 +41,9 @@ jobs:
           node emergency-procurement-gate-test.js 2>&1 | tee gate-output.txt
           gate_status=${PIPESTATUS[0]}
           if [ "$gate_status" -ne 0 ]; then exit "$gate_status"; fi
+          node tests/internal-control-policy.test.cjs 2>&1 | tee internal-control-output.txt
+          internal_status=${PIPESTATUS[0]}
+          if [ "$internal_status" -ne 0 ]; then exit "$internal_status"; fi
           node --test test/*.test.mjs 2>&1 | tee test-output.txt
           status=${PIPESTATUS[0]}
           echo "status=$status" >> "$GITHUB_OUTPUT"
@@ -52,6 +56,7 @@ jobs:
           path: |
             test-output.txt
             gate-output.txt
+            internal-control-output.txt
           retention-days: 1
       - name: Enforce test result
         if: steps.tests.outputs.status != '0'
